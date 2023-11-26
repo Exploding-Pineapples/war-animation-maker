@@ -108,7 +108,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 		int viewwidth = (int) (DISPLAY_WIDTH/camera.zoom);
 		int viewheight = (int) (DISPLAY_HEIGHT/camera.zoom);
 
-		backgroundmap = new TextureRegion(Assets.background, (int) (camera.position.x - (viewwidth-DISPLAY_WIDTH)/2.0f), (int) (camera.position.y - (viewheight-DISPLAY_WIDTH)/2.0f), viewwidth, viewheight);
+		backgroundmap = new TextureRegion(Assets.background, (int) (camera.position.x - (viewwidth-DISPLAY_WIDTH)/2.0f), (int) (DISPLAY_HEIGHT - camera.position.y - (viewheight-DISPLAY_WIDTH)/2.0f), viewwidth, viewheight);
 
 		nodes = animation.getLines().get(0).getNodes();
 
