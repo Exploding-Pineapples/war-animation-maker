@@ -26,7 +26,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class HelpScreen2 extends ScreenAdapter {
-	SuperJumper game;
+	WarAnimationMaker game;
 
 	OrthographicCamera guiCam;
 	Rectangle nextBounds;
@@ -34,7 +34,7 @@ public class HelpScreen2 extends ScreenAdapter {
 	Texture helpImage;
 	TextureRegion helpRegion;
 
-	public HelpScreen2 (SuperJumper game) {
+	public HelpScreen2 (WarAnimationMaker game) {
 		this.game = game;
 
 		guiCam = new OrthographicCamera(320, 480);

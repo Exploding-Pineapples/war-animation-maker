@@ -1,9 +1,13 @@
-sourceCompatibility = 1.7
+sourceCompatibility = 17
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../android/assets"]
 
 project.ext.mainClassName = "com.badlogicgames.superjumper.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../android/assets");
+
+dependencies {
+    implementation project(":core")
+}
 
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName

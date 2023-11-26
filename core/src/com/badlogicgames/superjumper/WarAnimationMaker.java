@@ -17,9 +17,10 @@
 package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class SuperJumper extends Game {
+public class WarAnimationMaker extends Game {
 	// used by all screens
 	public SpriteBatch batcher;
 	
@@ -27,8 +28,12 @@ public class SuperJumper extends Game {
 	public void create () {
 		batcher = new SpriteBatch();
 		Settings.load();
+		FileHandler.INSTANCE.load();
+		FileHandler.INSTANCE.save();
 		Assets.load();
-		setScreen(new MainMenuScreen(this));
+		Screen screen = new Screen(this);
+		Gdx.input.setInputProcessor(screen);
+		setScreen(screen);
 	}
 	
 	@Override

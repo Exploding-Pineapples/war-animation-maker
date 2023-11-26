@@ -34,7 +34,7 @@ public class GameScreen extends ScreenAdapter {
 	static final int GAME_LEVEL_END = 3;
 	static final int GAME_OVER = 4;
 
-	SuperJumper game;
+	WarAnimationMaker game;
 
 	int state;
 	OrthographicCamera guiCam;
@@ -50,7 +50,7 @@ public class GameScreen extends ScreenAdapter {
 
 	GlyphLayout glyphLayout = new GlyphLayout();
 
-	public GameScreen (SuperJumper game) {
+	public GameScreen (WarAnimationMaker game) {
 		this.game = game;
 
 		state = GAME_READY;
@@ -167,7 +167,7 @@ public class GameScreen extends ScreenAdapter {
 
 			if (quitBounds.contains(touchPoint.x, touchPoint.y)) {
 				Assets.playSound(Assets.clickSound);
-				game.setScreen(new MainMenuScreen(game));
+				game.setScreen(new Screen(game));
 				return;
 			}
 		}
@@ -184,7 +184,7 @@ public class GameScreen extends ScreenAdapter {
 
 	private void updateGameOver () {
 		if (Gdx.input.justTouched()) {
-			game.setScreen(new MainMenuScreen(game));
+			game.setScreen(new Screen(game));
 		}
 	}
 

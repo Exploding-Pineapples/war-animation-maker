@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Align;
 
 public class WinScreen extends ScreenAdapter {
-	SuperJumper game;
+	WarAnimationMaker game;
 	OrthographicCamera cam;
 	TextureRegion princess;
 	String[] messages = { "Princess: Oh dear!\n What have you done?",
@@ -21,7 +21,7 @@ public class WinScreen extends ScreenAdapter {
 			};
 	int currentMessage = 0;
 	
-	public WinScreen(SuperJumper game) {
+	public WinScreen(WarAnimationMaker game) {
 		this.game = game;
 		cam = new OrthographicCamera();
 		cam.setToOrtho(false, 320, 480);
@@ -34,7 +34,7 @@ public class WinScreen extends ScreenAdapter {
 			currentMessage++;
 			if(currentMessage == messages.length) {
 				currentMessage--;
-				game.setScreen(new MainMenuScreen(game));
+				game.setScreen(new Screen(game));
 			}
 		}
 		

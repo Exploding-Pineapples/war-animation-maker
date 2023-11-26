@@ -25,7 +25,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class HighscoresScreen extends ScreenAdapter {
-	SuperJumper game;
+	WarAnimationMaker game;
 	OrthographicCamera guiCam;
 	Rectangle backBounds;
 	Vector3 touchPoint;
@@ -33,7 +33,7 @@ public class HighscoresScreen extends ScreenAdapter {
 	float xOffset = 0;
 	GlyphLayout glyphLayout = new GlyphLayout();
 
-	public HighscoresScreen (SuperJumper game) {
+	public HighscoresScreen (WarAnimationMaker game) {
 		this.game = game;
 
 		guiCam = new OrthographicCamera(320, 480);
@@ -55,7 +55,7 @@ public class HighscoresScreen extends ScreenAdapter {
 
 			if (backBounds.contains(touchPoint.x, touchPoint.y)) {
 				Assets.playSound(Assets.clickSound);
-				game.setScreen(new MainMenuScreen(game));
+				game.setScreen(new Screen(game));
 				return;
 			}
 		}

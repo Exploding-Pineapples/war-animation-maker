@@ -49,7 +49,6 @@ public class Assets {
 	public static Animation brakingPlatform;
 	public static BitmapFont font;
 
-	public static Music music;
 	public static Sound jumpSound;
 	public static Sound highJumpSound;
 	public static Sound hitSound;
@@ -61,8 +60,8 @@ public class Assets {
 	}
 
 	public static void load () {
-		background = loadTexture("data/background.png");
-		backgroundRegion = new TextureRegion(background, 0, 0, 320, 480);
+		background = loadTexture("assets/maps/gaza.png");
+		//backgroundRegion = new TextureRegion(background, 0, 0, 320, 480);
 
 		items = loadTexture("data/items.png");
 		mainMenu = new TextureRegion(items, 0, 224, 300, 110);
@@ -90,10 +89,6 @@ public class Assets {
 
 		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), Gdx.files.internal("data/font.png"), false);
 
-		music = Gdx.audio.newMusic(Gdx.files.internal("data/music.mp3"));
-		music.setLooping(true);
-		music.setVolume(0.5f);
-		if (Settings.soundEnabled) music.play();
 		jumpSound = Gdx.audio.newSound(Gdx.files.internal("data/jump.wav"));
 		highJumpSound = Gdx.audio.newSound(Gdx.files.internal("data/highjump.wav"));
 		hitSound = Gdx.audio.newSound(Gdx.files.internal("data/hit.wav"));

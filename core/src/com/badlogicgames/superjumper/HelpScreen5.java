@@ -26,7 +26,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class HelpScreen5 extends ScreenAdapter {
-	SuperJumper game;
+	WarAnimationMaker game;
 
 	OrthographicCamera guiCam;
 	Rectangle nextBounds;
@@ -34,7 +34,7 @@ public class HelpScreen5 extends ScreenAdapter {
 	Texture helpImage;
 	TextureRegion helpRegion;
 
-	public HelpScreen5 (SuperJumper game) {
+	public HelpScreen5 (WarAnimationMaker game) {
 		this.game = game;
 
 		guiCam = new OrthographicCamera(320, 480);
@@ -51,7 +51,7 @@ public class HelpScreen5 extends ScreenAdapter {
 
 			if (nextBounds.contains(touchPoint.x, touchPoint.y)) {
 				Assets.playSound(Assets.clickSound);
-				game.setScreen(new MainMenuScreen(game));
+				game.setScreen(new Screen(game));
 			}
 		}
 	}
