@@ -26,6 +26,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Assets {
 	public static Texture background;
 	public static TextureRegion backgroundRegion;
+	public static Texture flag1;
+	public static Texture flag2;
 
 	public static Texture items;
 	public static TextureRegion mainMenu;
@@ -61,6 +63,8 @@ public class Assets {
 
 	public static void load () {
 		background = loadTexture("assets/maps/gaza.png");
+		flag1 = loadTexture("assets/flags/hamasflag.png");
+		flag2 = loadTexture("assets/flags/israelflag.png");
 		//backgroundRegion = new TextureRegion(background, 0, 0, 320, 480);
 
 		items = loadTexture("data/items.png");

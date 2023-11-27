@@ -14,8 +14,8 @@ object FileHandler {
         .serializeNulls()
         .create()
 
-    val animations = mutableListOf<Animation>(
-        /*Animation(
+    val animations = mutableListOf<Animation>(/*
+        Animation(
             path = "C:\\Users\\User\\Documents\\Projects\\war-animation-maker\\assets\\maps\\gaza.png",
             name = "hors",
             area = Line(
@@ -73,7 +73,7 @@ object FileHandler {
                             movementFrames = mutableListOf(
                                 GroupedMovement(
                                     frames = mutableMapOf(
-                                        400 to Coordinate(400.0f, 500.0f),
+                                        0 to Coordinate(400.0f, 500.0f),
                                     )
                                 )
                             )
@@ -84,7 +84,7 @@ object FileHandler {
                             movementFrames = mutableListOf(
                                 GroupedMovement(
                                     frames = mutableMapOf(
-                                        400 to Coordinate(500.0f, 600.0f),
+                                        0 to Coordinate(500.0f, 600.0f),
                                     )
                                 )
                             )
@@ -95,7 +95,7 @@ object FileHandler {
                             movementFrames = mutableListOf(
                                 GroupedMovement(
                                     frames = mutableMapOf(
-                                        400 to Coordinate(300.0f, 250.0f),
+                                        0 to Coordinate(300.0f, 250.0f),
                                     )
                                 )
                             )
@@ -106,7 +106,7 @@ object FileHandler {
                             movementFrames = mutableListOf(
                                 GroupedMovement(
                                     frames = mutableMapOf(
-                                        400 to Coordinate(50.0f, 900.0f),
+                                        0 to Coordinate(50.0f, 900.0f),
                                     )
                                 )
                             )

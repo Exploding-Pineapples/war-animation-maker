@@ -121,16 +121,23 @@ interface Object
 
         if (time > (lastGroup.keys.lastOrNull() ?: -1)) {
             lastGroup[time] = Coordinate(x, y)
+            println("Appended, new motions: $movementFrames")
             return
         }
+
+        var found = false; //Used to overwrite duplicate times
 
         for (movement in movementFrames) {
             for (t in movement.keys) {
                 if (time == t) {
                     movement.frames[t] = Coordinate(x, y)
-                    return
+                    println("Overwrote, new motions: $movementFrames")
+                    found = true; //no return yet, if it finds another duplicate time, overwrite
                 }
                 if (t > time) {
+                    if (found) { //if t > time and the time was found, all duplicate times have been overwritten already so return
+                        return
+                    }
                     movement[time] = Coordinate(x, y)
 
                     val clone = movement.frames.toMap()
@@ -139,6 +146,62 @@ interface Object
                     clone.keys.sorted().forEach {
                         movement[it] = clone[it]!!
                     }
+                    println("Inserted, new motions: $movementFrames")
+                    return
+                }
+            }
+        }
+    }
+    fun newSetPoint(time: Int, x: Float, y: Float, new: Boolean) {  //new = whether to create a new motion or not
+        if (movementFrames.isEmpty()) {
+            movementFrames += GroupedMovement()
+        }
+
+        val lastGroup = movementFrames.last()
+
+        if (new) {
+            if (time > lastGroup.keys.last()) {
+                movementFrames += GroupedMovement(
+                    mutableMapOf(
+                        lastGroup.keys.last() to Coordinate(
+                            lastGroup.frames.entries.last().value.x,
+                            lastGroup.frames.entries.last().value.y
+                        ),
+                        time to Coordinate(x, y)
+                    )
+                )
+                movementFrames += GroupedMovement(
+                    mutableMapOf(
+                        time to Coordinate(x, y)
+                    )
+                )
+            }
+            println("Not possible to add new motion during already defined time")
+            return
+        }
+
+        var found = false; //Used to overwrite duplicate times
+
+        for (movement in movementFrames) {
+            for (t in movement.keys) {
+                if (time == t) {
+                    movement.frames[t] = Coordinate(x, y)
+                    println("Overwrote, new motions: $movementFrames")
+                    found = true; //no return yet, if it finds another duplicate time, overwrite
+                }
+                if (t > time) {
+                    if (found) { //if t > time and the time was found, all duplicate times have been overwritten already so return
+                        return
+                    }
+                    movement[time] = Coordinate(x, y)
+
+                    val clone = movement.frames.toMap()
+                    movement.frames.clear()
+
+                    clone.keys.sorted().forEach {
+                        movement[it] = clone[it]!!
+                    }
+                    println("Inserted, new motions: $movementFrames")
                     return
                 }
             }
@@ -163,7 +226,9 @@ data class Unit(
     override var screenPosition: Coordinate
 ) : Object
 
-data class Node(
+data class Node
+    @JvmOverloads
+constructor(
     override val movementFrames: MutableList<GroupedMovement> = mutableListOf(),
     override var death: Int? = null,
     override var position: Coordinate,
