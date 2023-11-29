@@ -61,8 +61,8 @@ interface Object
                 (ymotion[0] + distancey * cos((PI / (2 * deltatime)) * ((time - start)) - PI / 2)).toFloat()
         }
         if (mode == "linear") {
-            position.x = xmotion[0] + distancex * ((time - start) / deltatime)
-            position.y = ymotion[0] + distancey * ((time - start) / deltatime)
+            position.x = xmotion[0] + distancex * ((time - start) / deltatime.toFloat())
+            position.y = ymotion[0] + distancey * ((time - start) / deltatime.toFloat())
         }
         screenPosition.x = position.x * zoom - cx * (zoom - 1) + (Screen.DISPLAY_WIDTH / 2 - cx)
         screenPosition.y = position.y * zoom - cy * (zoom - 1) + (Screen.DISPLAY_HEIGHT / 2 - cy)
@@ -175,6 +175,7 @@ interface Object
                         time to Coordinate(x, y)
                     )
                 )
+                return
             }
             println("Not possible to add new motion during already defined time")
             return

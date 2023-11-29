@@ -10,6 +10,10 @@ sourceCompatibility = 17
 dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-common
+    implementation("io.github.earcut4j:earcut4j:2.2.2")
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation("org.apache.commons:commons-lang3:3.14.0")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21")
 
     implementation 'com.drewnoakes:metadata-extractor:2.19.0'
