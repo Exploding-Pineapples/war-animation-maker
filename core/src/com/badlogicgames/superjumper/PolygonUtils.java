@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PolygonUtils {
-    public static List<Integer> findAdjacentVertices(double[] flatPolygon, double[] targetPoint) {
+    public static int[] findAdjacentVertices(double[] flatPolygon, double[] targetPoint) {
         double minDistance = Double.POSITIVE_INFINITY;
-        List<Integer> closestEdge = null;
+        int[] closestEdge = null;
 
         // Iterate through the edges of the polygon
         for (int i = 0; i < flatPolygon.length; i += 2) {
@@ -49,20 +49,20 @@ public class PolygonUtils {
             // Update the closest edge if the current distance is smaller
             if (distance < minDistance) {
                 minDistance = distance;
-                closestEdge = List.of(i / 2, (i / 2 + 1) % (flatPolygon.length / 2));
+                closestEdge = new int[]{i / 2, (i / 2 + 1) % (flatPolygon.length / 2)};
             }
         }
 
         if (closestEdge != null) {
             return closestEdge;
         } else {
-            return new ArrayList<>();
+            return new int[0]; // Return an empty array if no closest edge is found
         }
     }
 
     public static double[] polygon_points(double[] polygon, int[] indexes) {
         if (indexes[0] < indexes[1]) {
-            return Arrays.copyOfRange(polygon, indexes[0] * 2, indexes[1] * 2);
+            return Arrays.copyOfRange(polygon, indexes[0] * 2, indexes[1] * 2 + 2);
         }
         if (indexes[1] < indexes[0]) {
             double[] list1 = Arrays.copyOfRange(polygon, indexes[0] * 2, polygon.length);
@@ -71,5 +71,22 @@ public class PolygonUtils {
             return ArrayUtils.addAll(list1, list2);
         }
         return new double[] {polygon[indexes[0] * 2], polygon[indexes[0] * 2 + 1]};
+    }
+
+    public static boolean isClockwise(double[] polygon) {
+        int n = polygon.length / 2;
+        double signedArea = 0;
+
+        for (int i = 0; i < n; i++) {
+            double x1 = polygon[i * 2];
+            double y1 = polygon[i * 2 + 1];
+
+            double x2 = polygon[(i + 1) % n * 2];
+            double y2 = polygon[(i + 1) % n * 2 + 1];
+
+            signedArea += (x2 - x1) * (y2 + y1);
+        }
+
+        return signedArea > 0; // Clockwise if signed area is positive
     }
 }

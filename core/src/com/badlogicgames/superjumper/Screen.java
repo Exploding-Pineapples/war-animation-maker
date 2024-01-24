@@ -1,30 +1,12 @@
-/*******************************************************************************
- * Copyright 2011 See AUTHORS file.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-
 package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -32,10 +14,9 @@ import com.badlogicgames.superjumper.models.*;
 import com.badlogicgames.superjumper.models.Animation;
 import com.badlogicgames.superjumper.models.Object;
 import earcut4j.Earcut;
-import kotlin.collections.AbstractMutableList;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import java.time.LocalTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,36 +37,44 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     Animation animation;
     Integer time;
     TextureRegion backgroundmap;
-    List<Node> nodes;
+    TextureRegion battlefield;
+    List<List<Node>> nodes;
     List<Unit> units;
     Object selected;
-    double[][] keyPoints;
-    PolynomialSplineFunction xFunction;
-    PolynomialSplineFunction yFunction;
+    List<double[]> keyPoints;
+    List<PolynomialSplineFunction> xFunctions;
+    List<PolynomialSplineFunction> yFunctions;
+    LocalTime curtime;
     boolean up_pressed;
     boolean down_pressed;
     boolean left_pressed;
     boolean right_pressed;
+    boolean ctrl_pressed;
     boolean paused;
     boolean animationMode;
     float mousex;
     float mousey;
     float zoomfactor;
-    List<float[]> polygon;
+    int selectedLine = 0;
+    List<List<float[]>> insidePolys;
     public static final int DISPLAY_WIDTH = 1920;
     public static final int DISPLAY_HEIGHT = 1080;
     public static final int IMAGE_WIDTH = 40;
     public static final int IMAGE_HEIGHT = 40;
+    public static final int MIN_LINE_SIZE = 2;
 
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final BitmapFont bitmapFont = new BitmapFont();
+    FrameBuffer colorlayer;
 
     public Screen(WarAnimationMaker game) {
         this.game = game;
+        animation = FileHandler.INSTANCE.getAnimations().get(0);
 
         camera = new OrthographicCamera(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         camera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
         camera.setToOrtho(false, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        animation.camera();
 
         soundBounds = new Rectangle(0, 0, 64, 64);
         playBounds = new Rectangle(160 - 150, 200 + 18, 300, 36);
@@ -94,13 +83,79 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         touchPoint = new Vector3();
         bitmapFont.getData().setScale(2.5f);
 
-        animation = FileHandler.INSTANCE.getAnimations().get(0);
         time = 0;
         paused = true;
         animationMode = true;
-        polygon = new ArrayList<>();
-    }
+        keyPoints = new ArrayList<>();
+        xFunctions = new ArrayList<>();
+        yFunctions = new ArrayList<>();
+        nodes = new ArrayList<>();
 
+        curtime = LocalTime.now();
+        colorlayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
+
+        animation.camera().goToTime(time);
+        updateCam();
+    }
+    public List<List<float[]>> calculatePolygons(List<Line> lines) {
+        List<List<float[]>> insideDrawPolyList = new ArrayList<>();
+
+        float num = 1000.00f;
+        double[][] backwardsNodePositionsList = new double[lines.size()][ (int) num * 2]; //backwards version needed to draw interior clockwise polygon
+        double[][] nodePositionsList = new double[lines.size()][ (int) num * 2]; //stores the positions of all the interpolated points along the red line (not the green set points), this is used to draw polygon
+
+        int i = 0;
+        for (Line l : lines) {
+            List<Node> line = l.getNodes();
+            if (line.size() > MIN_LINE_SIZE) {
+                double[] backwardsNodePositions = backwardsNodePositionsList[i];
+                double[] nodePositions = nodePositionsList[i];
+
+                int k = (int) num * 2; //backwards list iterator
+                int m = 0; //forwards list iterator
+                for (float j = 0; j < (float) line.size() - 1.00f; j += (float) line.size() / num) { //loop evaluates interpolated spline function at 1000 points to draw border of polygon
+                    k -= 2;
+                    nodePositions[m] = xFunctions.get(i).value(j);
+                    nodePositions[m + 1] = yFunctions.get(i).value(j);
+                    backwardsNodePositions[k] = xFunctions.get(i).value(j);
+                    backwardsNodePositions[k + 1] = yFunctions.get(i).value(j);
+                    m += 2;
+                }
+
+                backwardsNodePositionsList[i] = Arrays.copyOfRange(backwardsNodePositions, k, backwardsNodePositions.length); //for some reason, interpolation doesn't reach num and I can't figure out why. Sublist removes extra default 0.0 elements that aren't set
+                nodePositionsList[i] = Arrays.copyOfRange(nodePositions, 0, m);
+                i++;
+            }
+        }
+
+        for (int j = 0; j < lines.size(); j++) {
+
+            double[] insidePoly = new double[nodePositionsList[j].length];
+
+            int l = 0;
+            for (double position : nodePositionsList[j]) {
+                insidePoly[l] = position;
+                l++;
+            }
+
+            List<Integer> insideEarcut = Earcut.earcut(insidePoly); //turns polygon into series of triangles represented by polygon vertex indexes
+            List<float[]> insideDrawPoly = new ArrayList<>();
+
+            float v1x, v1y, v2x, v2y, v3x, v3y;
+            for (i = 0; i < insideEarcut.size(); i += 3) {
+                v1x = (float) insidePoly[insideEarcut.get(i) * 2];
+                v1y = (float) insidePoly[insideEarcut.get(i) * 2 + 1];
+                v2x = (float) insidePoly[insideEarcut.get(i + 1) * 2];
+                v2y = (float) insidePoly[insideEarcut.get(i + 1) * 2 + 1];
+                v3x = (float) insidePoly[insideEarcut.get(i + 2) * 2];
+                v3y = (float) insidePoly[insideEarcut.get(i + 2) * 2 + 1];
+                insideDrawPoly.add(new float[]{v1x, v1y, v2x, v2y, v3x, v3y}); //the polygon instance variable is then drawn by triangles in the draw function
+            }
+
+            insideDrawPolyList.add(insideDrawPoly);
+        }
+        return insideDrawPolyList;
+    }
     public void update() {
         if (Gdx.input.justTouched()) {
             camera.unproject(touchPoint.set(Gdx.input.getX(), Gdx.input.getY(), 0));
@@ -112,99 +167,62 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         }
         camera.update();
 
-        nodes = animation.getLines().get(0).getNodes();
         units = animation.getUnits();
+        keyPoints.clear();
+        xFunctions.clear();
+        yFunctions.clear();
 
         //Update all nodes and interpolate line
-        double[] xValues = new double[nodes.size()];
-        double[] yValues = new double[nodes.size()];
-        double[] evalAt = new double[nodes.size()];
-
-        for (int i = 0; i < nodes.size(); i += 1) {
-            evalAt[i] = i;
-        }
-
-        Node node;
-
-        for (int i = 0; i < nodes.size(); i++) {
-            node = nodes.get(i);
+        for (Node node : animation.getArea().getNodes()) {
             node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            xValues[i] = node.getScreenPosition().getX();
-            yValues[i] = node.getScreenPosition().getY();
+        }
+        for (int lineNum = 0; lineNum < animation.getLines().size(); lineNum++) {
+            List<Node> nodes = animation.getLines().get(lineNum).getNodes();
+
+            double[] xValues = new double[nodes.size()];
+            double[] yValues = new double[nodes.size()];
+            double[] evalAt = new double[nodes.size()];
+
+            for (int i = 0; i < nodes.size(); i += 1) {
+                evalAt[i] = i;
+            }
+
+            Node node;
+
+            for (int i = 0; i < nodes.size(); i++) {
+                node = nodes.get(i);
+                node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+                xValues[i] = node.getScreenPosition().getX();
+                yValues[i] = node.getScreenPosition().getY();
+            }
+
+            for (int i = 0; i < xValues.length; i++) {
+                keyPoints.add(new double[]{xValues[i], yValues[i]});
+            }
+
+            // Create a spline interpolator
+            if (xValues.length > MIN_LINE_SIZE) {
+                SplineInterpolator interpolator = new SplineInterpolator();
+                xFunctions.add(interpolator.interpolate(evalAt, xValues));
+                yFunctions.add(interpolator.interpolate(evalAt, yValues));
+            }
         }
 
-        keyPoints = new double[xValues.length][2];
-
-        for (int i = 0; i < xValues.length; i++) {
-            keyPoints[i] = new double[]{xValues[i], yValues[i]};
-        }
-
-        // Create a spline interpolator
-        SplineInterpolator interpolator = new SplineInterpolator();
-        xFunction = interpolator.interpolate(evalAt, xValues);
-        yFunction = interpolator.interpolate(evalAt, yValues);
+        //Update shape polygons
+        insidePolys = calculatePolygons(animation.getLines());
 
         //Update background screen
-        Float[] rect = {camera.position.x, camera.position.y, camera.viewportWidth / camera.zoom, camera.viewportHeight / camera.zoom};
-
         int viewwidth = (int) (DISPLAY_WIDTH / camera.zoom);
         int viewheight = (int) (DISPLAY_HEIGHT / camera.zoom);
 
         zoomfactor = 0.75f + camera.zoom / 8;
 
         backgroundmap = new TextureRegion(Assets.background, (int) (camera.position.x - (viewwidth - DISPLAY_WIDTH) / 2.0f), (int) (DISPLAY_HEIGHT - camera.position.y - (viewheight - DISPLAY_WIDTH) / 2.0f), viewwidth, viewheight);
+        battlefield = new TextureRegion(Assets.battlefield, (int) (camera.position.x - (viewwidth - DISPLAY_WIDTH) / 2.0f), (int) (DISPLAY_HEIGHT - camera.position.y - (viewheight - DISPLAY_WIDTH) / 2.0f), viewwidth, viewheight);
 
         //Update all units
         for (Unit unit : units) {
             unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-        }
-
-        //Update area polygon (red shaded area)
-        if (polygon.size() > 0) {
-            polygon.clear();
-        }
-
-        double[] doublePoly = new double[animation.getArea().getNodes().size() * 2]; //list of polygon vertices in double, all calculation libraries use doubles
-
-        int i = 0;
-        for (Node n : animation.getArea().getNodes()) { //updates all the area nodes and adds their positions to the poly list
-            n.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            doublePoly[i] = n.getScreenPosition().getX();
-            doublePoly[i + 1] = n.getScreenPosition().getY();
-            i += 2;
-        }
-
-        List<Node> line = animation.getLines().get(0).getNodes();
-
-        float num = 1000.00f;
-        double[] nodePositions = new double[(int) num * 2]; //stores the positions of all the interpolated points along the red line (not the green set points), this is used to draw polygon
-
-        int k = (int) num * 2 - 2;
-        for (float j = nodes.size()/num; j < (float) nodes.size() - 1.00f; j += (float) nodes.size()/num) {
-            nodePositions[k] = xFunction.value(j);
-            nodePositions[k + 1] = yFunction.value(j);
-            k -= 2;
-        }
-
-        Node firstNode = line.get(0);
-        Node lastNode = line.get(line.size() - 1);
-        List<Integer> firstAdjacentIndexes = PolygonUtils.findAdjacentVertices(doublePoly, new double[]{firstNode.getScreenPosition().getX(), firstNode.getScreenPosition().getY()}); //util finds which polygon vertices are next to both ends of the frontline
-        List<Integer> lastAdjacentIndexes = PolygonUtils.findAdjacentVertices(doublePoly, new double[]{lastNode.getScreenPosition().getX(), lastNode.getScreenPosition().getY()});
-
-        doublePoly = PolygonUtils.polygon_points(doublePoly, new int[]{firstAdjacentIndexes.get(1), lastAdjacentIndexes.get(0)});
-
-        double[] superList = ArrayUtils.addAll(nodePositions, doublePoly); //this is the final list to be used to draw the polygon
-
-        List<Integer> triangulated = Earcut.earcut(superList); //turns polygon into series of triangles represented by polygon vertex indexes
-        float v1x, v1y, v2x, v2y, v3x, v3y;
-        for (i = 0; i < triangulated.size(); i += 3) {
-            v1x = (float) superList[triangulated.get(i) * 2];
-            v1y = (float) superList[triangulated.get(i) * 2 + 1];
-            v2x = (float) superList[triangulated.get(i + 1) * 2];
-            v2y = (float) superList[triangulated.get(i + 1) * 2 + 1];
-            v3x = (float) superList[triangulated.get(i + 2) * 2];
-            v3y = (float) superList[triangulated.get(i + 2) * 2 + 1];
-            polygon.add(new float[]{v1x, v1y, v2x, v2y, v3x, v3y}); //the polygon instance variable is then drawn by triangles in the draw function
         }
 
         //Handle repeated key inputs
@@ -221,38 +239,60 @@ public class Screen extends ScreenAdapter implements InputProcessor {
             camera.position.x += 10 / camera.zoom;
         }
 
+        animation.camera().goToTime(time);
+
         //Step time, do things that only happen when not paused
         if (!paused) {
+            updateCam();
             time++;
         }
 
     }
 
+    public void updateCam() {
+        camera.position.x = animation.camera().getPosition().getX();
+        camera.position.y = animation.camera().getPosition().getY();
+        camera.zoom = animation.camera().getZoom();
+    }
     public void draw() {
         GL20 gl = Gdx.gl;
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         //Draw background
-        game.batcher.begin();
-        game.batcher.draw(backgroundmap, 0.0F, 0.0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        game.batcher.end();
-
-        //Draw the area polygon
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(new Color(1, 0, 0, 0.3f));
+        game.batcher.begin();
+        game.batcher.draw(battlefield, 0.0F, 0.0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        game.batcher.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        if (polygon != null) {
-            for (float[] triangle : polygon) {
-                shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5]);
+        //Draw the area polygons
+        colorlayer.begin();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(new Color(0, 0, 1, 1.0f));
+        shapeRenderer.rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+        shapeRenderer.setColor(new Color(1, 0, 0, 1.0f));
+        for (List<float[]> poly: insidePolys){
+            if (poly != null) {
+                for (float[] triangle : poly) {
+                    shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5]);
+                }
             }
         }
 
         shapeRenderer.end();
+        colorlayer.end();
 
         game.batcher.begin();
+        Texture texture = colorlayer.getColorBufferTexture();
+        TextureRegion textureRegion = new TextureRegion(texture);
+        textureRegion.flip(false, true);
+        game.batcher.setColor(1,1,1,0.3f); //default is white 1,1,1,1
+        game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        game.batcher.setColor(1,1,1, 1);
         //Draw units
         for (Unit unit : animation.getUnits()) {
             if (unit.getImage().equals("israel")) {
@@ -261,6 +301,34 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         }
         game.batcher.end();
 
+        //Draw the front line
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.RED);
+
+        for (int lineNum = 0; lineNum < animation.getLines().size(); lineNum++) {
+            float num = 1000.00f; //the number of straight lines that will be used to approximate the spline function
+            List<Node> nodes = animation.getLines().get(lineNum).getNodes();
+            if (nodes.size() > MIN_LINE_SIZE) {
+                for (float i = nodes.size() / num; i < (float) nodes.size() - 1.00f; i += (float) nodes.size() / num) {
+                    shapeRenderer.rectLine(
+                            (float) xFunctions.get(lineNum).value(i - nodes.size() / num),
+                            (float) yFunctions.get(lineNum).value(i - nodes.size() / num),
+                            (float) xFunctions.get(lineNum).value(i),
+                            (float) yFunctions.get(lineNum).value(i),
+                            5.0f
+                    );
+                }
+            }
+        }
+        shapeRenderer.end();
+
+        //Draw the background
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        game.batcher.begin();
+        game.batcher.draw(backgroundmap, 0.0F, 0.0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        game.batcher.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
         //Draw the debug circles
@@ -276,20 +344,6 @@ public class Screen extends ScreenAdapter implements InputProcessor {
             for (Node node : animation.getArea().getNodes()) {
                 shapeRenderer.circle(node.getScreenPosition().getX(), node.getScreenPosition().getY(), 7);
             }
-        }
-        //Draw the front line
-        shapeRenderer.setColor(Color.RED);
-
-        float num = 1000.00f; //the number of straight lines that will be used to approximate the spline function
-        double[][] interpolated = new double[(int) num][2];
-        for (float i = nodes.size()/num; i < (float) nodes.size() - 1.00f; i += (float) nodes.size()/num) {
-            shapeRenderer.rectLine(
-                    (float) xFunction.value(i - nodes.size()/num),
-                    (float) yFunction.value(i - nodes.size()/num),
-                    (float) xFunction.value(i),
-                    (float) yFunction.value(i),
-                    5.0f
-            );
         }
         shapeRenderer.end();
         //Draw FPS and time text
@@ -312,6 +366,9 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if (keycode == Input.Keys.RIGHT) {
             right_pressed = true;
         }
+        if ((keycode == Input.Keys.CONTROL_LEFT) || (keycode == Input.Keys.CONTROL_RIGHT)) {
+            ctrl_pressed = true;
+        }
         if (keycode == Input.Keys.SPACE) {
             paused = !paused;
         }
@@ -321,7 +378,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
                     new Coordinate(mousex, mousey)
             );
             node.getMovementFrames().add(
-                    new GroupedMovement(
+                    new GroupedMovement<>(
                             new HashMap<>() {{
                                 put(time, new Coordinate(mousex, mousey));
                             }}
@@ -332,12 +389,32 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         }
         if (keycode == Input.Keys.E) {
             time = (time / 200) * 200 + 200;
+            animation.camera().goToTime(time);
+            updateCam();
+        }
+        if (keycode == Input.Keys.V) {
+            animationMode = !animationMode;
         }
         if (keycode == Input.Keys.Q) {
             time = (int) Math.ceil(time / 200.0) * 200 - 200;
+            animation.camera().goToTime(time);
+            updateCam();
         }
-        if (keycode == Input.Keys.C) {
-            animationMode = !animationMode;
+        if (keycode == Input.Keys.L) {
+            var node = new Node(
+                    new Coordinate(0, 0),
+                    new Coordinate(mousex, mousey)
+            );
+            node.getMovementFrames().add(
+                    new GroupedMovement<>(
+                            new HashMap<>() {{
+                                put(time, new Coordinate(mousex, mousey));
+                            }}
+                    )
+            );
+            animation.getLines().add(new Line());
+            selectedLine = animation.getLines().size() - 1;
+            animation.getLines().get(selectedLine).getNodes().add(node);
         }
         if (keycode == Input.Keys.NUM_1) {
             var node = new Node(
@@ -345,25 +422,25 @@ public class Screen extends ScreenAdapter implements InputProcessor {
                     new Coordinate(mousex, mousey)
             );
             node.getMovementFrames().add(
-                    new GroupedMovement(
+                    new GroupedMovement<>(
                             new HashMap<>() {{
                                 put(time, new Coordinate(mousex, mousey));
                             }}
                     )
             );
 
-            animation.getLines().get(0).getNodes().add(node);
+            animation.getLines().get(selectedLine).getNodes().add(node);
         }
         if (keycode == Input.Keys.NUM_2) {
             var unit = new Unit(
                     "israel",
-                    new ArrayList<GroupedMovement>(),
+                    new ArrayList<>(),
                     null,
                     new Coordinate(0, 0),
                     new Coordinate(mousex, mousey)
             );
             unit.getMovementFrames().add(
-                    new GroupedMovement(
+                    new GroupedMovement<>(
                             new HashMap<>() {{
                                 put(time, new Coordinate(mousex, mousey));
                             }}
@@ -371,6 +448,11 @@ public class Screen extends ScreenAdapter implements InputProcessor {
             );
 
             animation.getUnits().add(unit);
+        }
+        if (ctrl_pressed) {
+            if (keycode == Input.Keys.C) {
+                animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
+            }
         }
         return true;
     }
@@ -388,6 +470,9 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if (keycode == Input.Keys.RIGHT) {
             right_pressed = false;
         }
+        if ((keycode == Input.Keys.CONTROL_LEFT) || (keycode == Input.Keys.CONTROL_RIGHT)) {
+            ctrl_pressed = false;
+        }
         return true;
     }
 
@@ -403,7 +488,12 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
         System.out.println(mousex + " " + mousey);
 
-        List<Node> nodeList = Stream.concat(animation.getArea().getNodes().stream(), animation.getLines().get(0).getNodes().stream()).toList();
+
+        Stream<Node> nodeStream = animation.getArea().getNodes().stream();
+        for (Line line : animation.getLines()) {
+            nodeStream = Stream.concat(nodeStream, line.getNodes().stream());
+        }
+        List<Node> nodeList = nodeStream.toList();
         List<Unit> unitList = animation.getUnits();
 
         if (selected != null) {
@@ -419,10 +509,11 @@ public class Screen extends ScreenAdapter implements InputProcessor {
             }
         }
 
-        for (Object object : nodeList) {
-            if (object.clicked(x, y)) {
-                System.out.println(object.getPosition() + " was clicked");
-                selected = object;
+        for (Object node : nodeList) {
+            if (node.clicked(x, y)) {
+                System.out.println(node.getPosition() + " was clicked");
+                selected = node;
+                selectedLine = animation.getLineOfNode(node);
                 return true;
             }
         }
