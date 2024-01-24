@@ -51,6 +51,7 @@ public class Assets {
 	public static TextureRegion platform;
 	public static Animation brakingPlatform;
 	public static BitmapFont font;
+	public static Texture[] flags;
 
 	public static Sound jumpSound;
 	public static Sound highJumpSound;
@@ -67,6 +68,8 @@ public class Assets {
 		battlefield = loadTexture("assets/maps/gaza battlefield.png");
 		flag1 = loadTexture("assets/flags/hamasflag.png");
 		flag2 = loadTexture("assets/flags/israelflag.png");
+		flags = new Texture[]{flag1, flag2};
+
 		//backgroundRegion = new TextureRegion(background, 0, 0, 320, 480);
 
 		items = loadTexture("data/items.png");

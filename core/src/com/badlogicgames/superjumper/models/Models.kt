@@ -290,17 +290,17 @@ interface ObjectWithZoom
         }
 
         val prevframe = frames[subindex - 1].value
-        if (length == 2) {
-            return "double" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if two frames defined, return their motion
+        if (length == 2) { //if two frames or more are defined, return their motion
+            return "double" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //2 frames only means return a speed up and slow down
         }
         if (length > 2) {
             if (subindex == 1) {
-                return "speedup" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second))
+                return "speedup" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if more than 2 frames, first motion is speed up
             }
             if (subindex == length - 1) {
-                return "slowdown" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second))
+                return "slowdown" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if more than 2 frmes, last motion is slow down
             }
-            return "linear" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second))
+            return "linear" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if more than 2 frames, all middle frames are linear
         }
 
         throw IllegalStateException("what the fuck did you do")

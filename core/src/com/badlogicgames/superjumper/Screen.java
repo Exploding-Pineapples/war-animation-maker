@@ -57,6 +57,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     float zoomfactor;
     int selectedLine = 0;
     List<List<float[]>> insidePolys;
+    String[] countries;
     public static final int DISPLAY_WIDTH = 1920;
     public static final int DISPLAY_HEIGHT = 1080;
     public static final int IMAGE_WIDTH = 40;
@@ -90,6 +91,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         xFunctions = new ArrayList<>();
         yFunctions = new ArrayList<>();
         nodes = new ArrayList<>();
+        countries = new String[]{"hamas", "israel"};
 
         curtime = LocalTime.now();
         colorlayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
@@ -267,7 +269,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         game.batcher.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        //Draw the area polygons
+        //Draw the colored areas to buffer
         colorlayer.begin();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -287,18 +289,14 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         colorlayer.end();
 
         game.batcher.begin();
+        //Draw the colored areas to the screen
         Texture texture = colorlayer.getColorBufferTexture();
         TextureRegion textureRegion = new TextureRegion(texture);
         textureRegion.flip(false, true);
         game.batcher.setColor(1,1,1,0.3f); //default is white 1,1,1,1
         game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         game.batcher.setColor(1,1,1, 1);
-        //Draw units
-        for (Unit unit : animation.getUnits()) {
-            if (unit.getImage().equals("israel")) {
-                game.batcher.draw(Assets.flag2, unit.getScreenPosition().getX() - (IMAGE_WIDTH * zoomfactor)/2, unit.getScreenPosition().getY() - (IMAGE_HEIGHT * zoomfactor)/2, IMAGE_WIDTH * zoomfactor, IMAGE_HEIGHT * zoomfactor);
-            }
-        }
+
         game.batcher.end();
 
         //Draw the front line
@@ -328,6 +326,29 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
         game.batcher.begin();
         game.batcher.draw(backgroundmap, 0.0F, 0.0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+        //Draw units
+        for (Unit unit : animation.getUnits()) {
+            for (int i = 0; i < countries.length; i++) {
+                String image = countries[i];
+                if (unit.getImage().equals(image)) { //draw only for the correct country
+                    game.batcher.setColor(1, 1, 1, 1.0f); //sets no transparency by default
+                    if ((unit.getDeath() != null)) { //checks for death time
+                        if (time - unit.getDeath() < 100) { //if it less than 100 time after death, fade gradually
+                            game.batcher.setColor(1, 1, 1, 1.0f - (time - unit.getDeath()) / 100f);
+                        } else {
+                            if (time - unit.getDeath() >= 100) { // do not draw at all if it is more than 100 after death time
+                                continue;
+                            }
+                        }
+                    }
+                    game.batcher.draw(Assets.flags[i], unit.getScreenPosition().getX() - (IMAGE_WIDTH * zoomfactor) / 2, unit.getScreenPosition().getY() - (IMAGE_HEIGHT * zoomfactor) / 2, IMAGE_WIDTH * zoomfactor, IMAGE_HEIGHT * zoomfactor);
+                }
+            }
+
+        }
+        game.batcher.setColor(1, 1, 1, 1.0f); //resets to no transparency, if this isn't here the background breaks and I don't know why
+
         game.batcher.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -387,6 +408,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
             animation.getArea().getNodes().add(node);
         }
+
         if (keycode == Input.Keys.E) {
             time = (time / 200) * 200 + 200;
             animation.camera().goToTime(time);
@@ -416,42 +438,52 @@ public class Screen extends ScreenAdapter implements InputProcessor {
             selectedLine = animation.getLines().size() - 1;
             animation.getLines().get(selectedLine).getNodes().add(node);
         }
-        if (keycode == Input.Keys.NUM_1) {
-            var node = new Node(
-                    new Coordinate(0, 0),
-                    new Coordinate(mousex, mousey)
-            );
-            node.getMovementFrames().add(
-                    new GroupedMovement<>(
-                            new HashMap<>() {{
-                                put(time, new Coordinate(mousex, mousey));
-                            }}
-                    )
-            );
 
-            animation.getLines().get(selectedLine).getNodes().add(node);
-        }
-        if (keycode == Input.Keys.NUM_2) {
-            var unit = new Unit(
-                    "israel",
-                    new ArrayList<>(),
-                    null,
-                    new Coordinate(0, 0),
-                    new Coordinate(mousex, mousey)
-            );
-            unit.getMovementFrames().add(
-                    new GroupedMovement<>(
-                            new HashMap<>() {{
-                                put(time, new Coordinate(mousex, mousey));
-                            }}
-                    )
-            );
+        if ((keycode >= 7) && (keycode <= 16)) { //keycodes 7-16 inclusive correspond to number keys 0 - 9
+            int key_num = keycode - 7;
+            if (key_num == 1) { //1 creates forntline nodes
+                var node = new Node(
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey)
+                );
+                node.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+                animation.getLines().get(selectedLine).getNodes().add(node);
+            }
+            if ((key_num > 1) && (key_num - 2 < countries.length)) { //2+ create units of different countries
+                var unit = new Unit(
+                        countries[key_num - 2],
+                        new ArrayList<>(),
+                        null,
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey)
+                );
+                unit.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+                System.out.println(unit);
 
-            animation.getUnits().add(unit);
+                animation.getUnits().add(unit);
+            }
         }
         if (ctrl_pressed) {
             if (keycode == Input.Keys.C) {
                 animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
+            }
+            if (selected != null) {
+                if (keycode == Input.Keys.D) {
+                    selected.setDeath(time);
+                    System.out.println("Death of " + selected + " set to " + selected.getDeath());
+                }
             }
         }
         return true;
@@ -511,7 +543,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
         for (Object node : nodeList) {
             if (node.clicked(x, y)) {
-                System.out.println(node.getPosition() + " was clicked");
+                System.out.println("Node at " + node.getPosition() + " on line " + animation.getLineOfNode(node) + " was clicked");
                 selected = node;
                 selectedLine = animation.getLineOfNode(node);
                 return true;
