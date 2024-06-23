@@ -24,6 +24,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogicgames.superjumper.originalgame.Animation;
 import com.badlogicgames.superjumper.originalgame.Settings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Assets {
 	public static Texture background;
 	public static Texture battlefield;
@@ -61,8 +64,16 @@ public class Assets {
 	public static Sound coinSound;
 	public static Sound clickSound;
 
+	private static final Map<String, Texture> LOADED_TEXTURES = new HashMap<>();
+
 	public static Texture loadTexture (String file) {
-		return new Texture(Gdx.files.internal(file));
+		if (LOADED_TEXTURES.containsKey(file)) {
+			return LOADED_TEXTURES.get(file);
+		}
+
+		final Texture texture = new Texture(Gdx.files.internal(file));
+		LOADED_TEXTURES.put(file, texture);
+		return texture;
 	}
 
 	public static void load () {

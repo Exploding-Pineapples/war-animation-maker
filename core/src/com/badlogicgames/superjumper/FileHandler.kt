@@ -51,6 +51,8 @@ object FileHandler {
             kotlin.runCatching {
                 animations += gson.fromJson(content, Animation::class.java)
                     .apply {
+                        units.forEach { unit -> unit.texture() }
+
                         // preload image dimensions
                         getImageDimensions()
                     }

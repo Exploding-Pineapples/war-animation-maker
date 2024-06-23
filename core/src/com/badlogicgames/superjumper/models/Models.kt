@@ -1,5 +1,6 @@
 package com.badlogicgames.superjumper.models
 
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.superjumper.AreaColor
 import com.badlogicgames.superjumper.Assets
@@ -400,8 +401,17 @@ data class Unit(
     override var alpha: Float = 0.0f
 ) : Object
 {
-    private val texture by lazy {
-        Assets.
+    @Transient
+    private var texture: Texture? = null
+
+    fun texture(): Texture
+    {
+        if (texture == null)
+        {
+            texture = Assets.loadTexture(image)
+        }
+
+        return texture!!
     }
 }
 
@@ -489,8 +499,8 @@ data class Area(
 data class Line(
     val id: Int,
     val nodes: MutableList<Node> = mutableListOf(),
-    var interpolatedX: Array<Float> = arrayOf(),
-    var interpolatedY: Array<Float> = arrayOf(),
+    @Transient var interpolatedX: Array<Float> = arrayOf(),
+    @Transient var interpolatedY: Array<Float> = arrayOf(),
 ) {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
@@ -570,6 +580,7 @@ class UnitHandler(
 
     fun add(unit: Unit)
     {
+        unit.texture()
         animation.units += unit
     }
 

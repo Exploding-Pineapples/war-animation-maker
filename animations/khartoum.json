@@ -3093,9 +3093,7 @@
           },
           "alpha": 0.0
         }
-      ],
-      "interpolatedX": [],
-      "interpolatedY": []
+      ]
     },
     {
       "id": 1,
@@ -4760,9 +4758,7 @@
           },
           "alpha": 0.0
         }
-      ],
-      "interpolatedX": [],
-      "interpolatedY": []
+      ]
     }
   ],
   "areas": [
