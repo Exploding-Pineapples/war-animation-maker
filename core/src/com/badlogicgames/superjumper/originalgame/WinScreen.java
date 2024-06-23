@@ -1,4 +1,4 @@
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Align;
+import com.badlogicgames.superjumper.Assets;
+import com.badlogicgames.superjumper.Screen;
+import com.badlogicgames.superjumper.WarAnimationMaker;
 
 public class WinScreen extends ScreenAdapter {
 	WarAnimationMaker game;

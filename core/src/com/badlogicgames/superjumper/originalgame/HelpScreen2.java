@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -24,8 +24,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogicgames.superjumper.Assets;
+import com.badlogicgames.superjumper.WarAnimationMaker;
 
-public class HelpScreen4 extends ScreenAdapter {
+public class HelpScreen2 extends ScreenAdapter {
 	WarAnimationMaker game;
 
 	OrthographicCamera guiCam;
@@ -34,14 +36,14 @@ public class HelpScreen4 extends ScreenAdapter {
 	Texture helpImage;
 	TextureRegion helpRegion;
 
-	public HelpScreen4 (WarAnimationMaker game) {
+	public HelpScreen2 (WarAnimationMaker game) {
 		this.game = game;
 
 		guiCam = new OrthographicCamera(320, 480);
 		guiCam.position.set(320 / 2, 480 / 2, 0);
 		nextBounds = new Rectangle(320 - 64, 0, 64, 64);
 		touchPoint = new Vector3();
-		helpImage = Assets.loadTexture("data/help4.png");
+		helpImage = Assets.loadTexture("data/help2.png");
 		helpRegion = new TextureRegion(helpImage, 0, 0, 320, 480);
 	}
 
@@ -51,7 +53,7 @@ public class HelpScreen4 extends ScreenAdapter {
 
 			if (nextBounds.contains(touchPoint.x, touchPoint.y)) {
 				Assets.playSound(Assets.clickSound);
-				game.setScreen(new HelpScreen5(game));
+				game.setScreen(new HelpScreen3(game));
 			}
 		}
 	}

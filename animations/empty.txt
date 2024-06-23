@@ -1,0 +1,29 @@
+{
+  "path": "assets\\maps\\[PATH].png",
+  "name": "empty",
+  "units": [],
+  "camera": {
+    "position": {
+      "x": 960.0,
+      "y": 540.0
+    },
+    "zoom": 1.0,
+    "movementFrames": [
+      {
+        "0": {
+          "first": {
+            "x": 977.4591,
+            "y": 451.14648
+          },
+          "second": 0.30658844
+        }
+      }
+    ]
+  },
+  "lines": [],
+  "areas": [],
+  "cachedImageDimensions": {
+    "first": 10833,
+    "second": 7465
+  }
+}

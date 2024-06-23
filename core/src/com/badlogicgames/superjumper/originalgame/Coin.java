@@ -14,30 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+public class Coin extends GameObject {
+	public static final float COIN_WIDTH = 0.5f;
+	public static final float COIN_HEIGHT = 0.8f;
+	public static final int COIN_SCORE = 10;
 
-public class Animation {
-	public static final int ANIMATION_LOOPING = 0;
-	public static final int ANIMATION_NONLOOPING = 1;
+	float stateTime;
 
-	final TextureRegion[] keyFrames;
-	final float frameDuration;
-
-	public Animation (float frameDuration, TextureRegion... keyFrames) {
-		this.frameDuration = frameDuration;
-		this.keyFrames = keyFrames;
+	public Coin (float x, float y) {
+		super(x, y, COIN_WIDTH, COIN_HEIGHT);
+		stateTime = 0;
 	}
 
-	public TextureRegion getKeyFrame (float stateTime, int mode) {
-		int frameNumber = (int)(stateTime / frameDuration);
-
-		if (mode == ANIMATION_NONLOOPING) {
-			frameNumber = Math.min(keyFrames.length - 1, frameNumber);
-		} else {
-			frameNumber = frameNumber % keyFrames.length;
-		}
-		return keyFrames[frameNumber];
+	public void update (float deltaTime) {
+		stateTime += deltaTime;
 	}
 }

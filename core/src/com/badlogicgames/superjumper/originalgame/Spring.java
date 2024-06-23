@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 public class Spring extends GameObject {
 	public static float SPRING_WIDTH = 0.3f;

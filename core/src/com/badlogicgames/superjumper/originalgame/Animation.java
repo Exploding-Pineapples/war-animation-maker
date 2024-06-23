@@ -14,17 +14,30 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class GameObject {
-	public final Vector2 position;
-	public final Rectangle bounds;
+public class Animation {
+	public static final int ANIMATION_LOOPING = 0;
+	public static final int ANIMATION_NONLOOPING = 1;
 
-	public GameObject (float x, float y, float width, float height) {
-		this.position = new Vector2(x, y);
-		this.bounds = new Rectangle(x - width / 2, y - height / 2, width, height);
+	final TextureRegion[] keyFrames;
+	final float frameDuration;
+
+	public Animation (float frameDuration, TextureRegion... keyFrames) {
+		this.frameDuration = frameDuration;
+		this.keyFrames = keyFrames;
+	}
+
+	public TextureRegion getKeyFrame (float stateTime, int mode) {
+		int frameNumber = (int)(stateTime / frameDuration);
+
+		if (mode == ANIMATION_NONLOOPING) {
+			frameNumber = Math.min(keyFrames.length - 1, frameNumber);
+		} else {
+			frameNumber = frameNumber % keyFrames.length;
+		}
+		return keyFrames[frameNumber];
 	}
 }

@@ -17,11 +17,12 @@
 package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogicgames.superjumper.originalgame.Animation;
+import com.badlogicgames.superjumper.originalgame.Settings;
 
 public class Assets {
 	public static Texture background;
@@ -29,6 +30,7 @@ public class Assets {
 	public static TextureRegion backgroundRegion;
 	public static Texture flag1;
 	public static Texture flag2;
+	public static Texture explosion;
 
 	public static Texture items;
 	public static TextureRegion mainMenu;
@@ -69,6 +71,7 @@ public class Assets {
 		flag1 = loadTexture("assets/flags/hamasflag.png");
 		flag2 = loadTexture("assets/flags/israelflag.png");
 		flags = new Texture[]{flag1, flag2};
+		explosion = loadTexture("assets/explosion.png");
 
 		//backgroundRegion = new TextureRegion(background, 0, 0, 320, 480);
 

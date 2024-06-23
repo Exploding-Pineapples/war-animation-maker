@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 public class Platform extends DynamicGameObject {
 	public static final float PLATFORM_WIDTH = 2;
