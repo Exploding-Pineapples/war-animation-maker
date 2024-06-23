@@ -17,7 +17,7 @@ import kotlin.math.cos
 interface Object
 {
     var position: Coordinate
-    //var screenPosition: Coordinate
+    var screenPosition: Coordinate
 
     val movementFrames: MutableList<GroupedMovement<Coordinate>>
     var death: Int?
@@ -26,8 +26,7 @@ interface Object
 
     fun clicked(x: Float, y: Float): Boolean
     {
-        //return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
-        return (x - position.x).absoluteValue <= 10 && (y - position.y).absoluteValue <= 10
+        return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean { //can only be called after at least one key frame has been added
         val (length, index, subindex, start, end) = findTime(time)
@@ -406,7 +405,7 @@ constructor(
     override val movementFrames: MutableList<GroupedMovement<Coordinate>> = mutableListOf(),
     override var death: Int? = null,
     override var position: Coordinate,
-    //override var screenPosition: Coordinate,
+    override var screenPosition: Coordinate,
     override var alpha: Float = 0.0f,
 ) : Object
 

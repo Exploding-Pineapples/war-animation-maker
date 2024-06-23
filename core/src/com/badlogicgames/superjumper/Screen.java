@@ -48,8 +48,6 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
     public static final int DISPLAY_WIDTH = 1920;
     public static final int DISPLAY_HEIGHT = 1080;
-    public static final int BACKGROUND_WIDTH = 10833;
-    public static final int BACKGROUND_HEIGHT = 7465;
     public static final int IMAGE_WIDTH = 40;
     public static final int IMAGE_HEIGHT = 40;
     public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
@@ -98,16 +96,16 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         zoomfactor = 0.75f + camera.zoom * 8;
         animation.camera().goToTime(time);
         if (up_pressed) {
-            camera.position.y += 10 * camera.zoom;
+            camera.position.y += 10 / camera.zoom;
         }
         if (down_pressed) {
-            camera.position.y -= 10 * camera.zoom;
+            camera.position.y -= 10 / camera.zoom;
         }
         if (left_pressed) {
-            camera.position.x -= 10 * camera.zoom;
+            camera.position.x -= 10 / camera.zoom;
         }
         if (right_pressed) {
-            camera.position.x += 10 * camera.zoom;
+            camera.position.x += 10 / camera.zoom;
         }
         if (!paused) { //don't update camera when paused to allow for movement when paused
             updateCam();
@@ -167,10 +165,8 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         //Draw background
-        game.batcher.setProjectionMatrix(camera.combined);
-
         game.batcher.begin();
-        game.batcher.draw(backgroundImage, 0F, 0F, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+        game.batcher.draw(backgroundmap, 0F, 0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         game.batcher.end();
 
 
@@ -194,7 +190,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         TextureRegion textureRegion = new TextureRegion(texture);
         textureRegion.flip(false, true);
         game.batcher.setColor(1,1,1,0.3f); //default is white 1,1,1,1
-        game.batcher.draw(textureRegion, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+        game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         game.batcher.setColor(1,1,1, 1);
         game.batcher.end();
 
@@ -581,17 +577,15 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     }
 
     public boolean mouseMoved(int x, int y) {
-//        y = DISPLAY_HEIGHT - y;
-//        mousex = (float) (floor(x) - camera.position.x * (1 - camera.zoom) - (DISPLAY_WIDTH / 2.0f - camera.position.x)) / camera.zoom;
-//        mousey = (float) (floor(y) - camera.position.y * (1 - camera.zoom) - (DISPLAY_HEIGHT / 2.0f - camera.position.y)) / camera.zoom;
-        mousex = x;
-        mousey = y;
+        y = DISPLAY_HEIGHT - y;
+        mousex = (float) (floor(x) - camera.position.x * (1 - camera.zoom) - (DISPLAY_WIDTH / 2.0f - camera.position.x)) / camera.zoom;
+        mousey = (float) (floor(y) - camera.position.y * (1 - camera.zoom) - (DISPLAY_HEIGHT / 2.0f - camera.position.y)) / camera.zoom;
         return true;
     }
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        camera.zoom /= 1 - 0.05 * amountY;
+        camera.zoom *= 1 - 0.05 * amountY;
         return true;
     }
 
