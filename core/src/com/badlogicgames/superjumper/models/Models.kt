@@ -2,6 +2,7 @@ package com.badlogicgames.superjumper.models
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.superjumper.AreaColor
+import com.badlogicgames.superjumper.Assets
 import com.badlogicgames.superjumper.Screen
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
@@ -398,6 +399,11 @@ data class Unit(
     override var screenPosition: Coordinate,
     override var alpha: Float = 0.0f
 ) : Object
+{
+    private val texture by lazy {
+        Assets.
+    }
+}
 
 data class Node
     @JvmOverloads
@@ -415,11 +421,21 @@ data class Area(
     var lineIDs: List<Pair<Int, Int>> = mutableListOf(),
     var drawPoly: MutableList<FloatArray> = mutableListOf()
 ) {
-    fun calculatePolygon(lines: List<Pair<Line, Int>>) {
+    fun getDrawNodes(time: Int): List<Node> {
+        val out = mutableListOf<Node>()
+        for (n in nodes) {
+            if (time >= n.movementFrames.first().keys.first()) {
+                out.add(n)
+            }
+        }
+        return out
+    }
+    fun calculatePolygon(lines: List<Pair<Line, Int>>, time: Int) {
         val border1D = DoubleArray(nodes.size * 2)
         var poly = DoubleArray(0)
 
         var n = 0
+        val nodes = getDrawNodes(time)
         while (n < nodes.size) {
             val node = nodes[n]
             border1D[2 * n] = node.screenPosition.x.toDouble()

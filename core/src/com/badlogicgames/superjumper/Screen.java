@@ -48,8 +48,8 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
     public static final int DISPLAY_WIDTH = 1920;
     public static final int DISPLAY_HEIGHT = 1080;
-    public static final int IMAGE_WIDTH = 40;
-    public static final int IMAGE_HEIGHT = 40;
+    public static final int IMAGE_WIDTH = 10;
+    public static final int IMAGE_HEIGHT = 10;
     public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
     public static final int LINES_PER_LINE = 1000; //number of straight lines used to represent the splines
 
@@ -132,7 +132,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
                 convertedLineIDs.add(new Pair<>(animation.getLineByID(line.getFirst()), line.getSecond()));
             }
 
-            area.calculatePolygon(convertedLineIDs);
+            area.calculatePolygon(convertedLineIDs, time);
         }
 
         //Update background screen
