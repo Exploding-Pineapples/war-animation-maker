@@ -14,21 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
-public class Coin extends GameObject {
-	public static final float COIN_WIDTH = 0.5f;
-	public static final float COIN_HEIGHT = 0.8f;
-	public static final int COIN_SCORE = 10;
+import com.badlogic.gdx.math.Vector2;
 
-	float stateTime;
+public class DynamicGameObject extends GameObject {
+	public final Vector2 velocity;
+	public final Vector2 accel;
 
-	public Coin (float x, float y) {
-		super(x, y, COIN_WIDTH, COIN_HEIGHT);
-		stateTime = 0;
-	}
-
-	public void update (float deltaTime) {
-		stateTime += deltaTime;
+	public DynamicGameObject (float x, float y, float width, float height) {
+		super(x, y, width, height);
+		velocity = new Vector2();
+		accel = new Vector2();
 	}
 }

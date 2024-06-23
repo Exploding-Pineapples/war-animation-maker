@@ -1,104 +1,86 @@
-/*******************************************************************************
- * Copyright 2011 See AUTHORS file.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-
 package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogicgames.superjumper.models.*;
 import com.badlogicgames.superjumper.models.Animation;
 import com.badlogicgames.superjumper.models.Object;
-import earcut4j.Earcut;
-import kotlin.collections.AbstractMutableList;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import com.badlogicgames.superjumper.originalgame.Settings;
+import kotlin.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static com.badlogicgames.superjumper.Assets.loadTexture;
 import static java.lang.Math.floor;
 
 public class Screen extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;
     OrthographicCamera camera;
-    Rectangle soundBounds;
-    Rectangle playBounds;
-    Rectangle highscoresBounds;
-    Rectangle helpBounds;
-    Vector3 touchPoint;
-    Animation animation;
+    Vector3 touchPoint; //point of last mouse click
+    float mousex; //current mouse x position
+    float mousey; //current mouse y position
+    float zoomfactor; //separate from camera.zoom, changes certain things at a different scale
+    Animation animation; //contains all information about animation loaded from file
     Integer time;
     TextureRegion backgroundmap;
-    List<Node> nodes;
-    List<Unit> units;
     Object selected;
-    double[][] keyPoints;
-    PolynomialSplineFunction xFunction;
-    PolynomialSplineFunction yFunction;
     boolean up_pressed;
     boolean down_pressed;
     boolean left_pressed;
     boolean right_pressed;
+    boolean ctrl_pressed;
     boolean paused;
     boolean animationMode;
-    float mousex;
-    float mousey;
-    float zoomfactor;
-    List<float[]> polygon;
+    List<Node> selectedList;
+    String[] countries;
+    TouchMode touchMode;
+    Texture backgroundImage;
+    int lineID;
+
     public static final int DISPLAY_WIDTH = 1920;
     public static final int DISPLAY_HEIGHT = 1080;
-    public static final int IMAGE_WIDTH = 40;
-    public static final int IMAGE_HEIGHT = 40;
+    public static final int IMAGE_WIDTH = 10;
+    public static final int IMAGE_HEIGHT = 10;
+    public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
+    public static final int LINES_PER_LINE = 1000; //number of straight lines used to represent the splines
 
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private final BitmapFont bitmapFont = new BitmapFont();
+    FrameBuffer colorlayer;
 
     public Screen(WarAnimationMaker game) {
         this.game = game;
-
+        animation = FileHandler.INSTANCE.getAnimations().get(0);
+        //camera
         camera = new OrthographicCamera(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         camera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
-        camera.setToOrtho(false, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-
-        soundBounds = new Rectangle(0, 0, 64, 64);
-        playBounds = new Rectangle(160 - 150, 200 + 18, 300, 36);
-        highscoresBounds = new Rectangle(160 - 150, 200 - 18, 300, 36);
-        helpBounds = new Rectangle(160 - 150, 200 - 18 - 36, 300, 36);
+        //camera.setToOrtho(false, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        animation.camera();
+        //not gonna touch
         touchPoint = new Vector3();
         bitmapFont.getData().setScale(2.5f);
-
-        animation = FileHandler.INSTANCE.getAnimations().get(0);
+        //war animation init
+        backgroundImage = loadTexture(animation.getPath());
         time = 0;
         paused = true;
         animationMode = true;
-        polygon = new ArrayList<>();
+        countries = new String[]{"hamas", "israel"};
+        colorlayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
+        lineID = 0;
+        //UI
+        touchMode = TouchMode.DEFAULT;
+
+        animation.camera().goToTime(time);
+        updateCam();
     }
 
     public void update() {
@@ -107,107 +89,12 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 			/*if (soundBounds.contains(touchPoint.x, touchPoint.y)) {
 				Assets.playSound(Assets.clickSound);
 				Settings.soundEnabled = !Settings.soundEnabled;
-
 			}*/
         }
+        //Camera
         camera.update();
-
-        nodes = animation.getLines().get(0).getNodes();
-        units = animation.getUnits();
-
-        //Update all nodes and interpolate line
-        double[] xValues = new double[nodes.size()];
-        double[] yValues = new double[nodes.size()];
-        double[] evalAt = new double[nodes.size()];
-
-        for (int i = 0; i < nodes.size(); i += 1) {
-            evalAt[i] = i;
-        }
-
-        Node node;
-
-        for (int i = 0; i < nodes.size(); i++) {
-            node = nodes.get(i);
-            node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            xValues[i] = node.getScreenPosition().getX();
-            yValues[i] = node.getScreenPosition().getY();
-        }
-
-        keyPoints = new double[xValues.length][2];
-
-        for (int i = 0; i < xValues.length; i++) {
-            keyPoints[i] = new double[]{xValues[i], yValues[i]};
-        }
-
-        // Create a spline interpolator
-        SplineInterpolator interpolator = new SplineInterpolator();
-        xFunction = interpolator.interpolate(evalAt, xValues);
-        yFunction = interpolator.interpolate(evalAt, yValues);
-
-        //Update background screen
-        Float[] rect = {camera.position.x, camera.position.y, camera.viewportWidth / camera.zoom, camera.viewportHeight / camera.zoom};
-
-        int viewwidth = (int) (DISPLAY_WIDTH / camera.zoom);
-        int viewheight = (int) (DISPLAY_HEIGHT / camera.zoom);
-
-        zoomfactor = 0.75f + camera.zoom / 8;
-
-        backgroundmap = new TextureRegion(Assets.background, (int) (camera.position.x - (viewwidth - DISPLAY_WIDTH) / 2.0f), (int) (DISPLAY_HEIGHT - camera.position.y - (viewheight - DISPLAY_WIDTH) / 2.0f), viewwidth, viewheight);
-
-        //Update all units
-        for (Unit unit : units) {
-            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-        }
-
-        //Update area polygon (red shaded area)
-        if (polygon.size() > 0) {
-            polygon.clear();
-        }
-
-        double[] doublePoly = new double[animation.getArea().getNodes().size() * 2]; //list of polygon vertices in double, all calculation libraries use doubles
-
-        int i = 0;
-        for (Node n : animation.getArea().getNodes()) { //updates all the area nodes and adds their positions to the poly list
-            n.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            doublePoly[i] = n.getScreenPosition().getX();
-            doublePoly[i + 1] = n.getScreenPosition().getY();
-            i += 2;
-        }
-
-        List<Node> line = animation.getLines().get(0).getNodes();
-
-        float num = 1000.00f;
-        double[] nodePositions = new double[(int) num * 2]; //stores the positions of all the interpolated points along the red line (not the green set points), this is used to draw polygon
-
-        int k = (int) num * 2 - 2;
-        for (float j = nodes.size()/num; j < (float) nodes.size() - 1.00f; j += (float) nodes.size()/num) {
-            nodePositions[k] = xFunction.value(j);
-            nodePositions[k + 1] = yFunction.value(j);
-            k -= 2;
-        }
-
-        Node firstNode = line.get(0);
-        Node lastNode = line.get(line.size() - 1);
-        List<Integer> firstAdjacentIndexes = PolygonUtils.findAdjacentVertices(doublePoly, new double[]{firstNode.getScreenPosition().getX(), firstNode.getScreenPosition().getY()}); //util finds which polygon vertices are next to both ends of the frontline
-        List<Integer> lastAdjacentIndexes = PolygonUtils.findAdjacentVertices(doublePoly, new double[]{lastNode.getScreenPosition().getX(), lastNode.getScreenPosition().getY()});
-
-        doublePoly = PolygonUtils.polygon_points(doublePoly, new int[]{firstAdjacentIndexes.get(1), lastAdjacentIndexes.get(0)});
-
-        double[] superList = ArrayUtils.addAll(nodePositions, doublePoly); //this is the final list to be used to draw the polygon
-
-        List<Integer> triangulated = Earcut.earcut(superList); //turns polygon into series of triangles represented by polygon vertex indexes
-        float v1x, v1y, v2x, v2y, v3x, v3y;
-        for (i = 0; i < triangulated.size(); i += 3) {
-            v1x = (float) superList[triangulated.get(i) * 2];
-            v1y = (float) superList[triangulated.get(i) * 2 + 1];
-            v2x = (float) superList[triangulated.get(i + 1) * 2];
-            v2y = (float) superList[triangulated.get(i + 1) * 2 + 1];
-            v3x = (float) superList[triangulated.get(i + 2) * 2];
-            v3y = (float) superList[triangulated.get(i + 2) * 2 + 1];
-            polygon.add(new float[]{v1x, v1y, v2x, v2y, v3x, v3y}); //the polygon instance variable is then drawn by triangles in the draw function
-        }
-
-        //Handle repeated key inputs
+        zoomfactor = 0.75f + camera.zoom * 8;
+        animation.camera().goToTime(time);
         if (up_pressed) {
             camera.position.y += 10 / camera.zoom;
         }
@@ -220,12 +107,56 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if (right_pressed) {
             camera.position.x += 10 / camera.zoom;
         }
-
-        //Step time, do things that only happen when not paused
-        if (!paused) {
-            time++;
+        if (!paused) { //don't update camera when paused to allow for movement when paused
+            updateCam();
         }
 
+        if (selected != null && paused) { //automatically updates the selected object to go to the mouse for interactive adding
+            if ((touchMode == TouchMode.DEFAULT) || (touchMode == TouchMode.NEW_NODE)) {
+                selected.newSetPoint(time, mousex, mousey);
+                selected.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+            }
+        }
+
+        //Update area polygons
+        for (Area area : animation.getAreas()) {
+            for (Node node : area.getNodes()) {
+                node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+            }
+
+            //Since the area function requires lines and not line IDs, all the line IDs are turned into lines using the instance method of animation.getLineByID and then passed into the area.calculatePolygon() function
+            List<Pair<Integer, Integer>> lineIDs = area.getLineIDs();
+            List<Pair<Line, Integer>> convertedLineIDs = new ArrayList<>();
+
+            for (Pair<Integer, Integer> line : lineIDs) {
+                convertedLineIDs.add(new Pair<>(animation.getLineByID(line.getFirst()), line.getSecond()));
+            }
+
+            area.calculatePolygon(convertedLineIDs, time);
+        }
+
+        //Update background screen
+        int viewwidth = (int) (DISPLAY_WIDTH / camera.zoom);
+        int viewheight = (int) (DISPLAY_HEIGHT / camera.zoom);
+        backgroundmap = new TextureRegion(backgroundImage, (int) (camera.position.x - (viewwidth - DISPLAY_WIDTH) / 2.0f), (int) (DISPLAY_HEIGHT - camera.position.y - (viewheight - DISPLAY_WIDTH) / 2.0f), viewwidth, viewheight);
+
+        //update all nodes
+        for (Line line : animation.getLines()) {
+            for (Node node : line.getNodes()) {
+                node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+            }
+        }
+
+        //Update all units
+        for (Unit unit : animation.getUnits()) {
+            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+        }
+    }
+
+    public void updateCam() {
+        camera.position.x = animation.camera().getPosition().getX();
+        camera.position.y = animation.camera().getPosition().getY();
+        camera.zoom = animation.camera().getZoom();
     }
 
     public void draw() {
@@ -235,30 +166,66 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
         //Draw background
         game.batcher.begin();
-        game.batcher.draw(backgroundmap, 0.0F, 0.0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        game.batcher.draw(backgroundmap, 0F, 0F, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         game.batcher.end();
 
-        //Draw the area polygon
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(new Color(1, 0, 0, 0.3f));
 
-        if (polygon != null) {
-            for (float[] triangle : polygon) {
-                shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5]);
-            }
+        //Draw the colored areas to buffer
+        colorlayer.begin();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.CLEAR);
+        shapeRenderer.rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+
+        for (Area area: animation.getAreas()){
+            area.draw(shapeRenderer);
         }
 
+        shapeRenderer.end();
+        colorlayer.end();
+
+        //Draw the colored areas to the screen
+        game.batcher.begin();
+        Texture texture = colorlayer.getColorBufferTexture();
+        TextureRegion textureRegion = new TextureRegion(texture);
+        textureRegion.flip(false, true);
+        game.batcher.setColor(1,1,1,0.3f); //default is white 1,1,1,1
+        game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        game.batcher.setColor(1,1,1, 1);
+        game.batcher.end();
+
+        //Draw the front line
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.RED);
+
+        for (Line line : animation.getLines()) {
+            if (line.interpolate(LINES_PER_LINE, time)) { //lines.interpolate interpolates the points to draw into its instance variables and returns true only if there were more than 2 points
+                for (int i = 0; i < LINES_PER_LINE; i++) {
+                    shapeRenderer.rectLine(
+                            line.getInterpolatedX()[i],
+                            line.getInterpolatedY()[i],
+                            line.getInterpolatedX()[i + 1],
+                            line.getInterpolatedY()[i + 1],
+                            5.0f
+                    );
+                }
+            }
+        }
         shapeRenderer.end();
 
         game.batcher.begin();
         //Draw units
         for (Unit unit : animation.getUnits()) {
-            if (unit.getImage().equals("israel")) {
-                game.batcher.draw(Assets.flag2, unit.getScreenPosition().getX() - (IMAGE_WIDTH * zoomfactor)/2, unit.getScreenPosition().getY() - (IMAGE_HEIGHT * zoomfactor)/2, IMAGE_WIDTH * zoomfactor, IMAGE_HEIGHT * zoomfactor);
+            for (int i = 0; i < countries.length; i++) {
+                String image = countries[i];
+                if (unit.getImage().equals(image)) { //draw only for the correct country
+                    game.batcher.setColor(1, 1, 1, 1.0f); //sets no transparency by default
+                    game.batcher.draw(Assets.flags[i], unit.getScreenPosition().getX() - (IMAGE_WIDTH * zoomfactor) / 2, unit.getScreenPosition().getY() - (IMAGE_HEIGHT * zoomfactor) / 2, IMAGE_WIDTH * zoomfactor, IMAGE_HEIGHT * zoomfactor);
+                }
             }
+
         }
+        game.batcher.setColor(1, 1, 1, 1.0f); //resets to no transparency, if this isn't here the background breaks and I don't know why
         game.batcher.end();
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -268,28 +235,24 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if (animationMode) {
             //Draw line nodes
             shapeRenderer.setColor(Color.GREEN);
-            for (double[] point : keyPoints) {
-                shapeRenderer.circle((float) point[0], (float) point[1], 7);
+            for (Line l : animation.getLines()) {
+                for (Node n : l.getNodes()) { //Uses getNodes() instead of getDrawNodes() to show all nodes, even ones before their defined time
+                    shapeRenderer.circle(n.getScreenPosition().getX(), n.getScreenPosition().getY(), 7);
+                }
             }
             //Draw area polygon nodes
             shapeRenderer.setColor(Color.BLUE);
-            for (Node node : animation.getArea().getNodes()) {
-                shapeRenderer.circle(node.getScreenPosition().getX(), node.getScreenPosition().getY(), 7);
+            for (Area area : animation.getAreas()) {
+                for (Node node : area.getNodes()) {
+                    shapeRenderer.circle(node.getScreenPosition().getX(), node.getScreenPosition().getY(), 7);
+                }
             }
-        }
-        //Draw the front line
-        shapeRenderer.setColor(Color.RED);
-
-        float num = 1000.00f; //the number of straight lines that will be used to approximate the spline function
-        double[][] interpolated = new double[(int) num][2];
-        for (float i = nodes.size()/num; i < (float) nodes.size() - 1.00f; i += (float) nodes.size()/num) {
-            shapeRenderer.rectLine(
-                    (float) xFunction.value(i - nodes.size()/num),
-                    (float) yFunction.value(i - nodes.size()/num),
-                    (float) xFunction.value(i),
-                    (float) yFunction.value(i),
-                    5.0f
-            );
+            //Draw the selected node
+            if (selected != null) {
+                shapeRenderer.setColor(Color.ORANGE);
+                shapeRenderer.rect(selected.getScreenPosition().getX() - 6.0f, selected.getScreenPosition().getY() - 6.0f, 12.0f, 12.0f);
+                //System.out.println("selected");
+            }
         }
         shapeRenderer.end();
         //Draw FPS and time text
@@ -297,6 +260,10 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         bitmapFont.draw(game.batcher, Gdx.graphics.getFramesPerSecond() + " FPS", 30, (float) DISPLAY_HEIGHT - 30);
         bitmapFont.draw(game.batcher, "Time: " + time, 30, DISPLAY_HEIGHT - 70);
         game.batcher.end();
+
+        if (!paused) { //now that both update and draw are done, advance the time
+            time++;
+        }
     }
 
     public boolean keyDown(int keycode) {
@@ -312,65 +279,159 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if (keycode == Input.Keys.RIGHT) {
             right_pressed = true;
         }
+        if ((keycode == Input.Keys.CONTROL_LEFT) || (keycode == Input.Keys.CONTROL_RIGHT)) {
+            ctrl_pressed = true;
+        }
         if (keycode == Input.Keys.SPACE) {
             paused = !paused;
         }
-        if (keycode == Input.Keys.A) {
-            var node = new Node(
-                    new Coordinate(0, 0),
-                    new Coordinate(mousex, mousey)
-            );
-            node.getMovementFrames().add(
-                    new GroupedMovement(
-                            new HashMap<>() {{
-                                put(time, new Coordinate(mousex, mousey));
-                            }}
-                    )
-            );
 
-            animation.getArea().getNodes().add(node);
-        }
-        if (keycode == Input.Keys.E) {
-            time = (time / 200) * 200 + 200;
-        }
-        if (keycode == Input.Keys.Q) {
-            time = (int) Math.ceil(time / 200.0) * 200 - 200;
-        }
-        if (keycode == Input.Keys.C) {
-            animationMode = !animationMode;
-        }
-        if (keycode == Input.Keys.NUM_1) {
-            var node = new Node(
-                    new Coordinate(0, 0),
-                    new Coordinate(mousex, mousey)
-            );
-            node.getMovementFrames().add(
-                    new GroupedMovement(
-                            new HashMap<>() {{
-                                put(time, new Coordinate(mousex, mousey));
-                            }}
-                    )
-            );
+        if ((keycode >= 7) && (keycode <= 16)) { //keycodes 7-16 inclusive correspond to number keys 0 - 9
+            int key_num = keycode - 7;
+            if (key_num == 1) { //1 creates frontline nodes
+                if (touchMode != TouchMode.NEW_NODE) {
+                    touchMode = TouchMode.NEW_NODE;
+                    System.out.println("New Node Mode");
+                } else {
+                    touchMode = TouchMode.DEFAULT;
+                    selected = null;
+                    System.out.println("Default Mode");
+                }
+            }
+            if ((key_num > 1) && (key_num - 2 < countries.length)) { //2+ create units of different countries
+                var unit = new Unit(
+                        countries[key_num - 2],
+                        new ArrayList<>(),
+                        null,
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey),
+                        0.0f
+                );
+                unit.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+                System.out.println(unit);
 
-            animation.getLines().get(0).getNodes().add(node);
+                animation.getUnits().add(unit);
+            }
         }
-        if (keycode == Input.Keys.NUM_2) {
-            var unit = new Unit(
-                    "israel",
-                    new ArrayList<GroupedMovement>(),
-                    null,
-                    new Coordinate(0, 0),
-                    new Coordinate(mousex, mousey)
-            );
-            unit.getMovementFrames().add(
-                    new GroupedMovement(
-                            new HashMap<>() {{
-                                put(time, new Coordinate(mousex, mousey));
-                            }}
-                    )
-            );
 
-            animation.getUnits().add(unit);
+        boolean actioned = false;
+        if (selected != null) {
+            if (keycode == Input.Keys.C) {
+                selected = null;
+                System.out.println("Deselected object");
+            }
+            if (keycode == Input.Keys.FORWARD_DEL) {
+                animation.deleteObject(selected);
+                System.out.println("Deleted object");
+                actioned = true;
+            }
+            if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.DEL) {
+                if (selected.removeFrame(time)) {
+                    System.out.println("Deleted last frame");
+                } else {
+                    System.out.println("Cannot delete last frame on object with less than 2 frames");
+                }
+                selected = null;
+                touchMode = TouchMode.DEFAULT;
+                actioned = true;
+            }
+        }
+
+        if (ctrl_pressed) {
+            if (keycode == Input.Keys.C) {
+                animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
+            }
+            if (keycode == Input.Keys.S) {
+                Settings.save();
+                FileHandler.INSTANCE.save();
+                System.out.println("saved");
+            }
+            if (selected != null) {
+                if (keycode == Input.Keys.D) {
+                    selected.setDeath(time);
+                    System.out.println("Death of " + selected + " set to " + selected.getDeath());
+                    actioned = true;
+                }
+            }
+        } else {
+            if (keycode == Input.Keys.A) { //create a new area
+                var node = new Node(
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey)
+                );
+                node.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+                Area a = new Area(new ArrayList<>(), AreaColor.RED, new ArrayList<>(), new ArrayList<>());
+                //a.getLineIDs().add(new Pair<>(0, 0));
+
+                animation.getAreas().add(a);
+
+                selectedList = a.getNodes();
+                selected = node;
+                selectedList.add((Node) selected);
+            }
+            if (keycode == Input.Keys.S) {
+                touchMode = TouchMode.SET_AREA_LINE;
+                System.out.println("Set Area Line");
+            }
+            if (keycode == Input.Keys.E) {
+                time = (time / 200) * 200 + 200;
+                animation.camera().goToTime(time);
+                updateCam();
+            }
+            if (keycode == Input.Keys.PERIOD) {
+                time++;
+                animation.camera().goToTime(time);
+                updateCam();
+                System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
+            }
+            if (keycode == Input.Keys.COMMA) {
+                time--;
+                animation.camera().goToTime(time);
+                updateCam();
+                System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
+            }
+            if (keycode == Input.Keys.V) {
+                animationMode = !animationMode;
+            }
+            if (keycode == Input.Keys.Q) {
+                time = (int) Math.ceil(time / 200.0) * 200 - 200;
+                animation.camera().goToTime(time);
+                updateCam();
+            }
+            if (keycode == Input.Keys.L) {
+                var node = new Node(
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey)
+                );
+                node.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+                lineID++;
+                animation.getLines().add(new Line(lineID, new ArrayList<>(), new Float[0], new Float[0]));
+                selectedList = Objects.requireNonNull(animation.getLineByID(lineID)).getNodes();
+                selectedList.add(node);
+                selected = node;
+            }
+        }
+
+        if (actioned) {
+            selected = null;
         }
         return true;
     }
@@ -388,6 +449,9 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if (keycode == Input.Keys.RIGHT) {
             right_pressed = false;
         }
+        if ((keycode == Input.Keys.CONTROL_LEFT) || (keycode == Input.Keys.CONTROL_RIGHT)) {
+            ctrl_pressed = false;
+        }
         return true;
     }
 
@@ -397,41 +461,103 @@ public class Screen extends ScreenAdapter implements InputProcessor {
 
     public boolean touchDown(int x, int y, int pointer, int button) {
         y = DISPLAY_HEIGHT - y; //for some reason clicked is called with top left (0, 0) instead of bottom left
-
         mousex = (float) (floor(x) - camera.position.x * (1 - camera.zoom) - (DISPLAY_WIDTH / 2.0f - camera.position.x)) / camera.zoom;
         mousey = (float) (floor(y) - camera.position.y * (1 - camera.zoom) - (DISPLAY_HEIGHT / 2.0f - camera.position.y)) / camera.zoom;
 
-        System.out.println(mousex + " " + mousey);
+        System.out.println("Clicked " + mousex + " " + mousey + " touch mode " + touchMode);
 
-        List<Node> nodeList = Stream.concat(animation.getArea().getNodes().stream(), animation.getLines().get(0).getNodes().stream()).toList();
-        List<Unit> unitList = animation.getUnits();
+        if (paused) {
+            if (touchMode == TouchMode.DEFAULT) { //default behavior: selects an object to move when paused
+                Stream<Node> nodeStream = Stream.of();
+                for (Area area : animation.getAreas()) {
+                    nodeStream = Stream.concat(nodeStream, area.getNodes().stream());
+                }
+                for (Line line : animation.getLines()) {
+                    nodeStream = Stream.concat(nodeStream, line.getNodes().stream());
+                }
+                List<Node> nodeList = nodeStream.toList();
+                List<Unit> unitList = animation.getUnits();
 
-        if (selected != null) {
-            if (button == 0) {
-                selected.newSetPoint(time, mousex, mousey);
-                selected = null;
-                return true;
+                if (selected != null) {
+                    if (button == 0) {
+                        selected.newSetPoint(time, mousex, mousey);
+                        selected = null;
+                        return true;
+                    }
+                    if (button == 1) {
+                        selected.newSetPoint(time, mousex, mousey, true);
+                        selected = null;
+                        return true;
+                    }
+                }
+
+                for (Object node : nodeList) {
+                    if (node.clicked(x, y)) {
+                        System.out.println("Node at " + node.getPosition() + " on line " + animation.getListOfObject(node) + " was clicked");
+                        selected = node;
+                        selectedList = animation.getListOfNode(node);
+                        return true;
+                    }
+                }
+
+                for (Object object : unitList) {
+                    if (object.clicked(x, y)) {
+                        System.out.println(object.getPosition() + " was clicked");
+                        selected = object;
+                        return true;
+                    }
+                }
             }
-            if (button == 1) {
-                selected.newSetPoint(time, mousex, mousey, true);
-                selected = null;
-                return true;
-            }
-        }
 
-        for (Object object : nodeList) {
-            if (object.clicked(x, y)) {
-                System.out.println(object.getPosition() + " was clicked");
-                selected = object;
-                return true;
-            }
-        }
+            if (touchMode == TouchMode.NEW_NODE) { //will add a new Node to the List<Node> selectedList, this includes frontlines and area borders
+                int addAtIndex;
+                //Conditional is really for selecting addAtIndex, which allows inserting at any point along a line based on what was previously selected
+                if (selected == null || selected.getClass() == Unit.class) { //if there was no selected node or the selected object was a Unit, there is no adding on. By default, it goes to the first frontline
+                    if (animation.getLines().size() == 0) { //if there is no frontline, make one
+                        animation.getLines().add(new Line(lineID, new ArrayList<>(), new Float[0], new Float[0]));
+                        lineID++;
+                        selectedList = animation.getLines().get(0).getNodes();
+                        addAtIndex = 0;
+                    } else { //if there is a frontline (and nothign was selected), add to the last node
+                        selectedList = animation.getLines().get(0).getNodes();
+                        selected = selectedList.get(selectedList.size() - 1);
+                        addAtIndex = selectedList.size();
+                    }
+                } else { //if something was selected, add the new node to its list
+                    addAtIndex = selectedList.indexOf(selected) + 1;
+                }
 
-        for (Object object : unitList) {
-            if (object.clicked(x, y)) {
-                System.out.println(object.getPosition() + " was clicked");
-                selected = object;
-                return true;
+                var node = new Node(
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey)
+                );
+                node.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+                selected = node;
+                selectedList.add(addAtIndex, node);
+            }
+
+            if (touchMode == TouchMode.SET_AREA_LINE) {
+                System.out.println("Checking for clicked line");
+                if (selected != null) {
+                    for (Line l : animation.getLines()) {
+                        for (Object node : l.getNodes()) {
+                            if (node.clicked(x, y)) {
+                                Area selectedArea = animation.getAreaOfNode(selected);
+                                selectedArea.getLineIDs().add(new Pair<>(l.getId(), selectedArea.getNodes().indexOf(selected)));
+                                touchMode = TouchMode.DEFAULT;
+                                selected = null;
+                                System.out.println("Area set to line");
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
         }
         return false;

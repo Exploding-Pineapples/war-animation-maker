@@ -14,17 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
-import com.badlogic.gdx.math.Vector2;
+public class Castle extends GameObject {
+	public static float CASTLE_WIDTH = 1.7f;
+	public static float CASTLE_HEIGHT = 1.7f;
 
-public class DynamicGameObject extends GameObject {
-	public final Vector2 velocity;
-	public final Vector2 accel;
-
-	public DynamicGameObject (float x, float y, float width, float height) {
-		super(x, y, width, height);
-		velocity = new Vector2();
-		accel = new Vector2();
+	public Castle (float x, float y) {
+		super(x, y, CASTLE_WIDTH, CASTLE_HEIGHT);
 	}
+
 }

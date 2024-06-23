@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
@@ -25,7 +25,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogicgames.superjumper.World.WorldListener;
+import com.badlogicgames.superjumper.Assets;
+import com.badlogicgames.superjumper.Screen;
+import com.badlogicgames.superjumper.WarAnimationMaker;
+import com.badlogicgames.superjumper.originalgame.World.WorldListener;
 
 public class GameScreen extends ScreenAdapter {
 	static final int GAME_READY = 0;

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 public class Squirrel extends DynamicGameObject {
 	public static final float SQUIRREL_WIDTH = 1;

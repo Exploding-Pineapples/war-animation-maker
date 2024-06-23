@@ -19,6 +19,7 @@ package com.badlogicgames.superjumper;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogicgames.superjumper.originalgame.Settings;
 
 public class WarAnimationMaker extends Game {
 	// used by all screens

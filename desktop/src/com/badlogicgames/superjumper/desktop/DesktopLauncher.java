@@ -10,6 +10,7 @@ public class DesktopLauncher {
 		config.title = "Super Jumper";
 		config.width = 1920;
 		config.height = 1080;
+		config.forceExit = false;
 		new LwjglApplication(new WarAnimationMaker(), config);
 	}
 }

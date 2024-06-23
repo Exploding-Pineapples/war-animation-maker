@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 public class Bob extends DynamicGameObject {
 	public static final int BOB_STATE_JUMP = 0;
