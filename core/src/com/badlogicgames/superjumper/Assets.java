@@ -77,10 +77,6 @@ public class Assets {
 	}
 
 	public static void load () {
-		background = loadTexture("assets/maps/gaza background.png");
-		battlefield = loadTexture("assets/maps/gaza battlefield.png");
-		flag1 = loadTexture("assets/flags/hamasflag.png");
-		flag2 = loadTexture("assets/flags/israelflag.png");
 		flags = new Texture[]{flag1, flag2};
 		explosion = loadTexture("assets/explosion.png");
 

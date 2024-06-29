@@ -1,10 +1,15 @@
 package com.badlogicgames.superjumper.models
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.superjumper.AreaColor
 import com.badlogicgames.superjumper.Assets
 import com.badlogicgames.superjumper.Screen
+import com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT
+import com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import earcut4j.Earcut
@@ -40,6 +45,8 @@ interface Object
 
         if (death != null) { //checks for death time
             alpha = 0.0f.coerceAtLeast((1.0f - (time - death!!) / 100f))
+        } else {
+            alpha = 255.0f
         }
 
         //alpha = Math.min(alpha, movementFrames[0].frames.entries.first().key);
@@ -48,8 +55,8 @@ interface Object
             position.x = xmotion[0]
             position.y = ymotion[0]
             if (start == -1) {
-                screenPosition.x = position.x * zoom - cx * (zoom - 1) + (Screen.DISPLAY_WIDTH / 2 - cx)
-                screenPosition.y = position.y * zoom - cy * (zoom - 1) + (Screen.DISPLAY_HEIGHT / 2 - cy)
+                screenPosition.x = position.x * zoom - cx * (zoom - 1) + (DISPLAY_WIDTH / 2 - cx)
+                screenPosition.y = position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy)
                 return false
             }
         }
@@ -79,8 +86,8 @@ interface Object
             position.x = xmotion[0] + distancex * ((time - start) / deltatime.toFloat())
             position.y = ymotion[0] + distancey * ((time - start) / deltatime.toFloat())
         }
-        screenPosition.x = position.x * zoom - cx * (zoom - 1) + (Screen.DISPLAY_WIDTH / 2 - cx)
-        screenPosition.y = position.y * zoom - cy * (zoom - 1) + (Screen.DISPLAY_HEIGHT / 2 - cy)
+        screenPosition.x = position.x * zoom - cx * (zoom - 1) + (DISPLAY_WIDTH / 2 - cx)
+        screenPosition.y = position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy)
         return true
     }
 
@@ -157,7 +164,7 @@ interface Object
             for (t in movement.keys) {
                 if (time == t) {
                     movement.frames[t] = Coordinate(x, y)
-                    println("Overwrote, new motions: $movementFrames")
+                    //println("Overwrote, new motions: $movementFrames")
                     found = true //no return yet, if it finds another duplicate time, overwrite
                 }
                 if (t > time) {
@@ -394,13 +401,22 @@ data class GroupedMovement<T>(
 
 data class Unit(
     val image: String,
+    var name: String? = null,
+    var type: String = "infantry",
+    var size: String = "XX",
     override val movementFrames: MutableList<GroupedMovement<Coordinate>> = mutableListOf(),
     override var death: Int? = null,
     override var position: Coordinate,
     override var screenPosition: Coordinate,
-    override var alpha: Float = 0.0f
+    override var alpha: Float = 255.0f
 ) : Object
 {
+    companion object {
+        val sizePresets = mapOf<String, Float>(
+            "XX" to 1.0f,
+            "X" to 0.75f,
+        )
+    }
     @Transient
     private var texture: Texture? = null
 
@@ -412,6 +428,29 @@ data class Unit(
         }
 
         return texture!!
+    }
+
+    fun draw(batcher: SpriteBatch, sizefactor: Float, font: BitmapFont) {
+        //draw only for the correct country
+        var sizePresetFactor = 1.0f
+        if (size in sizePresets) {
+            sizePresetFactor = sizePresets[size]!!
+        }
+        
+        batcher.setColor(1f, 1f, 1f, alpha) //sets no transparency by default
+        batcher.draw(
+            texture(),
+            screenPosition.x - (Screen.DEFAULT_UNIT_WIDTH * sizefactor) / 2,
+            screenPosition.y - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2,
+            Screen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor,
+            Screen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
+        )
+        font.data.setScale((0.3*sizefactor).toFloat())
+        font.color = Color(255.0f, 63.75f, 0.0f, alpha)
+
+        font.draw(batcher, size, screenPosition.x - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2, screenPosition.y + (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2)
+        if (name != null) { font.draw(batcher, name, screenPosition.x - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2, screenPosition.y) }
+        font.draw(batcher, type, screenPosition.x - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor)/2, screenPosition.y - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2)
     }
 }
 
@@ -599,7 +638,8 @@ data class Animation(
     val units: MutableList<Unit> = mutableListOf(),
     private var camera: Camera? = Camera(),
     val lines: MutableList<Line> = mutableListOf(),
-    val areas: MutableList<Area> = mutableListOf()
+    val areas: MutableList<Area> = mutableListOf(),
+    var lineID: Int = 0
 )
 {
     private var cachedImageDimensions: Pair<Int, Int>? = null

@@ -18,23 +18,40 @@ package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogicgames.superjumper.originalgame.Settings;
 
 public class WarAnimationMaker extends Game {
 	// used by all screens
+	GL20 gl;
 	public SpriteBatch batcher;
+	public ShapeRenderer shapeRenderer;
+	public BitmapFont bitmapFont;
+	public LoadingScreen loadingScreen;
+
+	public static final int DISPLAY_WIDTH = 1920;
+	public static final int DISPLAY_HEIGHT = 1080;
 	
 	@Override
 	public void create () {
+		// Initialize rendering objects
 		batcher = new SpriteBatch();
+		shapeRenderer = new ShapeRenderer();
+		bitmapFont = new BitmapFont();
+		loadingScreen = new LoadingScreen(this);
+
+		gl = Gdx.gl;
+		Gdx.graphics.setTitle("War Animation Maker");
 		Settings.load();
 		FileHandler.INSTANCE.load();
 		FileHandler.INSTANCE.save();
 		Assets.load();
-		Screen screen = new Screen(this);
-		Gdx.input.setInputProcessor(screen);
-		setScreen(screen);
+		Menu menu = new Menu(this);
+		Gdx.input.setInputProcessor(menu);
+		setScreen(menu);
 	}
 	
 	@Override

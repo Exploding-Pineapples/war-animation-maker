@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogicgames.superjumper.models.*;
 import com.badlogicgames.superjumper.models.Animation;
@@ -20,7 +19,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.badlogicgames.superjumper.Assets.loadTexture;
-import static java.lang.Math.floor;
+import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT;
+import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH;
+import static java.lang.Character.isLetterOrDigit;
 
 public class Screen extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;
@@ -38,46 +39,56 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     boolean left_pressed;
     boolean right_pressed;
     boolean ctrl_pressed;
+    boolean shift_pressed;
     boolean paused;
     boolean animationMode;
     List<Node> selectedList;
     String[] countries;
     TouchMode touchMode;
+    InputMode inputMode;
     Texture backgroundImage;
-    int lineID;
+    String input;
+    List<Action> actions;
 
-    public static final int DISPLAY_WIDTH = 1920;
-    public static final int DISPLAY_HEIGHT = 1080;
-    public static final int IMAGE_WIDTH = 10;
-    public static final int IMAGE_HEIGHT = 10;
+    public static final int DEFAULT_UNIT_WIDTH = 10;
+    public static final int DEFAULT_UNIT_HEIGHT = 10;
     public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
     public static final int LINES_PER_LINE = 1000; //number of straight lines used to represent the splines
 
-    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
-    private final BitmapFont bitmapFont = new BitmapFont();
+    private final BitmapFont bitmapFont;
+    ShapeRenderer shapeRenderer;
+    GL20 gl;
     FrameBuffer colorlayer;
 
     public Screen(WarAnimationMaker game) {
         this.game = game;
+        gl = game.gl;
         animation = FileHandler.INSTANCE.getAnimations().get(0);
         //camera
         camera = new OrthographicCamera(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         camera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
-        //camera.setToOrtho(false, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         animation.camera();
         //not gonna touch
         touchPoint = new Vector3();
-        bitmapFont.getData().setScale(2.5f);
         //war animation init
+        shapeRenderer = game.shapeRenderer;
+        bitmapFont = game.bitmapFont;
+        bitmapFont.getData().setScale(2.5f);
         backgroundImage = loadTexture(animation.getPath());
         time = 0;
         paused = true;
         animationMode = true;
-        countries = new String[]{"hamas", "israel"};
+        countries = new String[]{"assets/flags/naziflag.png", "assets/flags/frflag.png", "assets/flags/bgflag.png", "assets/flags/luxflag.png"};
         colorlayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
-        lineID = 0;
+        for (Line line : animation.getLines()) {
+            line.interpolate(LINES_PER_LINE, time);
+        }
         //UI
         touchMode = TouchMode.DEFAULT;
+        inputMode = InputMode.NONE;
+        buildActions();
+        actions = ActionKt.getActions();
+        input = "";
 
         animation.camera().goToTime(time);
         updateCam();
@@ -112,7 +123,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         }
 
         if (selected != null && paused) { //automatically updates the selected object to go to the mouse for interactive adding
-            if ((touchMode == TouchMode.DEFAULT) || (touchMode == TouchMode.NEW_NODE)) {
+            if (inputMode == InputMode.NONE) {
                 selected.newSetPoint(time, mousex, mousey);
                 selected.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
             }
@@ -160,7 +171,6 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     }
 
     public void draw() {
-        GL20 gl = Gdx.gl;
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -216,14 +226,7 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         game.batcher.begin();
         //Draw units
         for (Unit unit : animation.getUnits()) {
-            for (int i = 0; i < countries.length; i++) {
-                String image = countries[i];
-                if (unit.getImage().equals(image)) { //draw only for the correct country
-                    game.batcher.setColor(1, 1, 1, 1.0f); //sets no transparency by default
-                    game.batcher.draw(Assets.flags[i], unit.getScreenPosition().getX() - (IMAGE_WIDTH * zoomfactor) / 2, unit.getScreenPosition().getY() - (IMAGE_HEIGHT * zoomfactor) / 2, IMAGE_WIDTH * zoomfactor, IMAGE_HEIGHT * zoomfactor);
-                }
-            }
-
+            unit.draw(game.batcher, zoomfactor, bitmapFont);
         }
         game.batcher.setColor(1, 1, 1, 1.0f); //resets to no transparency, if this isn't here the background breaks and I don't know why
         game.batcher.end();
@@ -256,10 +259,32 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         }
         shapeRenderer.end();
         //Draw FPS and time text
-        game.batcher.begin();
-        bitmapFont.draw(game.batcher, Gdx.graphics.getFramesPerSecond() + " FPS", 30, (float) DISPLAY_HEIGHT - 30);
-        bitmapFont.draw(game.batcher, "Time: " + time, 30, DISPLAY_HEIGHT - 70);
-        game.batcher.end();
+        if (animationMode) {
+            game.batcher.begin();
+            bitmapFont.getData().setScale(2.5f);
+            bitmapFont.setColor(Color.WHITE);
+            bitmapFont.draw(game.batcher, Gdx.graphics.getFramesPerSecond() + " FPS", 30, (float) DISPLAY_HEIGHT - 30);
+            bitmapFont.draw(game.batcher, "Time: " + time, 30, DISPLAY_HEIGHT - 70);
+
+            //Draw current input
+            bitmapFont.getData().setScale(10.0f);
+            bitmapFont.draw(game.batcher, input, (float) DISPLAY_WIDTH / 2, (float) DISPLAY_HEIGHT / 2);
+
+            //Draw keyboard options
+            bitmapFont.getData().setScale(1.0f);
+            StringBuilder options = new StringBuilder();
+            for (Action action : actions) {
+                if (action.couldExecute(false, ctrl_pressed, selected, inputMode)) {
+                    for (int key : action.getActionKeys()) {
+                        options.append(Input.Keys.toString(key)).append(" ");
+                    }
+                    options.append(" ").append(action.getActionName()).append("\n");
+                }
+            }
+            bitmapFont.draw(game.batcher, options, 30, DISPLAY_HEIGHT - 110);
+
+            game.batcher.end();
+        }
 
         if (!paused) { //now that both update and draw are done, advance the time
             time++;
@@ -282,157 +307,17 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if ((keycode == Input.Keys.CONTROL_LEFT) || (keycode == Input.Keys.CONTROL_RIGHT)) {
             ctrl_pressed = true;
         }
-        if (keycode == Input.Keys.SPACE) {
-            paused = !paused;
+        if (keycode == Input.Keys.SHIFT_LEFT) {
+            shift_pressed = true;
         }
 
-        if ((keycode >= 7) && (keycode <= 16)) { //keycodes 7-16 inclusive correspond to number keys 0 - 9
-            int key_num = keycode - 7;
-            if (key_num == 1) { //1 creates frontline nodes
-                if (touchMode != TouchMode.NEW_NODE) {
-                    touchMode = TouchMode.NEW_NODE;
-                    System.out.println("New Node Mode");
-                } else {
-                    touchMode = TouchMode.DEFAULT;
-                    selected = null;
-                    System.out.println("Default Mode");
-                }
-            }
-            if ((key_num > 1) && (key_num - 2 < countries.length)) { //2+ create units of different countries
-                var unit = new Unit(
-                        countries[key_num - 2],
-                        new ArrayList<>(),
-                        null,
-                        new Coordinate(0, 0),
-                        new Coordinate(mousex, mousey),
-                        0.0f
-                );
-                unit.getMovementFrames().add(
-                        new GroupedMovement<>(
-                                new HashMap<>() {{
-                                    put(time, new Coordinate(mousex, mousey));
-                                }}
-                        )
-                );
-                System.out.println(unit);
-
-                animation.getUnits().add(unit);
+        for (Action action : ActionKt.getActions()) {
+            if (action.shouldExecute(keycode, false, ctrl_pressed, selected, inputMode)) {
+                action.execute();
+                break;
             }
         }
 
-        boolean actioned = false;
-        if (selected != null) {
-            if (keycode == Input.Keys.C) {
-                selected = null;
-                System.out.println("Deselected object");
-            }
-            if (keycode == Input.Keys.FORWARD_DEL) {
-                animation.deleteObject(selected);
-                System.out.println("Deleted object");
-                actioned = true;
-            }
-            if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.DEL) {
-                if (selected.removeFrame(time)) {
-                    System.out.println("Deleted last frame");
-                } else {
-                    System.out.println("Cannot delete last frame on object with less than 2 frames");
-                }
-                selected = null;
-                touchMode = TouchMode.DEFAULT;
-                actioned = true;
-            }
-        }
-
-        if (ctrl_pressed) {
-            if (keycode == Input.Keys.C) {
-                animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
-            }
-            if (keycode == Input.Keys.S) {
-                Settings.save();
-                FileHandler.INSTANCE.save();
-                System.out.println("saved");
-            }
-            if (selected != null) {
-                if (keycode == Input.Keys.D) {
-                    selected.setDeath(time);
-                    System.out.println("Death of " + selected + " set to " + selected.getDeath());
-                    actioned = true;
-                }
-            }
-        } else {
-            if (keycode == Input.Keys.A) { //create a new area
-                var node = new Node(
-                        new Coordinate(0, 0),
-                        new Coordinate(mousex, mousey)
-                );
-                node.getMovementFrames().add(
-                        new GroupedMovement<>(
-                                new HashMap<>() {{
-                                    put(time, new Coordinate(mousex, mousey));
-                                }}
-                        )
-                );
-                Area a = new Area(new ArrayList<>(), AreaColor.RED, new ArrayList<>(), new ArrayList<>());
-                //a.getLineIDs().add(new Pair<>(0, 0));
-
-                animation.getAreas().add(a);
-
-                selectedList = a.getNodes();
-                selected = node;
-                selectedList.add((Node) selected);
-            }
-            if (keycode == Input.Keys.S) {
-                touchMode = TouchMode.SET_AREA_LINE;
-                System.out.println("Set Area Line");
-            }
-            if (keycode == Input.Keys.E) {
-                time = (time / 200) * 200 + 200;
-                animation.camera().goToTime(time);
-                updateCam();
-            }
-            if (keycode == Input.Keys.PERIOD) {
-                time++;
-                animation.camera().goToTime(time);
-                updateCam();
-                System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
-            }
-            if (keycode == Input.Keys.COMMA) {
-                time--;
-                animation.camera().goToTime(time);
-                updateCam();
-                System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
-            }
-            if (keycode == Input.Keys.V) {
-                animationMode = !animationMode;
-            }
-            if (keycode == Input.Keys.Q) {
-                time = (int) Math.ceil(time / 200.0) * 200 - 200;
-                animation.camera().goToTime(time);
-                updateCam();
-            }
-            if (keycode == Input.Keys.L) {
-                var node = new Node(
-                        new Coordinate(0, 0),
-                        new Coordinate(mousex, mousey)
-                );
-                node.getMovementFrames().add(
-                        new GroupedMovement<>(
-                                new HashMap<>() {{
-                                    put(time, new Coordinate(mousex, mousey));
-                                }}
-                        )
-                );
-                lineID++;
-                animation.getLines().add(new Line(lineID, new ArrayList<>(), new Float[0], new Float[0]));
-                selectedList = Objects.requireNonNull(animation.getLineByID(lineID)).getNodes();
-                selectedList.add(node);
-                selected = node;
-            }
-        }
-
-        if (actioned) {
-            selected = null;
-        }
         return true;
     }
 
@@ -452,17 +337,24 @@ public class Screen extends ScreenAdapter implements InputProcessor {
         if ((keycode == Input.Keys.CONTROL_LEFT) || (keycode == Input.Keys.CONTROL_RIGHT)) {
             ctrl_pressed = false;
         }
+        if (keycode == Input.Keys.SHIFT_LEFT) {
+            shift_pressed = false;
+        }
         return true;
     }
 
     public boolean keyTyped(char character) {
-        return false;
+        if (inputMode != InputMode.NONE) {
+            if (isLetterOrDigit(character)) {
+                input += character;
+            }
+        }
+        return true;
     }
 
     public boolean touchDown(int x, int y, int pointer, int button) {
-        y = DISPLAY_HEIGHT - y; //for some reason clicked is called with top left (0, 0) instead of bottom left
-        mousex = (float) (floor(x) - camera.position.x * (1 - camera.zoom) - (DISPLAY_WIDTH / 2.0f - camera.position.x)) / camera.zoom;
-        mousey = (float) (floor(y) - camera.position.y * (1 - camera.zoom) - (DISPLAY_HEIGHT / 2.0f - camera.position.y)) / camera.zoom;
+        updateMouse(x, y);
+        y = DISPLAY_HEIGHT - y;
 
         System.out.println("Clicked " + mousex + " " + mousey + " touch mode " + touchMode);
 
@@ -513,9 +405,9 @@ public class Screen extends ScreenAdapter implements InputProcessor {
                 int addAtIndex;
                 //Conditional is really for selecting addAtIndex, which allows inserting at any point along a line based on what was previously selected
                 if (selected == null || selected.getClass() == Unit.class) { //if there was no selected node or the selected object was a Unit, there is no adding on. By default, it goes to the first frontline
-                    if (animation.getLines().size() == 0) { //if there is no frontline, make one
-                        animation.getLines().add(new Line(lineID, new ArrayList<>(), new Float[0], new Float[0]));
-                        lineID++;
+                    if (animation.getLines().isEmpty()) { //if there is no frontline, make one
+                        animation.getLines().add(new Line(animation.getLineID(), new ArrayList<>(), new Float[0], new Float[0]));
+                        animation.setLineID(animation.getLineID() + 1);
                         selectedList = animation.getLines().get(0).getNodes();
                         addAtIndex = 0;
                     } else { //if there is a frontline (and nothign was selected), add to the last node
@@ -577,15 +469,19 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     }
 
     public boolean mouseMoved(int x, int y) {
-        y = DISPLAY_HEIGHT - y;
-        mousex = (float) (floor(x) - camera.position.x * (1 - camera.zoom) - (DISPLAY_WIDTH / 2.0f - camera.position.x)) / camera.zoom;
-        mousey = (float) (floor(y) - camera.position.y * (1 - camera.zoom) - (DISPLAY_HEIGHT / 2.0f - camera.position.y)) / camera.zoom;
+        updateMouse(x, y);
         return true;
+    }
+
+    public void updateMouse(int x, int y) {
+        y = DISPLAY_HEIGHT - y;
+        mousex = (float) ((double) x - camera.position.x * (1 - camera.zoom) - (DISPLAY_WIDTH / 2.0f - camera.position.x)) / camera.zoom;
+        mousey = (float) ((double) y - camera.position.y * (1 - camera.zoom) - (DISPLAY_HEIGHT / 2.0f - camera.position.y)) / camera.zoom;
     }
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        camera.zoom *= 1 - 0.05 * amountY;
+        camera.zoom *= (float) (1 - 0.05 * amountY);
         return true;
     }
 
@@ -599,5 +495,208 @@ public class Screen extends ScreenAdapter implements InputProcessor {
     public void pause() {
         Settings.save();
         FileHandler.INSTANCE.save();
+    }
+
+    public void buildActions() {
+        //Actions available when game is not inputting and nothing is selected
+        Action.createBuilder(() -> {
+            paused = !paused;
+            return null;
+        }, List.of(Input.Keys.SPACE), "Pause/Unpause the game").build();
+        Action.createBuilder(() -> {
+            selected = null;
+            System.out.println("Deselected object");
+            return null;
+        }, List.of(Input.Keys.U), "Deselect Object").description("Deselects object").requiresSelected(true).build();
+        Action.createBuilder(() -> {
+            var node = new Node(
+                    new Coordinate(0, 0),
+                    new Coordinate(mousex, mousey)
+            );
+            node.getMovementFrames().add(
+                    new GroupedMovement<>(
+                            new HashMap<>() {{
+                                put(time, new Coordinate(mousex, mousey));
+                            }}
+                    )
+            );
+            Area a = new Area(new ArrayList<>(), AreaColor.RED, new ArrayList<>(), new ArrayList<>());
+            //a.getLineIDs().add(new Pair<>(0, 0));
+
+            animation.getAreas().add(a);
+
+            selectedList = a.getNodes();
+            selected = node;
+            selectedList.add((Node) selected);
+            return null;
+        }, List.of(Input.Keys.A), "Create new area").requiresSelected(true).build();
+        Action.createBuilder(() -> {
+            touchMode = TouchMode.SET_AREA_LINE;
+            System.out.println("Set Area Line");
+            return null;
+        }, List.of(Input.Keys.S), "Set Area Line"
+        ).requiresSelected(true).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build();
+        Action.createBuilder(() -> {
+            time = (time / 200) * 200 + 200;
+            animation.camera().goToTime(time);
+            updateCam();
+            return null;
+        }, List.of(Input.Keys.E), "Step time forward 200").build();
+        Action.createBuilder(() -> {
+            time++;
+            animation.camera().goToTime(time);
+            updateCam();
+            System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
+            return null;
+        }, List.of(Input.Keys.PERIOD), "Step time forward 1").build();
+        Action.createBuilder(() -> {
+            time--;
+            animation.camera().goToTime(time);
+            updateCam();
+            System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
+            return null;
+        }, List.of(Input.Keys.COMMA), "Step time back 1").build();
+        Action.createBuilder(() -> {
+            animationMode = !animationMode;
+            return null;
+        }, List.of(Input.Keys.V), "Toggle animation mode").build();
+        Action.createBuilder(() -> {
+            time = (int) Math.ceil(time / 200.0) * 200 - 200;
+            animation.camera().goToTime(time);
+            updateCam();
+            return null;
+        }, List.of(Input.Keys.Q), "Step time back 200").build();
+        Action.createBuilder(() -> {
+            var node = new Node(
+                    new Coordinate(0, 0),
+                    new Coordinate(mousex, mousey)
+            );
+            node.getMovementFrames().add(
+                    new GroupedMovement<>(
+                            new HashMap<>() {{
+                                put(time, new Coordinate(mousex, mousey));
+                            }}
+                    )
+            );
+            animation.setLineID(animation.getLineID() + 1);
+            animation.getLines().add(new Line(animation.getLineID(), new ArrayList<>(), new Float[0], new Float[0]));
+            selectedList = Objects.requireNonNull(animation.getLineByID(animation.getLineID())).getNodes();
+            selectedList.add(node);
+            selected = node;
+            return null;
+        }, List.of(Input.Keys.L), "Create new line").build();
+        Action.createBuilder(() -> {
+            if (touchMode != TouchMode.NEW_NODE) {
+                touchMode = TouchMode.NEW_NODE;
+                System.out.println("New Node Mode");
+            } else {
+                touchMode = TouchMode.DEFAULT;
+                selected = null;
+                System.out.println("Default Mode");
+            }
+            return null;
+        }, List.of(Input.Keys.NUM_1), "New Node Mode").build();
+        for (int num_key = Input.Keys.NUM_2; num_key < Input.Keys.NUM_9; num_key++) {
+            int finalNum_key = num_key;
+            Action.createBuilder(() -> {
+                var unit = new Unit(
+                        countries[finalNum_key - 9], //number key enum number to list number
+                        null,
+                        "infantry",
+                        "XX",
+                        new ArrayList<>(),
+                        null,
+                        new Coordinate(0, 0),
+                        new Coordinate(mousex, mousey),
+                        0.0f
+                );
+                unit.getMovementFrames().add(
+                        new GroupedMovement<>(
+                                new HashMap<>() {{
+                                    put(time, new Coordinate(mousex, mousey));
+                                }}
+                        )
+                );
+
+                System.out.println(unit);
+
+                animation.getUnits().add(unit);
+                selected = unit;
+                return null;
+                }, List.of(num_key), "Create Unit of country " + (finalNum_key - 9)
+            ).build();
+        }
+        //Key presses which require control pressed
+        Action.createBuilder(() -> {
+            animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
+            return null;
+        }, List.of(Input.Keys.C), "Set camera set point").requiresControl(true).build();
+        Action.createBuilder(() -> {
+            Settings.save();
+            FileHandler.INSTANCE.save();
+            System.out.println("saved");
+            return null;
+        }, List.of(Input.Keys.S), "Save project").requiresControl(true).build();
+        //Key presses which require control pressed and selected object
+        Action.createBuilder(() -> {
+            selected.setDeath(time);
+            System.out.println("Death of " + selected + " set to " + selected.getDeath());
+            selected = null;
+            return null;
+        }, List.of(Input.Keys.D), "Set death of an object").requiresControl(true).requiresSelected(true).build();
+        // Key presses which require selected Object
+        Action.createBuilder(() -> {
+            animation.deleteObject(selected);
+            System.out.println("Deleted object");
+            selected = null;
+            return null;
+        }, List.of(Input.Keys.FORWARD_DEL), "Delete selected object").requiresSelected(true).build();
+        Action.createBuilder(() -> {
+            if (selected.removeFrame(time)) {
+                System.out.println("Deleted last frame");
+            } else {
+                System.out.println("Cannot delete last frame on object with less than 2 frames");
+            }
+            selected = null;
+            touchMode = TouchMode.DEFAULT;
+            return null;
+        }, List.of(Input.Keys.ESCAPE, Input.Keys.DEL), "Delete last frame of selected object").requiresSelected(true).build();
+        // Key presses which require selected Unit
+        Action.createBuilder(() -> {
+            inputMode = InputMode.NAME_INPUT;
+            return null;
+        }, List.of(Input.Keys.N), "Input name for selected unit").requiresSelected(true).clearRequiredSelectedTypes().requiredSelectedTypes(Unit.class).build();
+        Action.createBuilder(() -> {
+            inputMode = InputMode.TYPE_INPUT;
+            return null;
+        }, List.of(Input.Keys.T), "Input type for selected unit").requiresSelected(true).clearRequiredSelectedTypes().requiredSelectedTypes(Unit.class).build();
+        Action.createBuilder(() -> {
+            inputMode = InputMode.SIZE_INPUT;
+            return null;
+        }, List.of(Input.Keys.S), "Input size for selected unit").requiresSelected(true).clearRequiredSelectedTypes().requiredSelectedTypes(Unit.class).build();
+        // Key presses which require game to be in input mode
+        Action.createBuilder(() -> {
+            Unit unit = (Unit) selected;
+            if (inputMode == InputMode.NAME_INPUT) {
+                unit.setName(input);
+                System.out.println("Name set to: " + unit.getName());
+            }
+            if (inputMode == InputMode.TYPE_INPUT) {
+                unit.setType(input);
+            }
+            if (inputMode == InputMode.SIZE_INPUT) {
+                unit.setSize(input);
+            }
+            inputMode = InputMode.NONE;
+            input = "";
+            selected = null;
+            return null;
+        }, List.of(Input.Keys.ENTER), "Submit Input").requiredInputModes().requiresSelected(true).excludedInputModes(InputMode.NONE).build();
+        Action.createBuilder(() -> {
+            if (!input.isEmpty()) {
+                input = input.substring(0, input.length() - 1);
+            }
+            return null;
+        }, List.of(Input.Keys.BACKSPACE), "Delete last character of input").requiredInputModes().requiresSelected(true).excludedInputModes(InputMode.NONE).build();
     }
 }

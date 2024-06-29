@@ -1,10 +1,8 @@
-package com.badlogicgames.superjumper;
+package com.badlogicgames.superjumper.originalgame;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class PolygonUtils {
     public static int[] findAdjacentVertices(double[] flatPolygon, double[] targetPoint) {
