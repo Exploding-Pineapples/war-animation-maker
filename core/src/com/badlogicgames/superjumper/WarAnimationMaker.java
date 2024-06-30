@@ -18,11 +18,13 @@ package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogicgames.superjumper.originalgame.Settings;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class WarAnimationMaker extends Game {
 	// used by all screens
@@ -30,10 +32,13 @@ public class WarAnimationMaker extends Game {
 	public SpriteBatch batcher;
 	public ShapeRenderer shapeRenderer;
 	public BitmapFont bitmapFont;
-	public LoadingScreen loadingScreen;
+	public Skin skin;
+
+	public Menu menu;
 
 	public static final int DISPLAY_WIDTH = 1920;
 	public static final int DISPLAY_HEIGHT = 1080;
+	public static final double CHAR_WIDTH = 8.5;
 	
 	@Override
 	public void create () {
@@ -41,16 +46,14 @@ public class WarAnimationMaker extends Game {
 		batcher = new SpriteBatch();
 		shapeRenderer = new ShapeRenderer();
 		bitmapFont = new BitmapFont();
-		loadingScreen = new LoadingScreen(this);
+		skin = new Skin(new FileHandle("assets/skins/glassy/skin/glassy-ui.json"));
 
 		gl = Gdx.gl;
 		Gdx.graphics.setTitle("War Animation Maker");
-		Settings.load();
 		FileHandler.INSTANCE.load();
 		FileHandler.INSTANCE.save();
 		Assets.load();
-		Menu menu = new Menu(this);
-		Gdx.input.setInputProcessor(menu);
+		menu = new Menu(this);
 		setScreen(menu);
 	}
 	

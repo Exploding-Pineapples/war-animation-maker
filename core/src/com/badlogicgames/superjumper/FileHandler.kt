@@ -14,14 +14,20 @@ object FileHandler {
 
     val animations = mutableListOf<Animation>()
 
-    var currentAnimation: Animation? = null
-
     private val animationsFolder by lazy {
         val file = File("animations")
         if (!file.exists()) {
             file.mkdirs()
         }
         file
+    }
+
+    fun deleteAnimation(animation: Animation) {
+        animations.remove(animation)
+        val file = File(animationsFolder, "${animation.name}.json");
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     fun save() {
@@ -43,14 +49,24 @@ object FileHandler {
         }
     }
 
-    fun load() {
-        animationsFolder
+    fun createNewAnimation(animation: Animation) {
+        animations.add(animation)
+        save()
+    }
 
+    fun load() {
         animationsFolder.listFiles()?.forEach {
             val content = it.readText()
             kotlin.runCatching {
-                animations += gson.fromJson(content, Animation::class.java)
+                gson.fromJson(content, Animation::class.java)
                     .apply {
+                        if (animations.any { animation -> animation.name == name })
+                        {
+                            return@apply
+                        }
+
+                        animations += this
+
                         units.forEach { unit -> unit.texture() }
 
                         // preload image dimensions

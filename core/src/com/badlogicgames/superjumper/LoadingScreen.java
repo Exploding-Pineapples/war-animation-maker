@@ -5,16 +5,19 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogicgames.superjumper.models.Animation;
 
 import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT;
 import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH;
 
 public class LoadingScreen extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;
+    Animation animation;
     boolean loading;
 
-    public LoadingScreen(WarAnimationMaker game) {
+    public LoadingScreen(WarAnimationMaker game, Animation animation) {
         this.game = game;
+        this.animation = animation;
         loading = false;
     }
 
@@ -32,7 +35,7 @@ public class LoadingScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.end();
 
         if (loading) {
-            Screen screen = new Screen(game);
+            Screen screen = new Screen(game, animation);
             Gdx.input.setInputProcessor(screen);
             game.setScreen(screen);
             System.out.println("Loaded screen");

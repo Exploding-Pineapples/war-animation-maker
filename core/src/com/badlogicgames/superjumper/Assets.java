@@ -21,8 +21,6 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogicgames.superjumper.originalgame.Animation;
-import com.badlogicgames.superjumper.originalgame.Settings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,13 +46,8 @@ public class Assets {
 	public static TextureRegion pause;
 	public static TextureRegion spring;
 	public static TextureRegion castle;
-	public static Animation coinAnim;
-	public static Animation bobJump;
-	public static Animation bobFall;
 	public static TextureRegion bobHit;
-	public static Animation squirrelFly;
 	public static TextureRegion platform;
-	public static Animation brakingPlatform;
 	public static BitmapFont font;
 	public static Texture[] flags;
 
@@ -80,8 +73,6 @@ public class Assets {
 		flags = new Texture[]{flag1, flag2};
 		explosion = loadTexture("assets/explosion.png");
 
-		//backgroundRegion = new TextureRegion(background, 0, 0, 320, 480);
-
 		items = loadTexture("data/items.png");
 		mainMenu = new TextureRegion(items, 0, 224, 300, 110);
 		pauseMenu = new TextureRegion(items, 224, 128, 192, 96);
@@ -96,15 +87,8 @@ public class Assets {
 
 		spring = new TextureRegion(items, 128, 0, 32, 32);
 		castle = new TextureRegion(items, 128, 64, 64, 64);
-		coinAnim = new Animation(0.2f, new TextureRegion(items, 128, 32, 32, 32), new TextureRegion(items, 160, 32, 32, 32),
-			new TextureRegion(items, 192, 32, 32, 32), new TextureRegion(items, 160, 32, 32, 32));
-		bobJump = new Animation(0.2f, new TextureRegion(items, 0, 128, 32, 32), new TextureRegion(items, 32, 128, 32, 32));
-		bobFall = new Animation(0.2f, new TextureRegion(items, 64, 128, 32, 32), new TextureRegion(items, 96, 128, 32, 32));
 		bobHit = new TextureRegion(items, 128, 128, 32, 32);
-		squirrelFly = new Animation(0.2f, new TextureRegion(items, 0, 160, 32, 32), new TextureRegion(items, 32, 160, 32, 32));
 		platform = new TextureRegion(items, 64, 160, 64, 16);
-		brakingPlatform = new Animation(0.2f, new TextureRegion(items, 64, 160, 64, 16), new TextureRegion(items, 64, 176, 64, 16),
-			new TextureRegion(items, 64, 192, 64, 16), new TextureRegion(items, 64, 208, 64, 16));
 
 		font = new BitmapFont(Gdx.files.internal("data/font.fnt"), Gdx.files.internal("data/font.png"), false);
 
@@ -116,6 +100,6 @@ public class Assets {
 	}
 
 	public static void playSound (Sound sound) {
-		if (Settings.soundEnabled) sound.play(1);
+		sound.play(1);
 	}
 }

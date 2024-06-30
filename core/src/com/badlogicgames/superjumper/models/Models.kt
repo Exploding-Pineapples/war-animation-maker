@@ -419,6 +419,8 @@ data class Unit(
     }
     @Transient
     private var texture: Texture? = null
+    private var width: Float = Screen.DEFAULT_UNIT_WIDTH.toFloat()
+    private var height: Float = Screen.DEFAULT_UNIT_HEIGHT.toFloat()
 
     fun texture(): Texture
     {
@@ -436,21 +438,23 @@ data class Unit(
         if (size in sizePresets) {
             sizePresetFactor = sizePresets[size]!!
         }
-        
+        width = Screen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor
+        height = Screen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
+
         batcher.setColor(1f, 1f, 1f, alpha) //sets no transparency by default
         batcher.draw(
             texture(),
-            screenPosition.x - (Screen.DEFAULT_UNIT_WIDTH * sizefactor) / 2,
-            screenPosition.y - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2,
-            Screen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor,
-            Screen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
+            screenPosition.x - width / 2,
+            screenPosition.y - height / 2,
+            width,
+            height
         )
         font.data.setScale((0.3*sizefactor).toFloat())
         font.color = Color(255.0f, 63.75f, 0.0f, alpha)
 
-        font.draw(batcher, size, screenPosition.x - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2, screenPosition.y + (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2)
-        if (name != null) { font.draw(batcher, name, screenPosition.x - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2, screenPosition.y) }
-        font.draw(batcher, type, screenPosition.x - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor)/2, screenPosition.y - (Screen.DEFAULT_UNIT_HEIGHT * sizefactor) / 2)
+        font.draw(batcher, size, screenPosition.x - width / 2, screenPosition.y + height / 2)
+        if (name != null) { font.draw(batcher, name, screenPosition.x - width / 2, screenPosition.y) }
+        font.draw(batcher, type, screenPosition.x - width / 2, screenPosition.y - height / 2)
     }
 }
 
@@ -468,7 +472,7 @@ data class Area(
     val nodes: MutableList<Node> = mutableListOf(),
     val color: AreaColor = AreaColor.RED,
     var lineIDs: List<Pair<Int, Int>> = mutableListOf(),
-    var drawPoly: MutableList<FloatArray> = mutableListOf()
+    @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
 ) {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
@@ -543,9 +547,15 @@ data class Line(
 ) {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
-        for (n in nodes) {
-            if (time >= n.movementFrames.first().keys.first()) {
-                out.add(n)
+        for (node in nodes) {
+            if (time >= node.movementFrames.first().keys.first()) {
+                if (node.death != null) {
+                    if (time <= node.death!!) {
+                        out.add(node)
+                    }
+                } else {
+                    out.add(node)
+                }
             }
         }
         return out
@@ -570,10 +580,8 @@ data class Line(
         var node: Node
         for (nodeIndex in drawNodes.indices) {
             node = drawNodes[nodeIndex]
-            if (!(node.death != null && time > node.death!!)) {
-                xValues[nodeIndex] = node.screenPosition.x.toDouble()
-                yValues[nodeIndex] = node.screenPosition.y.toDouble()
-            }
+            xValues[nodeIndex] = node.screenPosition.x.toDouble()
+            yValues[nodeIndex] = node.screenPosition.y.toDouble()
         }
 
         if (drawNodes.size > Screen.MIN_LINE_SIZE) {
@@ -632,11 +640,12 @@ class UnitHandler(
     }
 }
 
-data class Animation(
-    val path: String,
-    val name: String = "My Animation",
+data class Animation @JvmOverloads constructor(
+    var path: String,
+    var name: String = "My Animation",
+    var countries: List<String> = mutableListOf(),
     val units: MutableList<Unit> = mutableListOf(),
-    private var camera: Camera? = Camera(),
+    private var camera: Camera? = null,
     val lines: MutableList<Line> = mutableListOf(),
     val areas: MutableList<Area> = mutableListOf(),
     var lineID: Int = 0
