@@ -1,6 +1,5 @@
 package com.badlogicgames.superjumper;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
@@ -35,8 +34,7 @@ public class LoadingScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.end();
 
         if (loading) {
-            Screen screen = new Screen(game, animation);
-            Gdx.input.setInputProcessor(screen);
+            AnimationScreen screen = new AnimationScreen(game, animation);
             game.setScreen(screen);
             System.out.println("Loaded screen");
         }

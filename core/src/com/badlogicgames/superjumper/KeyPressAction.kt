@@ -5,22 +5,20 @@ import com.badlogicgames.superjumper.models.Object
 val actions = mutableListOf<Action>()
 
 class Action private constructor(builder: Builder) {
-    val actionKeys: List<Int> = builder.actionKeys
+    val actionKeys = builder.actionKeys
     val actionName: String = builder.actionName
     val description: String = builder.description
     val requiresShift: Boolean = builder.requiresShift
     val requiresControl: Boolean = builder.requiresControl
     val requiresSelected: Requirement = builder.requiresSelected
     val requiredSelectedTypes: List<Class<*>> = builder.requiredSelectedTypes
-    val requiredInputModes: List<InputMode> = builder.requiredInputModes
-    val excludedInputModes: List<InputMode> = builder.excludedInputModes
     val requiredTouchModes: List<TouchMode> = builder.requiredTouchModes
     val excludedTouchModes: List<TouchMode> = builder.excludedTouchModes
     val action: () -> Unit = builder.action
     val debug: Boolean = builder.debug
 
     //returns if the action could be executed by key press given the current conditions
-    fun couldExecute(shiftPressed: Boolean, controlPressed: Boolean, selected: Object?, inputMode: InputMode): Boolean {
+    fun couldExecute(shiftPressed: Boolean, controlPressed: Boolean, selected: Object?, touchMode: TouchMode): Boolean {
         if (debug) {
             println("Shift pressed: $shiftPressed" + "requires shift: $requiresShift")
             println("Control pressed: $controlPressed" + "requires control: $requiresControl")
@@ -44,7 +42,7 @@ class Action private constructor(builder: Builder) {
         }
 
         if (requiresSelected == Requirement.REQUIRES) { // If requires selected object, if there is a selected object, check for type, otherwise no
-            var correctType = false;
+            var correctType = false
             if (selected != null) {
                 for (type in requiredSelectedTypes) {
                     if (type.isAssignableFrom(selected.javaClass)) {
@@ -60,24 +58,13 @@ class Action private constructor(builder: Builder) {
             }
         }
 
-        if (requiredInputModes.isNotEmpty()) {
-            if (inputMode !in requiredInputModes) {
-                return false
-            }
-        }
-        if (excludedInputModes.isNotEmpty()) {
-            if (inputMode in excludedInputModes) {
-                return false
-            }
-        }
-
         if (requiredTouchModes.isNotEmpty()) {
-            if (inputMode !in requiredInputModes) {
+            if (touchMode !in requiredTouchModes) {
                 return false
             }
         }
         if (excludedTouchModes.isNotEmpty()) {
-            if (inputMode in excludedInputModes) {
+            if (touchMode in excludedTouchModes) {
                 return false
             }
         }
@@ -85,8 +72,8 @@ class Action private constructor(builder: Builder) {
         return true
     }
     //returns if the action should be executed given the current conditions
-    fun shouldExecute(keyPressed: Int, shiftPressed: Boolean, controlPressed: Boolean, selected: Object?, inputMode: InputMode): Boolean {
-        return couldExecute(shiftPressed, controlPressed, selected, inputMode) && (keyPressed in actionKeys)
+    fun shouldExecute(keyPressed: Int, shiftPressed: Boolean, controlPressed: Boolean, selected: Object?, touchMode: TouchMode): Boolean {
+        return couldExecute(shiftPressed, controlPressed, selected, touchMode) && (keyPressed in actionKeys)
     }
 
     fun execute() {
@@ -95,18 +82,18 @@ class Action private constructor(builder: Builder) {
 
     companion object {
         @JvmStatic
-        fun createBuilder(action: () -> Unit, actionKeys: List<Int>, actionName: String) = Builder(action, actionKeys.toMutableList(), actionName)
-        class Builder(var action: () -> Unit, var actionKeys: MutableList<Int>, var actionName: String) {
+        fun createBuilder(action: () -> Unit, actionName: String, vararg actionKeys: Int) = Builder(action, actionName, actionKeys)
+        class Builder(var action: () -> Unit, var actionName: String, actionKeys: IntArray) {
+            val actionKeys: MutableList<Int> = MutableList(actionKeys.size){actionKeys[it]}
             var description: String = ""
             var requiresShift: Boolean = false
             var requiresControl: Boolean = false
             var requiresSelected: Requirement = Requirement.ANY
             var requiredSelectedTypes: MutableList<Class<*>> = mutableListOf(Object::class.java)
-            var requiredInputModes: MutableList<InputMode> = mutableListOf(InputMode.NONE)
-            var excludedInputModes: MutableList<InputMode> = mutableListOf()
             var requiredTouchModes: MutableList<TouchMode> = mutableListOf()
             var excludedTouchModes: MutableList<TouchMode> = mutableListOf()
             var debug: Boolean = false
+
             fun description(description: String): Builder {
                 this.description = description
                 return this
@@ -129,18 +116,6 @@ class Action private constructor(builder: Builder) {
             }
             fun requiredSelectedTypes(vararg types: Class<*>): Builder {
                 this.requiredSelectedTypes += types
-                return this
-            }
-            fun clearRequiredInputModes(): Builder {
-                requiredInputModes.clear()
-                return this
-            }
-            fun requiredInputModes(vararg requiredInputModes: InputMode): Builder {
-                this.requiredInputModes += requiredInputModes
-                return this
-            }
-            fun excludedInputModes(vararg excludedInputModes: InputMode): Builder {
-                this.excludedInputModes += excludedInputModes
                 return this
             }
             fun requiredTouchModes(vararg requiredTouchModes: TouchMode): Builder {

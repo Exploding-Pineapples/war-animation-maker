@@ -30,6 +30,15 @@ public class Menu extends ScreenAdapter implements InputProcessor {
         this.game = game;
         table.setPosition(DISPLAY_WIDTH/2f, DISPLAY_HEIGHT/2f);
 
+        stage = new Stage();
+
+        Table titleTable = new Table();
+        titleTable.setPosition(DISPLAY_WIDTH/2f, DISPLAY_HEIGHT - 100);
+        Label titleLabel = new Label("War Animation Maker", skin);
+        titleLabel.setPosition(DISPLAY_WIDTH/2f, DISPLAY_HEIGHT - 100);
+        titleTable.add(titleLabel);
+        stage.addActor(titleTable);
+
         TextButton newAnimationButton = new TextButton("New Animation", skin, "small");
         newAnimationButton.addListener(new ClickListener() {
             @Override
@@ -40,7 +49,6 @@ public class Menu extends ScreenAdapter implements InputProcessor {
         table.add(newAnimationButton).colspan(4);
         table.row().pad(10);
 
-        stage = new Stage();
         Gdx.input.setInputProcessor(stage);
 
         FileHandler.INSTANCE.load();

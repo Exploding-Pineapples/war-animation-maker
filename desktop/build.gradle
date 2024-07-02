@@ -1,13 +1,21 @@
-sourceCompatibility = 17
-sourceSets.main.java.srcDirs = [ "src/" ]
-sourceSets.main.resources.srcDirs = ["../android/assets"]
+plugins {
+    id "application"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+java {
+    sourceCompatibility = 1.8
+    sourceSets.main.java.srcDirs = [ "src/" ]
+    sourceSets.main.resources.srcDirs = ["../assets"]
+}
 
 project.ext.mainClassName = "com.badlogicgames.superjumper.desktop.DesktopLauncher"
-project.ext.assetsDir = new File("../android/assets");
+project.ext.assetsDir = new File("../assets");
 
 dependencies {
     implementation project(":core")
 }
+/*
 
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
@@ -25,6 +33,12 @@ task debug(dependsOn: classes, type: JavaExec) {
     ignoreExitValue true
     debug = true
 }
+*/
+
+
+application {
+    mainClassName = project.mainClassName
+}
 
 task dist(type: Jar) {
     manifest {
@@ -36,6 +50,11 @@ task dist(type: Jar) {
     }
     with jar
 }
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 
 dist.dependsOn classes
 

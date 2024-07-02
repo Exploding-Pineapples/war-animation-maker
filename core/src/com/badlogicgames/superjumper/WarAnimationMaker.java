@@ -18,6 +18,7 @@ package com.badlogicgames.superjumper;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -33,6 +34,7 @@ public class WarAnimationMaker extends Game {
 	public ShapeRenderer shapeRenderer;
 	public BitmapFont bitmapFont;
 	public Skin skin;
+	public InputMultiplexer multiplexer;
 
 	public Menu menu;
 
@@ -46,7 +48,8 @@ public class WarAnimationMaker extends Game {
 		batcher = new SpriteBatch();
 		shapeRenderer = new ShapeRenderer();
 		bitmapFont = new BitmapFont();
-		skin = new Skin(new FileHandle("assets/skins/glassy/skin/glassy-ui.json"));
+		skin = new Skin(Gdx.files.internal("assets/skins/glassy/skin/glassy-ui.json"));
+		multiplexer = new InputMultiplexer();
 
 		gl = Gdx.gl;
 		Gdx.graphics.setTitle("War Animation Maker");

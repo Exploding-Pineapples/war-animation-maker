@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.superjumper.AreaColor
 import com.badlogicgames.superjumper.Assets
-import com.badlogicgames.superjumper.Screen
+import com.badlogicgames.superjumper.AnimationScreen
 import com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH
 import com.drew.imaging.ImageMetadataReader
@@ -111,14 +111,48 @@ interface Object
     }
 
     fun removeFrame(time: Int): Boolean {
-        if ((movementFrames.size > 1)||(movementFrames.first().size > 1))
+        val removeFrames = mutableListOf<GroupedMovement<Coordinate>>()
+        var removeKeys: MutableList<Int>
+        var definedTime = 0
+
         for (frame in movementFrames) {
-            for (t in frame.keys) {
-                frame.remove(t)
-                return true
+            val iterator = frame.keys.iterator()
+            removeKeys = mutableListOf()
+            while ((definedTime <= time)) {
+                if (!iterator.hasNext()) { //the time is not defined further, so stop
+                    break
+                }
+
+                definedTime = iterator.next()
+                if (definedTime == time) {
+                    if (frame.size > 1) { // if frame has more than one coordinate, remove
+                        removeKeys.add(definedTime)
+                        println("removed single coordinate")
+                    } else {
+                        if (movementFrames.size > 1) { // if the frame has one coordinate, remove the frame completely if there is more than 1 frame
+                            removeFrames.add(frame) // avoid concurrent modification
+                        } else {
+                            if (movementFrames.isEmpty()) { // never supposed to happen
+                                throw IllegalStateException("Last movement frame was empty")
+                            }
+                            return false // if there is only one frame with one coordinate, cannot remove
+                        }
+                    }
+                }
+            }
+            for (key in removeKeys) {
+                if (frame.keys.size > 1) {
+                    frame.keys.remove(key)
+                }
             }
         }
-        return false
+        for (frame in removeFrames) {
+            if (movementFrames.size > 1) { // If there are multiple GroupedMovements with the same time, this might accidentally remove all the movement frames
+                movementFrames.remove(frame)
+            }
+        }
+        println("removed whole frame(s)")
+        return true
     }
 
     fun getMotion(length: Int, index: Int, subindex: Int): Pair<String, Pair<Coordinate, Coordinate>> {
@@ -185,61 +219,32 @@ interface Object
             }
         }
     }
-    fun newSetPoint(time: Int, x: Float, y: Float, new: Boolean) {  //new = whether to create a new motion or not
+    fun newSetPoint(time: Int) {  //new = whether to create a new motion or not
         if (movementFrames.isEmpty()) {
             movementFrames += GroupedMovement()
         }
 
         val lastGroup = movementFrames.last()
 
-        if (new) {
-            if (time > lastGroup.keys.last()) {
-                movementFrames += GroupedMovement(
-                    mutableMapOf(
-                        lastGroup.keys.last() to Coordinate(
-                            lastGroup.frames.entries.last().value.x,
-                            lastGroup.frames.entries.last().value.y
-                        ),
-                        time to Coordinate(x, y)
-                    )
+        if (time > lastGroup.keys.last()) { //creates a new motion with the last defined position and time followed by the current position with the current time
+            movementFrames += GroupedMovement(
+                mutableMapOf(
+                    lastGroup.keys.last() to Coordinate(
+                        lastGroup.frames.entries.last().value.x,
+                        lastGroup.frames.entries.last().value.y
+                    ),
+                    time to Coordinate(lastGroup.frames.entries.last().value.x,
+                        lastGroup.frames.entries.last().value.y)
                 )
-                movementFrames += GroupedMovement(
-                    mutableMapOf(
-                        time to Coordinate(x, y)
-                    )
+            )
+            movementFrames += GroupedMovement(
+                mutableMapOf(
+                    time to Coordinate(lastGroup.frames.entries.last().value.x,
+                        lastGroup.frames.entries.last().value.y)
                 )
-                println("Added new motion: $movementFrames")
-                return
-            }
-            println("Not possible to add new motion during already defined time")
+            )
+            println("Added new motion: $movementFrames")
             return
-        }
-
-        var found = false //Used to overwrite duplicate times
-
-        for (movement in movementFrames) {
-            for (t in movement.keys) {
-                if (time == t) {
-                    movement.frames[t] = Coordinate(x, y)
-                    println("Overwrote, new motions: $movementFrames")
-                    found = true //no return yet, if it finds another duplicate time, overwrite
-                }
-                if (t > time) {
-                    if (found) { //if t > time and the time was found, all duplicate times have been overwritten already so return
-                        return
-                    }
-                    movement[time] = Coordinate(x, y)
-
-                    val clone = movement.frames.toMap()
-                    movement.frames.clear()
-
-                    clone.keys.sorted().forEach {
-                        movement[it] = clone[it]!!
-                    }
-                    println("Inserted, new motions: $movementFrames")
-                    return
-                }
-            }
         }
     }
 }
@@ -419,8 +424,8 @@ data class Unit(
     }
     @Transient
     private var texture: Texture? = null
-    private var width: Float = Screen.DEFAULT_UNIT_WIDTH.toFloat()
-    private var height: Float = Screen.DEFAULT_UNIT_HEIGHT.toFloat()
+    private var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
+    private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
 
     fun texture(): Texture
     {
@@ -438,8 +443,8 @@ data class Unit(
         if (size in sizePresets) {
             sizePresetFactor = sizePresets[size]!!
         }
-        width = Screen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor
-        height = Screen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
+        width = AnimationScreen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor
+        height = AnimationScreen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
 
         batcher.setColor(1f, 1f, 1f, alpha) //sets no transparency by default
         batcher.draw(
@@ -468,12 +473,16 @@ constructor(
     override var alpha: Float = 0.0f,
 ) : Object
 
-data class Area(
-    val nodes: MutableList<Node> = mutableListOf(),
-    val color: AreaColor = AreaColor.RED,
+interface NodeCollection {
+    val nodes: MutableList<Node>
+}
+
+data class Area (
+    override val nodes: MutableList<Node> = mutableListOf(),
+    var color: AreaColor = AreaColor.RED,
     var lineIDs: List<Pair<Int, Int>> = mutableListOf(),
     @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
-) {
+) : NodeCollection {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
         for (n in nodes) {
@@ -541,10 +550,10 @@ data class Area(
 
 data class Line(
     val id: Int,
-    val nodes: MutableList<Node> = mutableListOf(),
+    override val nodes: MutableList<Node> = mutableListOf(),
     @Transient var interpolatedX: Array<Float> = arrayOf(),
     @Transient var interpolatedY: Array<Float> = arrayOf(),
-) {
+) : NodeCollection {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
         for (node in nodes) {
@@ -555,6 +564,22 @@ data class Line(
                     }
                 } else {
                     out.add(node)
+                }
+            }
+        }
+        return out
+    }
+
+    fun getNonDrawNodes(time: Int): List<Node> {
+        val out = mutableListOf<Node>()
+        for (node in nodes) {
+            if (time <= node.movementFrames.first().keys.first()) {
+                out.add(node)
+            } else {
+                if (node.death != null) {
+                    if (time >= node.death!!) {
+                        out.add(node)
+                    }
                 }
             }
         }
@@ -584,14 +609,14 @@ data class Line(
             yValues[nodeIndex] = node.screenPosition.y.toDouble()
         }
 
-        if (drawNodes.size > Screen.MIN_LINE_SIZE) {
+        if (drawNodes.size > AnimationScreen.MIN_LINE_SIZE) {
             interpolatedX = Array(num + 1) { 0.0f }
             interpolatedY = Array(num + 1) { 0.0f }
 
             val xInterpolator = Animation.interpolator.interpolate(evalAt, xValues)
             val yInterpolator = Animation.interpolator.interpolate(evalAt, yValues)
 
-            if (drawNodes.size > Screen.MIN_LINE_SIZE) {
+            if (drawNodes.size > AnimationScreen.MIN_LINE_SIZE) {
                 i = 0
                 var eval: Double
                 while (i < num) {
@@ -702,13 +727,22 @@ data class Animation @JvmOverloads constructor(
         return emptyList()
     }
 
-    fun getAreaOfNode(node: Object): Area {
-        for (a in areas) {
-            if (a.nodes.contains(node)) {
-                return a
+    fun getAreaOfNode(node: Object): Area? {
+        for (area in areas) {
+            if (area.nodes.contains(node)) {
+                return area
             }
         }
-        return Area()
+        return null
+    }
+
+    fun getLineOfNode(node: Object): Line? {
+        for (line in lines) {
+            if (line.nodes.contains(node)) {
+                return line
+            }
+        }
+        return null
     }
 
     fun getListOfNode(node: Object): List<Node> {
@@ -757,6 +791,7 @@ data class Animation @JvmOverloads constructor(
         }
         return null
     }
+
     companion object {
 
         val interpolator = SplineInterpolator()
