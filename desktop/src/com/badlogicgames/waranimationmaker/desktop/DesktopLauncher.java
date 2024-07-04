@@ -1,8 +1,8 @@
-package com.badlogicgames.superjumper.desktop;
+package com.badlogicgames.waranimationmaker.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogicgames.superjumper.WarAnimationMaker;
+import com.badlogicgames.waranimationmaker.WarAnimationMaker;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {

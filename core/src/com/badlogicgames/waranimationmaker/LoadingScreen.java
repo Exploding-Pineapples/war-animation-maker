@@ -1,18 +1,20 @@
-package com.badlogicgames.superjumper;
+package com.badlogicgames.waranimationmaker;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogicgames.superjumper.models.Animation;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogicgames.waranimationmaker.models.Animation;
 
-import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT;
-import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH;
+import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
+import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH;
 
 public class LoadingScreen extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;
     Animation animation;
     boolean loading;
+    Stage stage;
 
     public LoadingScreen(WarAnimationMaker game, Animation animation) {
         this.game = game;

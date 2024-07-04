@@ -1,4 +1,4 @@
-package com.badlogicgames.superjumper
+package com.badlogicgames.waranimationmaker
 
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
@@ -6,34 +6,55 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
+import com.badlogicgames.waranimationmaker.models.NodeCollection
 
 class InputElement<T> private constructor(builder: Builder<T>) {
     val table: Table = builder.table
     val textField: TextField = builder.textField
     val input = builder.input
     val requiredSelectedTypes = builder.requiredSelectedTypes
+    val requiredSelectedNodeCollectionTypes = builder.requiredSelectedNodeCollectionTypes
     var displayed: Boolean = false
 
-    fun update(selected: Any?, table: Table, animationMode: Boolean) {
-        if (animationMode) {
-            if (selected == null) {
-                if (displayed) {
-                    this.table.remove()
-                    displayed = false
+    fun shouldDisplay(selected: Any?, selectedNodeCollection: NodeCollection?, animationMode: Boolean): Boolean {
+        if (!animationMode) {
+            return false
+        }
+        if (selected == null) {
+            return false
+        }
+        if (requiredSelectedTypes.isNotEmpty()) {
+            var found = false
+            for (type in requiredSelectedTypes) {
+                if (type.isAssignableFrom(selected.javaClass)) {
+                    found = true
+                    break
                 }
-            } else {
-                if (requiredSelectedTypes.isEmpty()) {
-                    if (!displayed) {
-                        display(table)
-                    }
-                } else {
-                    for (type in requiredSelectedTypes) {
-                        if (type.isAssignableFrom(selected.javaClass)) {
-                            display(table)
-                            break
-                        }
+            }
+            if (!found) return false
+        }
+        if (requiredSelectedNodeCollectionTypes.isNotEmpty()) {
+            var found = false
+            for (type in requiredSelectedNodeCollectionTypes) {
+                if (selectedNodeCollection != null) {
+                    if (type.isAssignableFrom(selectedNodeCollection.javaClass)) {
+                        found = true
+                        break
                     }
                 }
+            }
+            if (!found) return false
+        }
+        return true
+    }
+
+    fun update(selected: Any?, selectedNodeCollection: NodeCollection?, table: Table, animationMode: Boolean) {
+        val shouldDisplay = shouldDisplay(selected, selectedNodeCollection, animationMode)
+        if (shouldDisplay) {
+            textField.setText(input.invoke())
+            if (!displayed) {
+                display(table)
+                displayed = true
             }
         } else {
             if (displayed) {
@@ -45,7 +66,6 @@ class InputElement<T> private constructor(builder: Builder<T>) {
 
     fun display(table: Table) {
         if (!displayed) {
-            textField.setText(input.invoke())
             table.add(this.table)
             table.row()
             displayed = true
@@ -66,12 +86,18 @@ class InputElement<T> private constructor(builder: Builder<T>) {
             }
         )
 
-        class Builder<T>(skin: Skin, var output: (T) -> Unit, var input: () -> String, private val clazz: Class<T>, var name: String) {
+        class Builder<T>(skin: Skin, var output: (T?) -> Unit, var input: () -> String?, private val clazz: Class<T>, var name: String) {
+            val requiredSelectedNodeCollectionTypes = mutableListOf<Class<*>>()
             var table = Table()
             var textField = TextField(input.invoke(), skin)
             var nameLabel = Label(name, skin)
             var requiredSelectedTypes = mutableListOf<Class<*>>()
             var converter: ((String) -> T)? = null
+
+            fun requiredSelectedNodeCollectionTypes(vararg classes: Class<*>): Builder<T> {
+                requiredSelectedNodeCollectionTypes.addAll(classes)
+                return this
+            }
 
             fun requiredSelectedTypes(vararg classes: Class<*>): Builder<T> {
                 requiredSelectedTypes.addAll(classes)
@@ -92,8 +118,11 @@ class InputElement<T> private constructor(builder: Builder<T>) {
                         val existing = converters[clazz]
                             ?: converter
                             ?: throw IllegalArgumentException("No converter for $clazz")
-
-                        output.invoke(existing(textField.text) as T)
+                        if (textField.text.equals("")) {
+                            output.invoke(null)
+                        } else {
+                            output.invoke(existing(textField.text) as T)
+                        }
                         return true
                     }
                 })

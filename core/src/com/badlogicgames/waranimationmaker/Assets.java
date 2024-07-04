@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.badlogicgames.superjumper;
+package com.badlogicgames.waranimationmaker;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;

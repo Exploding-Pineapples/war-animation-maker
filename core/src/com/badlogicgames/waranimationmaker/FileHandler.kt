@@ -1,6 +1,6 @@
-package com.badlogicgames.superjumper
+package com.badlogicgames.waranimationmaker
 
-import com.badlogicgames.superjumper.models.Animation
+import com.badlogicgames.waranimationmaker.models.Animation
 import com.google.gson.GsonBuilder
 import com.google.gson.LongSerializationPolicy
 import java.io.File

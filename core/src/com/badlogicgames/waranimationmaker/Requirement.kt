@@ -1,4 +1,4 @@
-package com.badlogicgames.superjumper
+package com.badlogicgames.waranimationmaker
 
 enum class Requirement {
     REQUIRES, REQUIRES_NOT, ANY

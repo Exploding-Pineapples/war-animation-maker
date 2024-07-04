@@ -1,4 +1,4 @@
-package com.badlogicgames.superjumper;
+package com.badlogicgames.waranimationmaker;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -10,11 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogicgames.superjumper.models.Animation;
+import com.badlogicgames.waranimationmaker.models.Animation;
 import org.jetbrains.annotations.NotNull;
 
-import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT;
-import static com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH;
+import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
+import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH;
 
 public class Menu extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;

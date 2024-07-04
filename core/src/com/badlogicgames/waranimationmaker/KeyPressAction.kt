@@ -1,8 +1,6 @@
-package com.badlogicgames.superjumper
+package com.badlogicgames.waranimationmaker
 
-import com.badlogicgames.superjumper.models.Object
-
-val actions = mutableListOf<Action>()
+import com.badlogicgames.waranimationmaker.models.Object
 
 class Action private constructor(builder: Builder) {
     val actionKeys = builder.actionKeys
@@ -131,7 +129,7 @@ class Action private constructor(builder: Builder) {
                 return this
             }
             fun build(): Action {
-                return Action(this).apply { actions += this }
+                return Action(this)
             }
         }
     }

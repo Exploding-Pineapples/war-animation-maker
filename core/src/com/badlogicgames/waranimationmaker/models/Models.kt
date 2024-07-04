@@ -1,15 +1,15 @@
-package com.badlogicgames.superjumper.models
+package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogicgames.superjumper.AreaColor
-import com.badlogicgames.superjumper.Assets
-import com.badlogicgames.superjumper.AnimationScreen
-import com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_HEIGHT
-import com.badlogicgames.superjumper.WarAnimationMaker.DISPLAY_WIDTH
+import com.badlogicgames.waranimationmaker.AnimationScreen
+import com.badlogicgames.waranimationmaker.AreaColor
+import com.badlogicgames.waranimationmaker.Assets
+import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
+import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import earcut4j.Earcut
@@ -475,6 +475,38 @@ constructor(
 
 interface NodeCollection {
     val nodes: MutableList<Node>
+
+    fun getDrawNodes(time: Int): List<Node> {
+        val out = mutableListOf<Node>()
+        for (node in nodes) {
+            if (time >= node.movementFrames.first().keys.first()) {
+                if (node.death != null) {
+                    if (time <= node.death!!) {
+                        out.add(node)
+                    }
+                } else {
+                    out.add(node)
+                }
+            }
+        }
+        return out
+    }
+
+    fun getNonDrawNodes(time: Int): List<Node> {
+        val out = mutableListOf<Node>()
+        for (node in nodes) {
+            if (time <= node.movementFrames.first().keys.first()) {
+                out.add(node)
+            } else {
+                if (node.death != null) {
+                    if (time >= node.death!!) {
+                        out.add(node)
+                    }
+                }
+            }
+        }
+        return out
+    }
 }
 
 data class Area (
@@ -483,15 +515,6 @@ data class Area (
     var lineIDs: List<Pair<Int, Int>> = mutableListOf(),
     @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
 ) : NodeCollection {
-    fun getDrawNodes(time: Int): List<Node> {
-        val out = mutableListOf<Node>()
-        for (n in nodes) {
-            if (time >= n.movementFrames.first().keys.first()) {
-                out.add(n)
-            }
-        }
-        return out
-    }
     fun calculatePolygon(lines: List<Pair<Line, Int>>, time: Int) {
         val border1D = DoubleArray(nodes.size * 2)
         var poly = DoubleArray(0)
@@ -553,38 +576,9 @@ data class Line(
     override val nodes: MutableList<Node> = mutableListOf(),
     @Transient var interpolatedX: Array<Float> = arrayOf(),
     @Transient var interpolatedY: Array<Float> = arrayOf(),
+    var lineThickness: Float = 5.0f,
+    var color: AreaColor = AreaColor.RED
 ) : NodeCollection {
-    fun getDrawNodes(time: Int): List<Node> {
-        val out = mutableListOf<Node>()
-        for (node in nodes) {
-            if (time >= node.movementFrames.first().keys.first()) {
-                if (node.death != null) {
-                    if (time <= node.death!!) {
-                        out.add(node)
-                    }
-                } else {
-                    out.add(node)
-                }
-            }
-        }
-        return out
-    }
-
-    fun getNonDrawNodes(time: Int): List<Node> {
-        val out = mutableListOf<Node>()
-        for (node in nodes) {
-            if (time <= node.movementFrames.first().keys.first()) {
-                out.add(node)
-            } else {
-                if (node.death != null) {
-                    if (time >= node.death!!) {
-                        out.add(node)
-                    }
-                }
-            }
-        }
-        return out
-    }
 
     fun interpolate(num: Int, time: Int) : Boolean {
         //reset values to nothing by default
@@ -632,6 +626,21 @@ data class Line(
             return true
         }
         return false
+    }
+
+    fun update(shapeRenderer: ShapeRenderer, linesPerNode: Int, time: Int) {
+        shapeRenderer.color = color.color
+        if (interpolate(linesPerNode * nodes.size, time)) {
+            for (i in 0 until AnimationScreen.LINES_PER_NODE * getDrawNodes(time).size) {
+                shapeRenderer.rectLine(
+                    interpolatedX[i],
+                    interpolatedY[i],
+                    interpolatedX[i + 1],
+                    interpolatedY[i + 1],
+                    lineThickness
+                )
+            }
+        }
     }
 }
 
@@ -694,6 +703,38 @@ data class Animation @JvmOverloads constructor(
         }
 
         return camera!!
+    }
+
+    fun getDrawUnits(time: Int): List<Unit> {
+        val out = mutableListOf<Unit>()
+        for (unit in units) {
+            if (time >= unit.movementFrames.first().keys.first()) {
+                if (unit.death != null) {
+                    if (time <= unit.death!!) {
+                        out.add(unit)
+                    }
+                } else {
+                    out.add(unit)
+                }
+            }
+        }
+        return out
+    }
+
+    fun getNonDrawUnits(time: Int): List<Unit> {
+        val out = mutableListOf<Unit>()
+        for (unit in units) {
+            if (time <= unit.movementFrames.first().keys.first()) {
+                out.add(unit)
+            } else {
+                if (unit.death != null) {
+                    if (time >= unit.death!!) {
+                        out.add(unit)
+                    }
+                }
+            }
+        }
+        return out
     }
 
     fun getImageDimensions(): Pair<Int, Int> {
