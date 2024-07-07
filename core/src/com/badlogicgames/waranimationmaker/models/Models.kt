@@ -1,6 +1,7 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -43,13 +44,15 @@ interface Object
         val xmotion = arrayOf(first.x, last.x)
         val ymotion = arrayOf(first.y, last.y)
 
-        if (death != null) { //checks for death time
-            alpha = 0.0f.coerceAtLeast((1.0f - (time - death!!) / 100f))
-        } else {
-            alpha = 255.0f
+        alpha = 1.0f
+
+        if (time < movementFrames.first().entries.first().key) {
+            alpha = 0f.coerceAtLeast(1.0f.coerceAtMost(1.0f - (movementFrames[0].frames.entries.first().key - time) / 100f))
         }
 
-        //alpha = Math.min(alpha, movementFrames[0].frames.entries.first().key);
+        if (death != null) { //checks for death time
+            alpha = 0.0f.coerceAtLeast((1.0f - (time - death!!) / 100f))
+        }
 
         if (mode == "single") {
             position.x = xmotion[0]
@@ -177,16 +180,14 @@ interface Object
         throw IllegalStateException("what the fuck did you do")
     }
 
-    fun newSetPoint(time: Int, x: Float, y: Float) {
-        // for (Class variableName : listOfItems) {}
-
+    fun holdPositionUntil(time: Int, x: Float, y: Float) {
         if (movementFrames.isEmpty()) {
             movementFrames += GroupedMovement()
         }
 
         val lastGroup = movementFrames.last()
 
-        if (time > (lastGroup.keys.lastOrNull() ?: -1)) {
+        if (time > (lastGroup.keys.lastOrNull() ?: -1)) { // Adds time and coordinate to the last movement frame
             lastGroup[time] = Coordinate(x, y)
             println("Appended, new motions: $movementFrames")
             return
@@ -219,33 +220,57 @@ interface Object
             }
         }
     }
-    fun newSetPoint(time: Int) {  //new = whether to create a new motion or not
-        if (movementFrames.isEmpty()) {
+    // When you add a time coordinate pair to an object which hasn't had a defined movement for a long time, it will interpolate a motion the whole way, which can be undesirable
+    // Ex. last defined position was at time 0, you want it to move to another position at 800
+    // But you only want it to move starting from time 600
+    // The below function is used hold the object at the last position until the desired time
+    fun holdPositionUntil(time: Int) {  // Create a new movement that keeps the object at its last defined position until the current time
+        if (movementFrames.isEmpty()) { // Should never happen
             movementFrames += GroupedMovement()
         }
 
-        val lastGroup = movementFrames.last()
+        var prevTime: Int? = null
+        var prevDefinedCoordinate: Coordinate? = null
 
-        if (time > lastGroup.keys.last()) { //creates a new motion with the last defined position and time followed by the current position with the current time
-            movementFrames += GroupedMovement(
-                mutableMapOf(
-                    lastGroup.keys.last() to Coordinate(
-                        lastGroup.frames.entries.last().value.x,
-                        lastGroup.frames.entries.last().value.y
-                    ),
-                    time to Coordinate(lastGroup.frames.entries.last().value.x,
-                        lastGroup.frames.entries.last().value.y)
-                )
-            )
-            movementFrames += GroupedMovement(
-                mutableMapOf(
-                    time to Coordinate(lastGroup.frames.entries.last().value.x,
-                        lastGroup.frames.entries.last().value.y)
-                )
-            )
-            println("Added new motion: $movementFrames")
-            return
+        for (j in movementFrames.indices) {
+            val frame = movementFrames[j]
+            val frameTimes = frame.keys.toList()
+            for (i in frameTimes.indices) {
+                val definedTime = frameTimes[i]
+
+                if (definedTime == time) { // If the time is already defined, don't do anything
+                    return
+                }
+
+                if ((definedTime > time) && (prevTime != null)) { // If the input time is not defined but is in the defined period, modify the movement to stay at the position just before the input time until the input time
+                    val definedCoordinate = frame[definedTime]!!
+
+                    frame[time] = prevDefinedCoordinate!!
+
+                    movementFrames.add(j, GroupedMovement(
+                        mutableMapOf(
+                            time to prevDefinedCoordinate,
+                            definedTime to definedCoordinate
+                        )
+                    ))
+
+                    println("Added new motion: $movementFrames")
+                    return
+                }
+
+                prevTime = definedTime
+                prevDefinedCoordinate = frame[prevTime]
+            }
         }
+        // If the input time was not in the defined period, add a movement to the end
+        val lastFrame = movementFrames.last().frames.lastEntry()
+
+        movementFrames += GroupedMovement(
+            mutableMapOf(
+                lastFrame.key to lastFrame.value,
+                time to lastFrame.value
+            )
+        )
     }
 }
 
@@ -417,9 +442,10 @@ data class Unit(
 ) : Object
 {
     companion object {
-        val sizePresets = mapOf<String, Float>(
+        val sizePresets = mapOf(
             "XX" to 1.0f,
             "X" to 0.75f,
+            "III" to 0.5f,
         )
     }
     @Transient
@@ -446,7 +472,7 @@ data class Unit(
         width = AnimationScreen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor
         height = AnimationScreen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
 
-        batcher.setColor(1f, 1f, 1f, alpha) //sets no transparency by default
+        batcher.setColor(1f, 1f, 1f, alpha)
         batcher.draw(
             texture(),
             screenPosition.x - width / 2,
@@ -454,7 +480,7 @@ data class Unit(
             width,
             height
         )
-        font.data.setScale((0.3*sizefactor).toFloat())
+        font.data.setScale((0.3 * sizefactor * sizePresetFactor).toFloat())
         font.color = Color(255.0f, 63.75f, 0.0f, alpha)
 
         font.draw(batcher, size, screenPosition.x - width / 2, screenPosition.y + height / 2)
@@ -464,17 +490,36 @@ data class Unit(
 }
 
 data class Node
-    @JvmOverloads
+@JvmOverloads
 constructor(
     override val movementFrames: MutableList<GroupedMovement<Coordinate>> = mutableListOf(),
     override var death: Int? = null,
     override var position: Coordinate,
     override var screenPosition: Coordinate,
     override var alpha: Float = 0.0f,
-) : Object
+    var color: Color = Color.GREEN
+) : Object {
+    fun update(shapeRenderer: ShapeRenderer, time: Int, camera: OrthographicCamera, animationMode: Boolean) { // Goes to time, and if animation mode is active, draws colored circle
+        color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
+            Color.GREEN
+        } else {
+            Color.YELLOW
+        }
+        if (death != null) {
+            if (time > death!!) {
+                color = Color.RED
+            }
+        }
+        if (animationMode) {
+            shapeRenderer.color = color
+            shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
+        }
+    }
+}
 
 interface NodeCollection {
     val nodes: MutableList<Node>
+    var alpha: Float
 
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
@@ -513,7 +558,8 @@ data class Area (
     override val nodes: MutableList<Node> = mutableListOf(),
     var color: AreaColor = AreaColor.RED,
     var lineIDs: List<Pair<Int, Int>> = mutableListOf(),
-    @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
+    @Transient var drawPoly: MutableList<FloatArray> = mutableListOf(),
+    override var alpha: Float
 ) : NodeCollection {
     fun calculatePolygon(lines: List<Pair<Line, Int>>, time: Int) {
         val border1D = DoubleArray(nodes.size * 2)
@@ -577,7 +623,8 @@ data class Line(
     @Transient var interpolatedX: Array<Float> = arrayOf(),
     @Transient var interpolatedY: Array<Float> = arrayOf(),
     var lineThickness: Float = 5.0f,
-    var color: AreaColor = AreaColor.RED
+    var color: AreaColor = AreaColor.RED,
+    override var alpha: Float
 ) : NodeCollection {
 
     fun interpolate(num: Int, time: Int) : Boolean {
@@ -744,64 +791,6 @@ data class Animation @JvmOverloads constructor(
         }
 
         return cachedImageDimensions!!
-    }
-
-    fun getListOfObject(obj: Object): List<Object> {
-        var id = 0
-        for (line in lines) {
-            if (line.nodes.contains(obj)) {
-                return line.nodes
-            }
-            id++
-        }
-        for (area in areas) {
-            if (area.nodes.contains(obj)) {
-                return area.nodes
-            }
-            id++
-        }
-        for (unit in units) {
-            if (unit == obj) {
-                return units
-            }
-        }
-        return emptyList()
-    }
-
-    fun getAreaOfNode(node: Object): Area? {
-        for (area in areas) {
-            if (area.nodes.contains(node)) {
-                return area
-            }
-        }
-        return null
-    }
-
-    fun getLineOfNode(node: Object): Line? {
-        for (line in lines) {
-            if (line.nodes.contains(node)) {
-                return line
-            }
-        }
-        return null
-    }
-
-    fun getListOfNode(node: Object): List<Node> {
-        var id = 0
-        for (line in lines) {
-            if (line.nodes.contains(node)) {
-                return line.nodes
-            }
-            id++
-        }
-        for (area in areas) {
-            if (area.nodes.contains(node)) {
-                return area.nodes
-            }
-            id++
-        }
-
-        return emptyList()
     }
 
     fun deleteObject(obj: Object): Boolean {
