@@ -22,6 +22,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
@@ -31,6 +32,7 @@ public class WarAnimationMaker extends Game {
 	public SpriteBatch batcher;
 	public ShapeRenderer shapeRenderer;
 	public BitmapFont bitmapFont;
+	public FreeTypeFontGenerator generator;
 	public Skin skin;
 	public InputMultiplexer multiplexer;
 
@@ -44,8 +46,8 @@ public class WarAnimationMaker extends Game {
 		// Initialize rendering objects
 		batcher = new SpriteBatch();
 		shapeRenderer = new ShapeRenderer();
-		bitmapFont = new BitmapFont();
-		skin = new Skin(Gdx.files.internal("assets/skins/glassy/skin/glassy-ui.json"));
+		generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/bitstream_vera_sans/VeraBd.ttf"));
+		skin = Assets.loadSkin("skins/glassy/skin/glassy-ui.json");
 		multiplexer = new InputMultiplexer();
 
 		gl = Gdx.gl;

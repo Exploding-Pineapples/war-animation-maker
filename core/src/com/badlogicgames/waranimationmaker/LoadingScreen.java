@@ -2,7 +2,6 @@ package com.badlogicgames.waranimationmaker;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogicgames.waranimationmaker.models.Animation;
@@ -29,9 +28,8 @@ public class LoadingScreen extends ScreenAdapter implements InputProcessor {
 
         game.gl.glClearColor(0, 0, 0, 1);
         game.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        game.bitmapFont.getData().setScale(1.0f);
-        game.bitmapFont.setColor(Color.WHITE);
+        game.generator.generateData(12);
+        game.generator.dispose();
         game.bitmapFont.draw(game.batcher, "Loading", DISPLAY_WIDTH/2F, DISPLAY_HEIGHT/2F);
         game.batcher.end();
 

@@ -19,6 +19,7 @@ package com.badlogicgames.waranimationmaker;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class Assets {
 
 	private static final Map<String, Texture> LOADED_TEXTURES = new HashMap<>();
+	private static final Map<String, Skin> LOADED_SKINS = new HashMap<>();
 
 	public static Texture loadTexture (String file) {
 		if (LOADED_TEXTURES.containsKey(file)) {
@@ -35,6 +37,16 @@ public class Assets {
 		final Texture texture = new Texture(Gdx.files.internal(file));
 		LOADED_TEXTURES.put(file, texture);
 		return texture;
+	}
+
+	public static Skin loadSkin (String file) {
+		if (LOADED_SKINS.containsKey(file)) {
+			return LOADED_SKINS.get(file);
+		}
+
+		final Skin skin = new Skin(Gdx.files.internal(file));
+		LOADED_SKINS.put(file, skin);
+		return skin;
 	}
 
 	public static void playSound (Sound sound) {

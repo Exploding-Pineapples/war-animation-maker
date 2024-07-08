@@ -61,3 +61,6 @@ nb-configuration.xml
 versions.json
 .gradle
 build/
+
+# Large assets
+assets/maps
