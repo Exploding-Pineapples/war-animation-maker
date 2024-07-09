@@ -25,7 +25,7 @@ import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDT
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 10;
     public static final int DEFAULT_UNIT_HEIGHT = 10;
-    public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
+    public static final int MIN_LINE_SIZE = 5; //minimum number of nodes needed to draw a line
     public static final int LINES_PER_NODE = 12; //number of straight lines per node on a spline
 
     WarAnimationMaker game; // Contains some variables common to all screens

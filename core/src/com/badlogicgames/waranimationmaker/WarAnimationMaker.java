@@ -46,7 +46,7 @@ public class WarAnimationMaker extends Game {
 		// Initialize rendering objects
 		batcher = new SpriteBatch();
 		shapeRenderer = new ShapeRenderer();
-		generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/bitstream_vera_sans/VeraBd.ttf"));
+		bitmapFont = new BitmapFont();
 		skin = Assets.loadSkin("skins/glassy/skin/glassy-ui.json");
 		multiplexer = new InputMultiplexer();
 

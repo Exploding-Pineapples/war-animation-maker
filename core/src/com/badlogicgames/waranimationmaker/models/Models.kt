@@ -14,6 +14,7 @@ import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import earcut4j.Earcut
+import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction
 import java.io.File
@@ -823,13 +824,10 @@ data class Animation @JvmOverloads constructor(
     }
 
     companion object {
-
-        val interpolator = SplineInterpolator()
+        val interpolator = AkimaSplineInterpolator()
         fun getInterpolator(evalAt: DoubleArray, values: DoubleArray): PolynomialSplineFunction {
             return interpolator.interpolate(evalAt, values)
         }
-
-        //Update all nodes and interpolate line
     }
 
     @Transient

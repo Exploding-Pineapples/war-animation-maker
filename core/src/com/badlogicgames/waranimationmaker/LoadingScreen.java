@@ -28,8 +28,6 @@ public class LoadingScreen extends ScreenAdapter implements InputProcessor {
 
         game.gl.glClearColor(0, 0, 0, 1);
         game.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.generator.generateData(12);
-        game.generator.dispose();
         game.bitmapFont.draw(game.batcher, "Loading", DISPLAY_WIDTH/2F, DISPLAY_HEIGHT/2F);
         game.batcher.end();
 
