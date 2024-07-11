@@ -11,20 +11,17 @@ import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.Assets
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolator
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import earcut4j.Earcut
-import org.apache.commons.math3.analysis.interpolation.AkimaSplineInterpolator
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction
 import java.io.File
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.absoluteValue
 import kotlin.math.cos
 
-interface Object
-{
+interface Object {
     var position: Coordinate
     var screenPosition: Coordinate
 
@@ -37,6 +34,7 @@ interface Object
     {
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
+
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean { //can only be called after at least one key frame has been added
         val (length, index, subindex, start, end) = findTime(time)
         val (mode, motion) = getMotion(length, index, subindex)
@@ -221,6 +219,7 @@ interface Object
             }
         }
     }
+
     // When you add a time coordinate pair to an object which hasn't had a defined movement for a long time, it will interpolate a motion the whole way, which can be undesirable
     // Ex. last defined position was at time 0, you want it to move to another position at 800
     // But you only want it to move starting from time 600
@@ -651,26 +650,24 @@ data class Line(
             yValues[nodeIndex] = node.screenPosition.y.toDouble()
         }
 
-        if (drawNodes.size > AnimationScreen.MIN_LINE_SIZE) {
+        if (drawNodes.size >= AnimationScreen.MIN_LINE_SIZE) {
             interpolatedX = Array(num + 1) { 0.0f }
             interpolatedY = Array(num + 1) { 0.0f }
 
-            val xInterpolator = Animation.interpolator.interpolate(evalAt, xValues)
-            val yInterpolator = Animation.interpolator.interpolate(evalAt, yValues)
+            val xInterpolator = PCHIPInterpolator.Interpolator(evalAt, xValues)
+            val yInterpolator = PCHIPInterpolator.Interpolator(evalAt, yValues)
 
-            if (drawNodes.size > AnimationScreen.MIN_LINE_SIZE) {
-                i = 0
-                var eval: Double
-                while (i < num) {
-                    eval = (drawNodes.size.toFloat() - 1.00) * i / num
-                    interpolatedX[i] = xInterpolator.value(eval).toFloat()
-                    interpolatedY[i] = yInterpolator.value(eval).toFloat()
-                    i++
-                }
+            i = 0
+            var eval: Double
+            while (i < num) {
+                eval = (drawNodes.size.toFloat() - 1.00) * i / num
+                interpolatedX[i] = xInterpolator.interpolateAt(eval).toFloat()
+                interpolatedY[i] = yInterpolator.interpolateAt(eval).toFloat()
+                i++
             }
 
-            interpolatedX[num] = xInterpolator.value((drawNodes.size.toFloat() - 1.00)).toFloat()
-            interpolatedY[num] = yInterpolator.value((drawNodes.size.toFloat() - 1.00)).toFloat()
+            interpolatedX[num] = xInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
+            interpolatedY[num] = yInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
             return true
         }
         return false
@@ -824,10 +821,10 @@ data class Animation @JvmOverloads constructor(
     }
 
     companion object {
-        val interpolator = AkimaSplineInterpolator()
-        fun getInterpolator(evalAt: DoubleArray, values: DoubleArray): PolynomialSplineFunction {
-            return interpolator.interpolate(evalAt, values)
-        }
+        val interpolator = PCHIPInterpolator()
+//        fun getInterpolator(evalAt: DoubleArray, values: DoubleArray): PolynomialSplineFunction {
+//            return interpolator.interpolate(evalAt, values)
+//        }
     }
 
     @Transient
