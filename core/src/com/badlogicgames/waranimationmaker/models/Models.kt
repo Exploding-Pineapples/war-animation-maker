@@ -12,210 +12,96 @@ import com.badlogicgames.waranimationmaker.Assets
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolator
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolator.IntToFloatInterpolator
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolator.FloatToFloatInterpolator
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import earcut4j.Earcut
 import java.io.File
 import java.util.*
-import kotlin.math.PI
 import kotlin.math.absoluteValue
-import kotlin.math.cos
 
-interface Object {
-    var position: Coordinate
-    var screenPosition: Coordinate
+// Any values which needed to be interpolated over time are of this type
+class InterpolatedFloat(initValue: Float, initTime: Int) {
+    var interpolator = IntToFloatInterpolator(listOf(initTime), listOf(initValue))
+    val setPoints: SortedMap<Int, Float> = TreeMap()
+    var value: Float = initValue
 
-    val movementFrames: MutableList<GroupedMovement<Coordinate>>
-    var death: Int?
-
-    var alpha: Float
-
-    fun clicked(x: Float, y: Float): Boolean
-    {
-        return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
+    init {
+        println("Created new Interpolated Value")
+        setPoints[initTime] = initValue
     }
 
-    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean { //can only be called after at least one key frame has been added
-        val (length, index, subindex, start, end) = findTime(time)
-        val (mode, motion) = getMotion(length, index, subindex)
-        val (first, last) = motion
-
-        val xmotion = arrayOf(first.x, last.x)
-        val ymotion = arrayOf(first.y, last.y)
-
-        alpha = 1.0f
-
-        if (time < movementFrames.first().entries.first().key) {
-            alpha = 0f.coerceAtLeast(1.0f.coerceAtMost(1.0f - (movementFrames[0].frames.entries.first().key - time) / 100f))
-        }
-
-        if (death != null) { //checks for death time
-            alpha = 0.0f.coerceAtLeast((1.0f - (time - death!!) / 100f))
-        }
-
-        if (mode == "single") {
-            position.x = xmotion[0]
-            position.y = ymotion[0]
-            if (start == -1) {
-                screenPosition.x = position.x * zoom - cx * (zoom - 1) + (DISPLAY_WIDTH / 2 - cx)
-                screenPosition.y = position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy)
-                return false
-            }
-        }
-
-        val distancex = xmotion[1] - xmotion[0]
-        val distancey = ymotion[1] - ymotion[0]
-        val deltatime = end - start
-        if (mode == "double") {
-            position.x =
-                (xmotion[0] - 0.5 * distancex * cos((PI / deltatime) * (time - start)) + 0.5 * distancex).toFloat()
-            position.y =
-                (ymotion[0] - 0.5 * distancey * cos((PI / deltatime) * (time - start)) + 0.5 * distancey).toFloat()
-        }
-        if (mode == "speedup") {
-            position.x =
-                (xmotion[0] + distancex * cos((PI / (2 * deltatime)) * ((time - start) - 2 * deltatime)) + distancex).toFloat()
-            position.y =
-                (ymotion[0] + distancey * cos((PI / (2 * deltatime)) * ((time - start) - 2 * deltatime)) + distancey).toFloat()
-        }
-        if (mode == "slowdown") {
-            position.x =
-                (xmotion[0] + distancex * cos((PI / (2 * deltatime)) * ((time - start)) - PI / 2)).toFloat()
-            position.y =
-                (ymotion[0] + distancey * cos((PI / (2 * deltatime)) * ((time - start)) - PI / 2)).toFloat()
-        }
-        if (mode == "linear") {
-            position.x = xmotion[0] + distancex * ((time - start) / deltatime.toFloat())
-            position.y = ymotion[0] + distancey * ((time - start) / deltatime.toFloat())
-        }
-        screenPosition.x = position.x * zoom - cx * (zoom - 1) + (DISPLAY_WIDTH / 2 - cx)
-        screenPosition.y = position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy)
-        return true
+    fun updateInterpolator() {
+        print("updating interpolator")
+        println(setPoints)
+        interpolator.update(setPoints.keys.toList(), setPoints.values.toList())
     }
 
-    fun findTime(time: Int): Array<Int> {
-        var index = 0
-        if (time < movementFrames[0].frames.keys.toList()[0]) {
-            return arrayOf(1, 0, 0, -1, -1)
+    fun update(time: Int): Float { // Updates value based on time and returns it
+        if (setPoints.isEmpty()) {
+            throw IllegalArgumentException("Movement frames can not be empty when goToTime is called")
         }
+        value = interpolator.interpolateAt(time)
 
-        for (frame in movementFrames) {
-            val times = frame.frames.keys.toList()
-            for (subindex in 1 until times.size) {
-                if ((time >= times[subindex - 1]) && (time < times[subindex])) {
-                    return arrayOf(times.size, index, subindex, times[subindex - 1], times[subindex])
-                }
-            }
-            index++
-        }
+        println(value)
 
-        return arrayOf(1, index - 1, movementFrames[movementFrames.size - 1].frames.keys.size - 1, -1, -1)
+        return value
     }
 
     fun removeFrame(time: Int): Boolean {
-        val removeFrames = mutableListOf<GroupedMovement<Coordinate>>()
-        var removeKeys: MutableList<Int>
         var definedTime = 0
 
-        for (frame in movementFrames) {
-            val iterator = frame.keys.iterator()
-            removeKeys = mutableListOf()
-            while ((definedTime <= time)) {
-                if (!iterator.hasNext()) { //the time is not defined further, so stop
-                    break
-                }
+        val iterator = setPoints.keys.iterator()
+        val removeKeys: MutableList<Int> = mutableListOf() // avoid concurrent modification of keys
 
-                definedTime = iterator.next()
-                if (definedTime == time) {
-                    if (frame.size > 1) { // if frame has more than one coordinate, remove
-                        removeKeys.add(definedTime)
-                        println("removed single coordinate")
-                    } else {
-                        if (movementFrames.size > 1) { // if the frame has one coordinate, remove the frame completely if there is more than 1 frame
-                            removeFrames.add(frame) // avoid concurrent modification
-                        } else {
-                            if (movementFrames.isEmpty()) { // never supposed to happen
-                                throw IllegalStateException("Last movement frame was empty")
-                            }
-                            return false // if there is only one frame with one coordinate, cannot remove
-                        }
-                    }
-                }
+        while ((definedTime <= time)) {
+            if (!iterator.hasNext()) { //the time is not defined further, so stop
+                break
             }
-            for (key in removeKeys) {
-                if (frame.keys.size > 1) {
-                    frame.keys.remove(key)
+
+            definedTime = iterator.next()
+            if (definedTime == time) {
+                if (setPoints.size > 1) {
+                    removeKeys.add(definedTime)
+                    println("removed single coordinate")
+                } else {
+                    return false
                 }
             }
         }
-        for (frame in removeFrames) {
-            if (movementFrames.size > 1) { // If there are multiple GroupedMovements with the same time, this might accidentally remove all the movement frames
-                movementFrames.remove(frame)
+
+        for (key in removeKeys) {
+            if (setPoints.keys.size > 1) { // if somehow all the times in movement frames were the same, this would prevent them all being removed
+                setPoints.keys.remove(key)
             }
         }
-        println("removed whole frame(s)")
+        updateInterpolator()
+
         return true
     }
 
-    fun getMotion(length: Int, index: Int, subindex: Int): Pair<String, Pair<Coordinate, Coordinate>> {
-        val motion = movementFrames[index]
-        val frames = motion.frames.entries.toList()
-        if (length == 1) {
-            return "single" to (frames[subindex].value to frames[subindex].value)
-        }
-        if (length == 2) {
-            return "double" to (frames[subindex-1].value to frames[subindex].value)
-        }
-        if (length > 2) {
-            if (subindex == 1) {
-                return "speedup" to (frames[0].value to frames[subindex].value)
-            }
-            if (subindex == length - 1) {
-                return "slowdown" to (frames[subindex - 1].value to frames[subindex].value)
-            }
-            return "linear" to (frames[subindex - 1].value to frames[subindex].value)
-        }
-
-        throw IllegalStateException("what the fuck did you do")
-    }
-
-    fun holdPositionUntil(time: Int, x: Float, y: Float) {
-        if (movementFrames.isEmpty()) {
-            movementFrames += GroupedMovement()
-        }
-
-        val lastGroup = movementFrames.last()
-
-        if (time > (lastGroup.keys.lastOrNull() ?: -1)) { // Adds time and coordinate to the last movement frame
-            lastGroup[time] = Coordinate(x, y)
-            println("Appended, new motions: $movementFrames")
+    fun newSetPoint(time: Int, value: Float) {
+        if (time > (setPoints.keys.last())) { // Adds time and value to the end
+            setPoints[time] = value
+            updateInterpolator()
+            println("Appended, new motions: $setPoints")
             return
         }
 
-        var found = false //Used to overwrite duplicate times
+        for (definedTime in setPoints.keys) {
+            if (time == definedTime) {
+                setPoints[definedTime] = value
+                updateInterpolator()
+                println("Overwrote, new motions: $setPoints")
+                return
+            }
+            if (definedTime > time) {
+                setPoints[time] = value
+                updateInterpolator()
 
-        for (movement in movementFrames) {
-            for (t in movement.keys) {
-                if (time == t) {
-                    movement.frames[t] = Coordinate(x, y)
-                    //println("Overwrote, new motions: $movementFrames")
-                    found = true //no return yet, if it finds another duplicate time, overwrite
-                }
-                if (t > time) {
-                    if (found) { //if t > time and the time was found, all duplicate times have been overwritten already so return
-                        return
-                    }
-                    movement[time] = Coordinate(x, y)
-
-                    val clone = movement.frames.toMap()
-                    movement.frames.clear()
-
-                    clone.keys.sorted().forEach {
-                        movement[it] = clone[it]!!
-                    }
-                    println("Inserted, new motions: $movementFrames")
-                    return
-                }
+                println("Inserted, new motions: $setPoints")
+                return
             }
         }
     }
@@ -224,223 +110,135 @@ interface Object {
     // Ex. last defined position was at time 0, you want it to move to another position at 800
     // But you only want it to move starting from time 600
     // The below function is used hold the object at the last position until the desired time
-    fun holdPositionUntil(time: Int) {  // Create a new movement that keeps the object at its last defined position until the current time
-        if (movementFrames.isEmpty()) { // Should never happen
-            movementFrames += GroupedMovement()
-        }
-
+    fun holdValueUntil(time: Int) {
         var prevTime: Int? = null
-        var prevDefinedCoordinate: Coordinate? = null
+        var prevValue: Float? = null
 
-        for (j in movementFrames.indices) {
-            val frame = movementFrames[j]
-            val frameTimes = frame.keys.toList()
-            for (i in frameTimes.indices) {
-                val definedTime = frameTimes[i]
+        val frameTimes = setPoints.keys.toList()
 
-                if (definedTime == time) { // If the time is already defined, don't do anything
-                    return
-                }
+        for (i in frameTimes.indices) {
+            val definedTime = frameTimes[i]
 
-                if ((definedTime > time) && (prevTime != null)) { // If the input time is not defined but is in the defined period, modify the movement to stay at the position just before the input time until the input time
-                    val definedCoordinate = frame[definedTime]!!
-
-                    frame[time] = prevDefinedCoordinate!!
-
-                    movementFrames.add(j, GroupedMovement(
-                        mutableMapOf(
-                            time to prevDefinedCoordinate,
-                            definedTime to definedCoordinate
-                        )
-                    ))
-
-                    println("Added new motion: $movementFrames")
-                    return
-                }
-
-                prevTime = definedTime
-                prevDefinedCoordinate = frame[prevTime]
+            if (definedTime?.toInt() == time) { // If the time is already defined, don't do anything
+                return
             }
+
+            if ((definedTime > time) && (prevTime != null)) { // If the input time is not defined but is in the defined period, modify the movement to stay at the position just before the input time until the input time
+                setPoints[time] = prevValue!!
+                updateInterpolator()
+
+                println("Added hold frame: $setPoints")
+                return
+            }
+
+            prevTime = definedTime
+            prevValue = setPoints[prevTime]
         }
         // If the input time was not in the defined period, add a movement to the end
-        val lastFrame = movementFrames.last().frames.lastEntry()
+        setPoints[time] = setPoints.entries.last().value
+        updateInterpolator()
+    }
+}
+// Needed for StaticObject to have a plain Coordinate as its position while other Objects have a InterpolatedCoordinate
 
-        movementFrames += GroupedMovement(
-            mutableMapOf(
-                lastFrame.key to lastFrame.value,
-                time to lastFrame.value
-            )
-        )
+data class Coordinate(var x: Float, var y: Float) {
+    var value = Pair(x, y)
+}
+// Contains 2 InterpolatedValues which represent an interpolated Coordinate
+class InterpolatedCoordinate(
+    firstCoordinate: Coordinate,
+    firstTime: Int
+) {
+    var x: InterpolatedFloat = InterpolatedFloat(firstCoordinate.x, firstTime)
+    var y: InterpolatedFloat = InterpolatedFloat(firstCoordinate.y, firstTime)
+
+    var value = Pair(x.value, y.value)
+    fun update(time: Int): Coordinate {
+        val x = x.update(time).toFloat()
+        val y = y.update(time).toFloat()
+        return Coordinate(x, y)
+    }
+    fun removeFrame(time: Int): Boolean {
+        return x.removeFrame(time) && y.removeFrame(time)
+    }
+    fun newSetPoint(time: Int, coordinate: Coordinate) {
+        x.newSetPoint(time, coordinate.x)
+        y.newSetPoint(time, coordinate.y)
+    }
+    fun holdPositionUntil(time: Int) {
+        x.holdValueUntil(time)
+        y.holdValueUntil(time)
+    }
+}
+// The base Object, is extended by the camera, all nodes, all units, and all other features with a specific position. Might not have a screen position. Requires a position to instantiate
+open class Object (@Transient open val position: InterpolatedCoordinate) {
+}
+
+interface ObjectWithDeath {
+    var death: Int?
+}
+
+interface ObjectWithAlpha {
+    var alpha: Float
+}
+
+interface ObjectWithScreenPosition {
+    val screenPosition: Coordinate
+
+    fun clicked(x: Float, y: Float): Boolean {
+        return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
 }
 
-interface ObjectWithZoom
-{
-    var position: Coordinate
-    var zoom: Float //zoom for camera only
-
-    val movementFrames: MutableList<GroupedMovement<Pair<Coordinate, Float>>>
-    fun goToTime(time: Int): Boolean {
-        val (length, index, subindex, start, end) = findTime(time)
-        val (mode, motion) = getMotion(length, index, subindex)
-        val (coordinates, zooms) = motion
-
-        val xmotion = arrayOf(coordinates.first.x, coordinates.second.x)
-        val ymotion = arrayOf(coordinates.first.y, coordinates.second.y)
-        val (zfirst, zsecond) = zooms
-
-
-        if (mode == "single") {
-            position.x = xmotion[0]
-            position.y = ymotion[0]
-            zoom = zfirst
-            if (start == -1) {
-                return false
-            }
-        }
-
-        val distancex = xmotion[1] - xmotion[0]
-        val distancey = ymotion[1] - ymotion[0]
-        val deltatime = end - start
-        val deltaz = zsecond - zfirst
-
-        if (mode == "double") {
-            position.x = (xmotion[0] - 0.5 * distancex * cos((PI / deltatime) * (time - start)) + 0.5 * distancex).toFloat()
-            position.y = (ymotion[0] - 0.5 * distancey * cos((PI / deltatime) * (time - start)) + 0.5 * distancey).toFloat()
-            zoom = (zfirst - 0.5 * deltaz * cos((PI / deltatime) * (time - start)) + 0.5 * deltaz).toFloat()
-        }
-        if (mode == "speedup") {
-            position.x = (xmotion[0] + distancex * cos((PI / (2 * deltatime)) * ((time - start) - 2 * deltatime)) + distancex).toFloat()
-            position.y = (ymotion[0] + distancey * cos((PI / (2 * deltatime)) * ((time - start) - 2 * deltatime)) + distancey).toFloat()
-            zoom = (zfirst + deltaz * cos((PI / (2 * deltatime)) * ((time - start) - 2 * deltatime)) + deltaz).toFloat()
-        }
-        if (mode == "slowdown") {
-            position.x = (xmotion[0] + distancex * cos((PI / (2 * deltatime)) * ((time - start)) - PI / 2)).toFloat()
-            position.y = (ymotion[0] + distancey * cos((PI / (2 * deltatime)) * ((time - start)) - PI / 2)).toFloat()
-            zoom = (zfirst + deltaz * cos((PI / (2 * deltatime)) * ((time - start)) - PI / 2)).toFloat()
-        }
-        if (mode == "linear") {
-            position.x = xmotion[0] + distancex * ((time - start) / deltatime.toFloat())
-            position.y = ymotion[0] + distancey * ((time - start) / deltatime.toFloat())
-            zoom = zfirst + deltaz * ((time - start) / deltatime.toFloat())
-        }
-        return true
-    }
-
-    fun findTime(time: Int): Array<Int> {
-        var index = 0
-        if (time < movementFrames[0].frames.keys.toList()[0]) {
-            return arrayOf(1, 0, 0, -1, -1)
-        }
-
-        for (frame in movementFrames) {
-            val times = frame.frames.keys.toList()
-            for (subindex in 1 until times.size) {
-                if ((time >= times[subindex - 1]) && (time < times[subindex])) {
-                    return arrayOf(times.size, index, subindex, times[subindex - 1], times[subindex])
-                }
-            }
-            index++
-        }
-        return arrayOf(1, index - 1, movementFrames[movementFrames.size - 1].frames.keys.size - 1, -1, -1)
-    }
-
-    fun getMotion(length: Int, index: Int, subindex: Int): Pair<String, Pair<Pair<Coordinate, Coordinate>, Pair<Float, Float>>> {
-        val motion = movementFrames[index]
-        val frames = motion.frames.entries.toList()
-        val curframe = frames[subindex].value
-        if (length == 1) {
-            return "single" to ((curframe.first to curframe.first) to (curframe.second to curframe.second)) //if only one frame defined, make a dummy motion with no movement (beginning and end are the same thing)
-        }
-
-        val prevframe = frames[subindex - 1].value
-        if (length == 2) { //if two frames or more are defined, return their motion
-            return "double" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //2 frames only means return a speed up and slow down
-        }
-        if (length > 2) {
-            if (subindex == 1) {
-                return "speedup" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if more than 2 frames, first motion is speed up
-            }
-            if (subindex == length - 1) {
-                return "slowdown" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if more than 2 frmes, last motion is slow down
-            }
-            return "linear" to ((prevframe.first to curframe.first) to (prevframe.second to curframe.second)) //if more than 2 frames, all middle frames are linear
-        }
-
-        throw IllegalStateException("what the fuck did you do")
-    }
-
-    fun newSetPoint(time: Int, x: Float, y: Float, zoom: Float) {
-        // for (Class variableName : listOfItems) {}
-
-        if (movementFrames.isEmpty()) {
-            movementFrames += GroupedMovement()
-        }
-
-        val lastGroup = movementFrames.last()
-
-        if (time > (lastGroup.keys.lastOrNull() ?: -1)) {
-            lastGroup[time] = Coordinate(x, y) to zoom
-            println("Appended, new motions: $movementFrames")
-            return
-        }
-
-        var found = false //Used to overwrite duplicate times
-
-        for (movement in movementFrames) {
-            for (t in movement.keys) {
-                if (time == t) {
-                    movement.frames[t] = Coordinate(x, y) to zoom
-                    println("Overwrote, new motions: $movementFrames")
-                    found = true //no return yet, if it finds another duplicate time, overwrite
-                }
-                if (t > time) {
-                    if (found) { //if t > time and the time was found, all duplicate times have been overwritten already so return
-                        return
-                    }
-                    movement[time] = Coordinate(x, y) to zoom
-
-                    val clone = movement.frames.toMap()
-                    movement.frames.clear()
-
-                    clone.keys.sorted().forEach {
-                        movement[it] = clone[it]!!
-                    }
-                    println("Inserted, new motions: $movementFrames")
-                    return
-                }
-            }
-        }
+// Object which moves, includes all nodes, all units, and the camera.
+abstract class InterpolatedObject(@Transient override val position: InterpolatedCoordinate) : Object(position) {
+    open fun update(time: Int) {
+        position.update(time)
     }
 }
 
-data class Coordinate(
-    var x: Float,
-    var y: Float
-)
+interface ObjectWithZoom {
+    val zoom: InterpolatedFloat
+}
 
-data class GroupedMovement<T>(
-    val frames: TreeMap<Int, T> = TreeMap()
-) : MutableMap<Int, T> by frames
-{
-    constructor(frames: MutableMap<Int, T>) : this()
-    {
-        this.frames.putAll(frames)
+data class Camera(
+    override var position: InterpolatedCoordinate = InterpolatedCoordinate(Coordinate(960f, 540f), 0),
+    override val zoom: InterpolatedFloat = InterpolatedFloat(1.0f, 0)
+) : InterpolatedObject(position), ObjectWithZoom {
+    override fun update(time: Int) {
+        super.update(time)
+        zoom.update(time)
+    }
+}
+
+interface InterpolatedScreenObject : ObjectWithScreenPosition {
+    val position: InterpolatedCoordinate
+
+    fun update(time: Int, camera: OrthographicCamera) {
+        position.update(time)
+        updateScreenPosition(camera)
+    }
+
+    fun updateScreenPosition(camera: OrthographicCamera) {
+        val screenX = position.x.value * camera.zoom - camera.position.x * (camera.zoom - 1) + (DISPLAY_WIDTH / 2 - camera.position.x)
+        val screenY = position.y.value * camera.zoom - camera.position.y * (camera.zoom - 1) + (DISPLAY_HEIGHT / 2 - camera.position.y)
+
+        screenPosition.x = screenX
+        screenPosition.y = screenY
     }
 }
 
 data class Unit(
+    override val position: InterpolatedCoordinate,
     val image: String,
     var name: String? = null,
     var type: String = "infantry",
     var size: String = "XX",
-    override val movementFrames: MutableList<GroupedMovement<Coordinate>> = mutableListOf(),
-    override var death: Int? = null,
-    override var position: Coordinate,
-    override var screenPosition: Coordinate,
-    override var alpha: Float = 255.0f
-) : Object
+    override var alpha: Float = 1.0f,
+    override var death: Int? = null
+) : InterpolatedObject(position), InterpolatedScreenObject, ObjectWithAlpha, ObjectWithDeath
 {
+    override var screenPosition: Coordinate = Coordinate(Float.NaN, Float.NaN)
     companion object {
         val sizePresets = mapOf(
             "XX" to 1.0f,
@@ -462,9 +260,11 @@ data class Unit(
 
         return texture!!
     }
+    override fun update(time: Int) {
+        super<InterpolatedObject>.update(time)
+    }
 
     fun draw(batcher: SpriteBatch, sizefactor: Float, font: BitmapFont) {
-        //draw only for the correct country
         var sizePresetFactor = 1.0f
         if (size in sizePresets) {
             sizePresetFactor = sizePresets[size]!!
@@ -492,24 +292,24 @@ data class Unit(
 data class Node
 @JvmOverloads
 constructor(
-    override val movementFrames: MutableList<GroupedMovement<Coordinate>> = mutableListOf(),
+    override val position: InterpolatedCoordinate,
+    var color: Color = Color.GREEN,
     override var death: Int? = null,
-    override var position: Coordinate,
-    override var screenPosition: Coordinate,
-    override var alpha: Float = 0.0f,
-    var color: Color = Color.GREEN
-) : Object {
+) : InterpolatedObject(position), InterpolatedScreenObject, ObjectWithDeath {
+    override var screenPosition: Coordinate = Coordinate(Float.NaN, Float.NaN)
+
     fun update(shapeRenderer: ShapeRenderer, time: Int, camera: OrthographicCamera, animationMode: Boolean) { // Goes to time, and if animation mode is active, draws colored circle
-        color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
-            Color.GREEN
-        } else {
-            Color.YELLOW
-        }
+        position.update(time)
+        // Add back the color update code
+
         if (death != null) {
             if (time > death!!) {
                 color = Color.RED
             }
         }
+        
+        updateScreenPosition(camera)
+        
         if (animationMode) {
             shapeRenderer.color = color
             shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
@@ -524,7 +324,7 @@ interface NodeCollection {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
         for (node in nodes) {
-            if (time >= node.movementFrames.first().keys.first()) {
+            if (time >= node.position.x.setPoints.keys.first()) {
                 if (node.death != null) {
                     if (time <= node.death!!) {
                         out.add(node)
@@ -540,7 +340,7 @@ interface NodeCollection {
     fun getNonDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
         for (node in nodes) {
-            if (time <= node.movementFrames.first().keys.first()) {
+            if (time <= node.position.x.setPoints.keys.first()) {
                 out.add(node)
             } else {
                 if (node.death != null) {
@@ -627,47 +427,47 @@ data class Line(
     override var alpha: Float
 ) : NodeCollection {
 
-    fun interpolate(num: Int, time: Int) : Boolean {
+    private fun interpolate(num: Int, time: Int) : Boolean {
         //reset values to nothing by default
         interpolatedX = arrayOf()
         interpolatedY = arrayOf()
 
         val drawNodes = getDrawNodes(time)
-        val xValues = DoubleArray(drawNodes.size)
-        val yValues = DoubleArray(drawNodes.size)
-        val evalAt = DoubleArray(drawNodes.size)
+        val xValues = FloatArray(drawNodes.size)
+        val yValues = FloatArray(drawNodes.size)
+        val evalAt = FloatArray(drawNodes.size)
 
         var i = 0
         while (i < drawNodes.size) {
-            evalAt[i] = i.toDouble() //numbers from 0 - drawNodes.size() are used as interpolation points
+            evalAt[i] = i.toFloat() //numbers from 0 - drawNodes.size() are used as interpolation points
             i += 1
         }
 
         var node: Node
         for (nodeIndex in drawNodes.indices) {
             node = drawNodes[nodeIndex]
-            xValues[nodeIndex] = node.screenPosition.x.toDouble()
-            yValues[nodeIndex] = node.screenPosition.y.toDouble()
+            xValues[nodeIndex] = node.screenPosition.x
+            yValues[nodeIndex] = node.screenPosition.y
         }
 
         if (drawNodes.size >= AnimationScreen.MIN_LINE_SIZE) {
             interpolatedX = Array(num + 1) { 0.0f }
             interpolatedY = Array(num + 1) { 0.0f }
 
-            val xInterpolator = PCHIPInterpolator.Interpolator(evalAt, xValues)
-            val yInterpolator = PCHIPInterpolator.Interpolator(evalAt, yValues)
+            val xInterpolator = FloatToFloatInterpolator(evalAt.toList(), xValues.toList())
+            val yInterpolator = FloatToFloatInterpolator(evalAt.toList(), yValues.toList())
 
             i = 0
             var eval: Double
             while (i < num) {
                 eval = (drawNodes.size.toFloat() - 1.00) * i / num
-                interpolatedX[i] = xInterpolator.interpolateAt(eval).toFloat()
-                interpolatedY[i] = yInterpolator.interpolateAt(eval).toFloat()
+                interpolatedX[i] = xInterpolator.interpolateAt(eval.toFloat()).toFloat()
+                interpolatedY[i] = yInterpolator.interpolateAt(eval.toFloat()).toFloat()
                 i++
             }
 
-            interpolatedX[num] = xInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
-            interpolatedY[num] = yInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
+            interpolatedX[num] = xInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00f)).toFloat()
+            interpolatedY[num] = yInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00f)).toFloat()
             return true
         }
         return false
@@ -688,12 +488,6 @@ data class Line(
         }
     }
 }
-
-data class Camera(
-    override var position: Coordinate = Coordinate(x = 960.0f, y = 540.0f),
-    override var zoom: Float = 1.0f,
-    override val movementFrames: MutableList<GroupedMovement<Pair<Coordinate, Float>>> = mutableListOf()
-) : ObjectWithZoom
 
 class UnitHandler(
     private val animation: Animation
@@ -736,15 +530,7 @@ data class Animation @JvmOverloads constructor(
     {
         if (camera == null)
         {
-            camera = Camera(
-                movementFrames = mutableListOf(
-                    GroupedMovement(
-                        frames = mutableMapOf(
-                            0 to (Coordinate(x = 0.0f, y = 0.0f) to 1.0f)
-                        )
-                    )
-                )
-            )
+            camera = Camera()
         }
 
         return camera!!
@@ -753,7 +539,7 @@ data class Animation @JvmOverloads constructor(
     fun getDrawUnits(time: Int): List<Unit> {
         val out = mutableListOf<Unit>()
         for (unit in units) {
-            if (time >= unit.movementFrames.first().keys.first()) {
+            if (time >= unit.position.x.setPoints.keys.first()) {
                 if (unit.death != null) {
                     if (time <= unit.death!!) {
                         out.add(unit)
@@ -769,7 +555,7 @@ data class Animation @JvmOverloads constructor(
     fun getNonDrawUnits(time: Int): List<Unit> {
         val out = mutableListOf<Unit>()
         for (unit in units) {
-            if (time <= unit.movementFrames.first().keys.first()) {
+            if (time <= unit.position.x.setPoints.keys.first()) {
                 out.add(unit)
             } else {
                 if (unit.death != null) {
@@ -805,26 +591,16 @@ data class Animation @JvmOverloads constructor(
             }
             id++
         }
-        if (units.remove(obj)) {
-            return true
-        }
-        return false
+        return units.remove(obj)
     }
 
-    fun getLineByID(ID: Int): Line? {
+    fun getLineByID(id: Int): Line? {
         for (l in lines) {
-            if (l.id == ID) {
+            if (l.id == id) {
                 return l
             }
         }
         return null
-    }
-
-    companion object {
-        val interpolator = PCHIPInterpolator()
-//        fun getInterpolator(evalAt: DoubleArray, values: DoubleArray): PolynomialSplineFunction {
-//            return interpolator.interpolate(evalAt, values)
-//        }
     }
 
     @Transient

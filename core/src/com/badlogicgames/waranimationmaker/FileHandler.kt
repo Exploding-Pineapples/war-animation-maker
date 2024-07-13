@@ -10,6 +10,7 @@ object FileHandler {
         .setPrettyPrinting()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)
         .serializeNulls()
+        .serializeSpecialFloatingPointValues()
         .create()
 
     val animations = mutableListOf<Animation>()

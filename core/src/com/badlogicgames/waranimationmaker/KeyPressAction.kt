@@ -1,6 +1,7 @@
 package com.badlogicgames.waranimationmaker
 
 import com.badlogicgames.waranimationmaker.models.Object
+import com.badlogicgames.waranimationmaker.models.InterpolatedScreenObject
 
 class Action private constructor(builder: Builder) {
     val actionKeys = builder.actionKeys
@@ -87,7 +88,7 @@ class Action private constructor(builder: Builder) {
             var requiresShift: Boolean = false
             var requiresControl: Boolean = false
             var requiresSelected: Requirement = Requirement.ANY
-            var requiredSelectedTypes: MutableList<Class<*>> = mutableListOf(Object::class.java)
+            var requiredSelectedTypes: MutableList<Class<*>> = mutableListOf(InterpolatedScreenObject::class.java)
             var requiredTouchModes: MutableList<TouchMode> = mutableListOf()
             var excludedTouchModes: MutableList<TouchMode> = mutableListOf()
             var debug: Boolean = false

@@ -5,18 +5,18 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogicgames.waranimationmaker.models.*;
-import com.badlogicgames.waranimationmaker.models.Animation;
 import com.badlogicgames.waranimationmaker.models.Object;
+import com.badlogicgames.waranimationmaker.models.*;
 import kotlin.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.badlogicgames.waranimationmaker.Assets.loadTexture;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
@@ -25,7 +25,7 @@ import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDT
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 10;
     public static final int DEFAULT_UNIT_HEIGHT = 10;
-    public static final int MIN_LINE_SIZE = 5; //minimum number of nodes needed to draw a line
+    public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
     public static final int LINES_PER_NODE = 12; //number of straight lines per node on a spline
 
     WarAnimationMaker game; // Contains some variables common to all screens
@@ -37,7 +37,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Animation animation; // Contains all information about animation loaded from file
     Integer time;
 
-    Object selected;
+    InterpolatedObject selected;
     NodeCollection selectedNodeCollection; // if a Node is selected, this will be the Area or Line that the Node is on
 
     boolean shiftPressed;
@@ -62,7 +62,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Label keyOptions;
     Label selectedLabel;
     List<Action> actions;
-    Node origin;
+    InterpolatedScreenObject origin;
 
     public AnimationScreen(WarAnimationMaker game, Animation animation) {
         this.animation = animation;
@@ -77,7 +77,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         shapeRenderer = game.shapeRenderer;
         fullMap = loadTexture(animation.getPath());
         colorLayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
-        origin = createNodeAtPosition(0, 0, 0);
+        origin = new Node(new InterpolatedCoordinate(new Coordinate(0f, 0f), 0));
 
         // Animation init
         time = 0;
@@ -111,14 +111,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         Gdx.input.setInputProcessor(game.multiplexer);
 
         // Final init
-        animation.camera().goToTime(time);
+        animation.camera().update(time);
         updateCam();
     }
 
     public void updateCam() {
-        camera.position.x = animation.camera().getPosition().getX();
-        camera.position.y = animation.camera().getPosition().getY();
-        camera.zoom = animation.camera().getZoom();
+        camera.position.x = animation.camera().getPosition().getY().update(time);
+        camera.position.y = animation.camera().getPosition().getY().update(time);
+        camera.zoom = animation.camera().getZoom().update(time);
     }
 
     public boolean keyDown(int keycode) {
@@ -150,7 +150,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (paused) {
             if (touchMode == TouchMode.DEFAULT) { // Default behavior: select an object to show info about it
-                ArrayList<Object> selectedThings = select(x, y);
+                ArrayList<InterpolatedObject> selectedThings = select(x, y);
                 if (selectedThings.isEmpty()) {
                     resetSelected();
                 } else {
@@ -159,47 +159,62 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
                 if (selected != null) {
-                    selected.holdPositionUntil(time, mouseX, mouseY);
                     if (selected.getClass() == Node.class) {
-                        Object newSelection = null;
-                        for (Object selection : select(x, y)) {
+                        InterpolatedObject newSelection = null;
+                        for (InterpolatedObject selection : select(x, y)) {
                             if (selection != selected) {
                                 newSelection = selection;
                             }
                         }
                         if (newSelection != null) {
                             if (newSelection.getClass() == Node.class) { //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
-                                selected.holdPositionUntil(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
+                                Node newSelectionNode = (Node) newSelection;
+                                selected.getPosition().newSetPoint(time, new Coordinate(newSelectionNode.getPosition().getX().getValue(), newSelectionNode.getPosition().getY().getValue()));
                                 resetSelected();
                                 return true;
                             }
+                        } else {
+                            System.out.println("Created new set point at mouse");
+                            selected.getPosition().newSetPoint(time, new Coordinate(mouseX, mouseY));
+                            resetSelected();
+                            return true;
                         }
+                    } else {
+                        selected.getPosition().newSetPoint(time, new Coordinate(mouseX, mouseY));
+                        resetSelected();
+                        return true;
                     }
-                    resetSelected();
-                    return true;
-                }
-
-                ArrayList<Object> selectedThings = select(x, y);
-                if (selectedThings.isEmpty()) {
-                    resetSelected();
                 } else {
-                    selected = select(x, y).get(0);
+                    ArrayList<InterpolatedObject> selectedThings = select(x, y);
+                    if (selectedThings.isEmpty()) {
+                        resetSelected();
+                    } else {
+                        selected = select(x, y).get(0);
+                    }
                 }
+                return true;
             }
             if (touchMode == TouchMode.NEW_NODE) { //will add a new Node to the selectedNodeCollection or create a new line with the node if none are selected
+                System.out.println(selected);
+                if (selected != null) {
+                    System.out.println(selected.getClass());
+                }
                 if ((selected != null) && (selected.getClass() == Node.class)) {
                     int addAtIndex = selectedNodeCollection.getNodes().indexOf((Node) selected) + 1;
                     Node node;
-                    ArrayList<Object> newSelections = select(x, y);
-                    if (!newSelections.isEmpty()) {
-                        Object newSelection = newSelections.get(0);
-                        if (((newSelection != null) && (newSelection.getClass() == Node.class)) && (selectedNodeCollection.getNodes().contains(newSelection))) { // If the user clicks on another node on the same line, merge the nodes
-                            addAtIndex = selectedNodeCollection.getNodes().indexOf((Node) newSelection) + 1;
-                            node = createNodeAtPosition(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
-                            selected = node;
-                            selectedNodeCollection.getNodes().add(addAtIndex, node);
-                            return true;
+                    ArrayList<InterpolatedObject> newSelections = select(x, y);
+                    Node newSelection = null;
+                    for (InterpolatedObject selection : newSelections) {
+                        if (selection.getClass() == Node.class) {
+                            newSelection = (Node) selection;
                         }
+                    }
+                    if ((newSelection != null) && (selectedNodeCollection.getNodes().contains(newSelection))) { // If the user clicks on another node on the same line, merge the nodes
+                        addAtIndex = selectedNodeCollection.getNodes().indexOf(newSelection) + 1;
+                        node = createNodeAtPosition(time, newSelection.getPosition().getX().getValue(), newSelection.getPosition().getY().getValue());
+                        selected = node;
+                        selectedNodeCollection.getNodes().add(addAtIndex, node);
+                        return true;
                     }
                     // If the user does not select another node on the same line, create a new node on the same line in front of it
                     node = createNodeAtMouse(time);
@@ -221,7 +236,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 System.out.println("Checking for clicked line");
                 if (selected != null) {
                     for (Line line : animation.getLines()) {
-                        for (Object node : line.getNodes()) {
+                        for (Node node : line.getNodes()) {
                             if (node.clicked(x, y)) {
                                 Area selectedArea = (Area) selectedNodeCollection;
                                 selectedArea.getLineIDs().add(new Pair<>(line.getId(), selectedArea.getNodes().indexOf((Node) selected)));
@@ -234,9 +249,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                 }
             }
-            for (InputElement inputElement : inputElements) {
-                inputElement.update(selected, selectedNodeCollection, selectedInfoTable, animationMode);
-            }
+        }
+        for (InputElement inputElement : inputElements) {
+            inputElement.update(selected, selectedNodeCollection, selectedInfoTable, animationMode);
         }
         return false;
     }
@@ -246,32 +261,24 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     private Node createNodeAtPosition(int time, float x, float y) {
-        Node node = new Node(
-                new Coordinate(0, 0),
-                new Coordinate(x, y)
-        );
+        Node node = new Node(new InterpolatedCoordinate(new Coordinate(x, y), time));
 
-        HashMap<Integer, Coordinate> hashMap = new HashMap<>();
-        hashMap.put(time, new Coordinate(x, y));
-
-        node.getMovementFrames().add(
-                new GroupedMovement<>(hashMap)
-        );
+        node.getPosition().newSetPoint(time, new Coordinate(x, y));
         return node;
     }
 
-    public ArrayList<Object> select(int x, int y) {
-        ArrayList<Object> output = new ArrayList<>();
-        ArrayList<Object> lowPriority = new ArrayList<>();
+    public ArrayList<InterpolatedObject> select(int x, int y) {
+        ArrayList<InterpolatedObject> output = new ArrayList<>();
+        ArrayList<InterpolatedObject> lowPriority = new ArrayList<>();
         for (Line line : animation.getLines()) {
-            for (Object node : line.getDrawNodes(time)) {
+            for (Node node : line.getDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Line node at " + node.getPosition() + " on line " + line.getId() + " was clicked");
                     selectedNodeCollection = line;
                     output.add(node);
                 }
             }
-            for (Object node : line.getNonDrawNodes(time)) {
+            for (Node node : line.getNonDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Line node at " + node.getPosition() + " on line " + line.getId() + " was clicked");
                     selectedNodeCollection = line;
@@ -281,14 +288,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         for (Area area : animation.getAreas()) {
-            for (Object node : area.getDrawNodes(time)) {
+            for (Node node : area.getDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Area node at " + node.getPosition() + " was clicked");
                     selectedNodeCollection = area;
                     output.add(node);
                 }
             }
-            for (Object node : area.getNonDrawNodes(time)) {
+            for (Node node : area.getNonDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Area node at " + node.getPosition() + " was clicked");
                     selectedNodeCollection = area;
@@ -355,7 +362,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         //Camera
         zoomFactor = 0.75f + camera.zoom * 8;
-        animation.camera().goToTime(time);
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             camera.position.y += 10 / camera.zoom;
         }
@@ -368,6 +374,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             camera.position.x += 10 / camera.zoom;
         }
+        animation.camera().update(time);
         if (!paused) { //don't update camera when paused to allow for movement when paused
             updateCam();
         }
@@ -379,7 +386,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         //Draw background
         game.batcher.begin();
 
-        origin.goToTime(0, camera.zoom, camera.position.x, camera.position.y);
+        origin.update(time, camera);
         game.batcher.draw(fullMap, origin.getScreenPosition().getX(),
                 origin.getScreenPosition().getY(),
                 fullMap.getWidth() * camera.zoom,
@@ -399,27 +406,34 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         //Update the nodes and draw the front lines
         if ((selected != null) && paused) { //automatically updates the selected object to go to the mouse for interactive adding
             if ((touchMode == TouchMode.MOVE)) {
-                selected.holdPositionUntil(time, mouseX, mouseY);
+                selected.getPosition().newSetPoint(time, new Coordinate(mouseX, mouseY));
             }
         }
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        //Update and draw units
+        game.batcher.begin();
+        for (Unit unit : animation.getUnits()) {
+            unit.update(time, camera);
+            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
+        }
+        game.batcher.setColor(1, 1, 1, 1.0f); // Resets to no transparency
+        game.batcher.end();
 
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        // Update all nodes and draw their representations
+        if (animationMode) {shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);}
         for (Line line : animation.getLines()) {
+            for (Node node : line.getNodes()) {
+                node.update(shapeRenderer, time, camera, animationMode);
+            }
             line.update(shapeRenderer, LINES_PER_NODE, time);
         }
-        shapeRenderer.end();
-
-        // Update and draw area polygons
-        colorLayer.begin();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.CLEAR);
-        shapeRenderer.rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        if (animationMode) { shapeRenderer.end(); }
 
         for (Area area : animation.getAreas()) {
             for (Node node : area.getNodes()) {
-                node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+                node.update(shapeRenderer, time, camera, animationMode);
             }
 
             //Since the area function requires lines and not line IDs, all the line IDs are turned into lines using the instance method of animation.getLineByID and then passed into the area.calculatePolygon() function
@@ -434,30 +448,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             area.draw(shapeRenderer);
         }
 
-        shapeRenderer.end();
-        colorLayer.end();
-
-        //Update and draw units
-        game.batcher.begin();
-        for (Unit unit : animation.getUnits()) {
-            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
-        }
-        game.batcher.setColor(1, 1, 1, 1.0f); // Resets to no transparency
-        game.batcher.end();
-
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-
-        //Draw the debug circles
-        if (animationMode) {shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);}
-        for (Line line : animation.getLines()) {
-            for (Node node : line.getNodes()) {
-                node.update(shapeRenderer, time, camera, animationMode);
-            }
-        }
-        if (animationMode) { shapeRenderer.end(); }
-
-
         if (animationMode) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             //Draw area polygon nodes
@@ -470,7 +460,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             //Draw the selected node
             if (selected != null) {
                 shapeRenderer.setColor(Color.ORANGE);
-                shapeRenderer.rect(selected.getScreenPosition().getX() - 6.0f, selected.getScreenPosition().getY() - 6.0f, 12.0f, 12.0f);
+                InterpolatedScreenObject selectedScreenObject = (InterpolatedScreenObject) selected;
+                shapeRenderer.rect(selectedScreenObject.getScreenPosition().getX() - 6.0f, selectedScreenObject.getScreenPosition().getY() - 6.0f, 12.0f, 12.0f);
                 //System.out.println("selected");
             }
             shapeRenderer.end();
@@ -483,7 +474,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             options.append("Touch mode: ").append(touchMode.name()).append("\n");
             options.append("Control pressed: ").append(ctrlPressed).append(" ").append("Shift pressed: ").append(shiftPressed).append("\n");
             for (Action action : actions) {
-                if (action.couldExecute(shiftPressed, ctrlPressed, selected, touchMode)) {
+                if (action.couldExecute(shiftPressed, ctrlPressed, (Object) selected, touchMode)) {
                     for (int key : action.getActionKeys()) {
                         options.append(Input.Keys.toString(key)).append(" ");
                     }
@@ -556,16 +547,18 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public void buildInputs() {
         // Inputs which require selected Object
         inputElements.add(new InputElement.Companion.Builder<>(game.skin, (input) -> {
-            selected.setDeath(input);
+            ObjectWithDeath selectedObjectWithDeath = (ObjectWithDeath) selected;
+            selectedObjectWithDeath.setDeath((Integer) input);
             return null;
         }, () -> {
             if (selected != null) {
-                if (selected.getDeath() != null) {
-                    return String.valueOf(selected.getDeath());
+                ObjectWithDeath selectedObjectWithDeath = (ObjectWithDeath) selected;
+                if (selectedObjectWithDeath.getDeath() != null) {
+                    return String.valueOf(selectedObjectWithDeath.getDeath());
                 }
             }
             return null;
-        }, Integer.class,"Set death").requiredSelectedTypes(Object.class).build());
+        }, Integer.class,"Set death").requiredSelectedTypes(ObjectWithDeath.class).build());
         // Inputs which require selected unit
         inputElements.add(new InputElement.Companion.Builder<>(game.skin, (input) -> {
             if (input != null) {
@@ -685,22 +678,16 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Toggle animation mode", Input.Keys.V).requiresSelected(Requirement.ANY).build());
         // Selection required
         actions.add(Action.createBuilder(() -> {
-            selected.holdPositionUntil(time);
+            if (selected.getClass().isAssignableFrom(InterpolatedObject.class)) {
+                InterpolatedObject selectedInterpolatedObject = (InterpolatedObject) selected;
+                selectedInterpolatedObject.getPosition().holdPositionUntil(time);
+            }
             resetSelected();
             return null;
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
         // Node required
         actions.add(Action.createBuilder(() -> {
-            HashMap<Integer, Coordinate> hashMap = new HashMap<>();
-            hashMap.put(time, new Coordinate(mouseX, mouseY));
-
-            Node node = new Node(
-                    new Coordinate(0, 0),
-                    new Coordinate(mouseX, mouseY)
-            );
-            node.getMovementFrames().add(
-                    new GroupedMovement<>(hashMap)
-            );
+            Node node = new Node(new InterpolatedCoordinate(new Coordinate(mouseX, mouseY), time));
             Area a = new Area(new ArrayList<>(), AreaColor.RED, new ArrayList<>(), new ArrayList<>(), 0.0f);
 
             animation.getAreas().add(a);
@@ -709,32 +696,30 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             selected = node;
             selectedNodeCollection.getNodes().add((Node) selected);
             return null;
-        }, "Create new area", Input.Keys.A).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
+        }, "Create new area", Input.Keys.A).requiresSelected(Requirement.ANY).build());
         // Selection prohibited
         actions.add(Action.createBuilder(() -> {
             time = (time / 200) * 200 + 200;
-            animation.camera().goToTime(time);
+            animation.camera().update(time);
             updateCam();
             return null;
         }, "Step time forward 200", Input.Keys.E).build());
         actions.add(Action.createBuilder(() -> {
             time = (int) Math.ceil(time / 200.0) * 200 - 200;
-            animation.camera().goToTime(time);
+            animation.camera().update(time);
             updateCam();
             return null;
         }, "Step time back 200", Input.Keys.Q).build());
         actions.add(Action.createBuilder(() -> {
             time++;
-            animation.camera().goToTime(time);
+            animation.camera().update(time);
             updateCam();
-            System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
             return null;
         }, "Step time forward 1", Input.Keys.PERIOD).build());
         actions.add(Action.createBuilder(() -> {
             time--;
-            animation.camera().goToTime(time);
+            animation.camera().update(time);
             updateCam();
-            System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
             return null;
         }, "Step time back 1", Input.Keys.COMMA).build());
         actions.add(Action.createBuilder(() -> {
@@ -760,22 +745,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             int finalNum_key = num_key;
             actions.add(Action.createBuilder(() -> {
                         Unit unit = new Unit(
+                                new InterpolatedCoordinate(new Coordinate(mouseX, mouseY), time),
                                 animation.getCountries().get(finalNum_key - 9), //number key enum number to list number
                                 null,
                                 "infantry",
                                 "XX",
-                                new ArrayList<>(),
-                                null,
-                                new Coordinate(0, 0),
-                                new Coordinate(mouseX, mouseY),
-                                0.0f
-                        );
-
-                        HashMap<Integer, Coordinate> hashMap = new HashMap<>();
-                        hashMap.put(time, new Coordinate(mouseX, mouseY));
-
-                        unit.getMovementFrames().add(
-                                new GroupedMovement<>(hashMap)
+                                1.0f,
+                                null
                         );
 
                         System.out.println(unit);
@@ -788,7 +764,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
-            animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
+            animation.camera().getPosition().newSetPoint(time, new Coordinate(camera.position.x, camera.position.y));
+            animation.camera().getZoom().newSetPoint(time, camera.zoom);
+            System.out.println(animation.camera().getPosition().getX().getSetPoints());
+            System.out.println(animation.camera().getPosition().getY().getSetPoints());
+            System.out.println(animation.camera().getZoom().getSetPoints());
             return null;
         }, "Set camera set point", Input.Keys.C).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
@@ -798,8 +778,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Save project", Input.Keys.S).requiresControl(true).build());
         //Key presses which require control pressed and selected Object
         actions.add(Action.createBuilder(() -> {
-            selected.setDeath(time);
-            System.out.println("Death of " + selected + " set to " + selected.getDeath());
+            ObjectWithDeath selectedObjectWithDeath = (ObjectWithDeath) selected;
+            selectedObjectWithDeath.setDeath(time);
+            System.out.println("Death of " + selected + " set to " + selectedObjectWithDeath.getDeath());
             resetSelected();
             return null;
         }, "Set death of an object", Input.Keys.D).requiresControl(true).requiresSelected(Requirement.REQUIRES).build());
@@ -810,14 +791,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Deselect Object", Input.Keys.D).description("Deselects object").requiresSelected(Requirement.REQUIRES).build());
         actions.add(Action.createBuilder(() -> {
-            animation.deleteObject(selected);
+            animation.deleteObject((Object) selected);
             System.out.println("Deleted object");
             resetSelected();
             return null;
         }, "Delete selected unit", Input.Keys.FORWARD_DEL).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Unit.class).build());
         actions.add(Action.createBuilder(() -> {
             int selectedIndex = selectedNodeCollection.getNodes().indexOf((Node) selected);
-            animation.deleteObject(selected);
+            animation.deleteObject((Object) selected);
             if (selectedIndex > 0) {
                 selected = selectedNodeCollection.getNodes().get(selectedIndex - 1);
             } else {
@@ -827,9 +808,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Delete selected node and select next node", Input.Keys.FORWARD_DEL).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
         actions.add(Action.createBuilder(() -> {
-            if (selected.removeFrame(time)) {
+            if (selected.getPosition().removeFrame(time)) {
                 System.out.println("Deleted last frame");
-                System.out.println("New movements: " + selected.getMovementFrames());
+                System.out.println("New movements: " + selected.getPosition().getX().getSetPoints() + selected.getPosition().getY().getSetPoints());
             } else {
                 System.out.println("Cannot delete last frame on object with less than 2 frames");
             }
