@@ -306,6 +306,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         output.addAll(lowPriority);
+
+        if (!output.isEmpty()) {
+            System.out.println(output.get(0));
+        }
+
         return output;
     }
 
@@ -424,18 +429,20 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             area.calculatePolygon(convertedLineIDs, time);
             area.draw(shapeRenderer);
         }
-
         shapeRenderer.end();
         colorLayer.end();
 
         //Update and draw units
         game.batcher.begin();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (Unit unit : animation.getUnits()) {
             unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
+            unit.draw(shapeRenderer, game.batcher, zoomFactor, game.bitmapFont, animationMode);
         }
+        shapeRenderer.end();
         game.batcher.setColor(1, 1, 1, 1.0f); // Resets to no transparency
         game.batcher.end();
+
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -443,7 +450,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (animationMode) {shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);}
         for (Line line : animation.getLines()) {
             for (Node node : line.getNodes()) {
-                node.update(shapeRenderer, time, camera, animationMode);
+                node.update(shapeRenderer, time, camera, animationMode, zoomFactor);
             }
         }
         if (animationMode) { shapeRenderer.end(); }
@@ -460,9 +467,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             //Draw the selected object
             if (selected != null) {
-                shapeRenderer.setColor(Color.ORANGE);
-                shapeRenderer.rect(selected.getScreenPosition().getX() - 6.0f, selected.getScreenPosition().getY() - 6.0f, 12.0f, 12.0f);
-                //System.out.println("selected");
+                selected.drawAsSelected(shapeRenderer, zoomFactor, animationMode, camera.zoom, camera.position.x, camera.position.y);
             }
             shapeRenderer.end();
             //Draw the UI
@@ -804,7 +809,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 System.out.println("           xs: " + selected.getXPosition().getSetPoints().values());
                 System.out.println("           ys: " + selected.getYPosition().getSetPoints().values());
             } else {
-                System.out.println("Cannot delete last frame on object with less than 2 frames");
+                System.out.println("Cannot delete frame on object with less than 2 frames");
             }
             resetSelected();
             touchMode = TouchMode.DEFAULT;

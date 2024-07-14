@@ -32,12 +32,15 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 3469.186,
+        "y": -759.9153
+      }
     },
     {
       "position": {
-        "x": 6090.5254,
-        "y": 2778.4226
+        "x": 6323.768,
+        "y": 2862.1643
       },
       "initTime": 0,
       "image": "assets/flags/bgflag.png",
@@ -60,7 +63,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 820.63965,
+        "y": 460.2964
+      }
     },
     {
       "position": {
@@ -86,7 +92,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 2542.811,
+        "y": 1913.6431
+      }
     },
     {
       "position": {
@@ -112,7 +121,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 2251.2534,
+        "y": 1804.7104
+      }
     },
     {
       "position": {
@@ -138,7 +150,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 2459.5093,
+        "y": 1708.5928
+      }
     },
     {
       "position": {
@@ -164,7 +179,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 708.83154,
+        "y": 770.20776
+      }
     },
     {
       "position": {
@@ -190,7 +208,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -1089.8369,
+        "y": 1822.6797
+      }
     },
     {
       "position": {
@@ -216,7 +237,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -2055.4248,
+        "y": 2699.103
+      }
     },
     {
       "position": {
@@ -242,7 +266,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 306.15332,
+        "y": -1118.3203
+      }
     },
     {
       "position": {
@@ -268,7 +295,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 786.81494,
+        "y": -907.58716
+      }
     },
     {
       "position": {
@@ -294,7 +324,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -3810.3633,
+        "y": 3747.7397
+      }
     },
     {
       "position": {
@@ -320,7 +353,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -3682.5571,
+        "y": 3336.976
+      }
     },
     {
       "position": {
@@ -346,7 +382,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -1108.7261,
+        "y": 3370.896
+      }
     },
     {
       "position": {
@@ -372,7 +411,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -4112.2783,
+        "y": 4265.986
+      }
     },
     {
       "position": {
@@ -398,7 +440,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -4640.711,
+        "y": 4313.4443
+      }
     },
     {
       "position": {
@@ -424,7 +469,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -5563.484,
+        "y": 499.135
+      }
     },
     {
       "position": {
@@ -450,7 +498,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -2393.2852,
+        "y": 196.61816
+      }
     },
     {
       "position": {
@@ -476,7 +527,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -2705.2915,
+        "y": -1971.6451
+      }
     },
     {
       "position": {
@@ -502,7 +556,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -1015.14453,
+        "y": -1637.3531
+      }
     },
     {
       "position": {
@@ -528,7 +585,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 199.979,
+        "y": 1121.3645
+      }
     },
     {
       "position": {
@@ -554,7 +614,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -452.4497,
+        "y": 1204.093
+      }
     },
     {
       "position": {
@@ -580,7 +643,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -1876.2241,
+        "y": 633.5149
+      }
     },
     {
       "position": {
@@ -606,7 +672,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -716.2461,
+        "y": 2606.415
+      }
     },
     {
       "position": {
@@ -632,7 +701,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -4223.526,
+        "y": -2191.826
+      }
     },
     {
       "position": {
@@ -658,7 +730,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": -4626.089,
+        "y": -929.5586
+      }
     },
     {
       "position": {
@@ -684,7 +759,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 3371.8696,
+        "y": -519.1854
+      }
     },
     {
       "position": {
@@ -710,7 +788,10 @@
       "height": 97.58289,
       "death": null,
       "alpha": 1.0,
-      "screenPosition": null
+      "screenPosition": {
+        "x": 3140.3286,
+        "y": 3172.998
+      }
     },
     {
       "position": {
@@ -735,8 +816,11 @@
       "width": 48.791447,
       "height": 48.791447,
       "death": null,
-      "alpha": 0.0,
-      "screenPosition": null
+      "alpha": 1.0,
+      "screenPosition": {
+        "x": 1145.4077,
+        "y": 294.43628
+      }
     },
     {
       "position": {
@@ -761,8 +845,11 @@
       "width": 73.18717,
       "height": 73.18717,
       "death": 1300,
-      "alpha": 14.0,
-      "screenPosition": null
+      "alpha": 1.0,
+      "screenPosition": {
+        "x": 1084.2354,
+        "y": 280.83374
+      }
     }
   ],
   "camera": {
@@ -772,9 +859,21 @@
     },
     "zoom": 1.1260362,
     "initTime": 0,
-    "xPosition": null,
-    "yPosition": null,
-    "zoomInterpolator": null
+    "xPosition": {
+      "setPoints": {
+        "0.0": 6447.52978515625
+      }
+    },
+    "yPosition": {
+      "setPoints": {
+        "0.0": 2932.94677734375
+      }
+    },
+    "zoomInterpolator": {
+      "setPoints": {
+        "0.0": 1.1260361671447754
+      }
+    }
   },
   "lines": [
     {
@@ -5878,7 +5977,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1777.294,
             "y": 1657.7571
@@ -5886,8 +5985,8 @@
         },
         {
           "position": {
-            "x": 7161.117,
-            "y": 3889.3394
+            "x": 7449.062,
+            "y": 4020.3745
           },
           "initTime": 0,
           "color": {
@@ -5911,8 +6010,8 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1763.5249,
-            "y": 1616.9324
+            "x": 2087.7612,
+            "y": 1764.4829
           }
         },
         {
@@ -5938,7 +6037,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1741.376,
             "y": 1581.1335
@@ -5946,8 +6045,8 @@
         },
         {
           "position": {
-            "x": 7130.1143,
-            "y": 3833.3345
+            "x": 7468.109,
+            "y": 3993.6333
           },
           "initTime": 0,
           "color": {
@@ -5971,8 +6070,8 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1728.6147,
-            "y": 1553.8689
+            "x": 2109.2085,
+            "y": 1734.3716
           }
         },
         {
@@ -5998,7 +6097,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1712.6426,
             "y": 1528.4543
@@ -6006,8 +6105,8 @@
         },
         {
           "position": {
-            "x": 7099.112,
-            "y": 3778.3296
+            "x": 7492.2866,
+            "y": 3957.734
           },
           "initTime": 0,
           "color": {
@@ -6031,8 +6130,8 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1693.7046,
-            "y": 1491.9314
+            "x": 2136.434,
+            "y": 1693.947
           }
         },
         {
@@ -6058,7 +6157,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1674.3301,
             "y": 1454.2253
@@ -6087,7 +6186,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1674.3301,
             "y": 1454.2253
@@ -6116,7 +6215,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1674.3301,
             "y": 1454.2253
@@ -6124,8 +6223,8 @@
         },
         {
           "position": {
-            "x": 7074.1094,
-            "y": 3717.3245
+            "x": 7497.781,
+            "y": 3918.1724
           },
           "initTime": 0,
           "color": {
@@ -6149,8 +6248,8 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1665.5513,
-            "y": 1423.2375
+            "x": 2142.6206,
+            "y": 1649.3997
           }
         },
         {
@@ -6176,7 +6275,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1636.0186,
             "y": 1372.8127
@@ -6205,7 +6304,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1636.0186,
             "y": 1372.8127
@@ -6234,7 +6333,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1636.0186,
             "y": 1372.8127
@@ -6263,7 +6362,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1636.0186,
             "y": 1372.8127
@@ -6292,7 +6391,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1636.0186,
             "y": 1372.8127
@@ -6321,7 +6420,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1636.0186,
             "y": 1372.8127
@@ -6329,8 +6428,8 @@
         },
         {
           "position": {
-            "x": 7040.1064,
-            "y": 3649.3184
+            "x": 7488.2563,
+            "y": 3865.7886
           },
           "initTime": 0,
           "color": {
@@ -6354,8 +6453,8 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1627.2627,
-            "y": 1346.6604
+            "x": 2131.896,
+            "y": 1590.4133
           }
         },
         {
@@ -6381,7 +6480,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6410,7 +6509,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6439,7 +6538,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6468,7 +6567,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6497,7 +6596,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6526,7 +6625,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6555,7 +6654,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1613.2886,
             "y": 1318.238
@@ -6584,7 +6683,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 954.0,
             "y": 718.0
@@ -6613,7 +6712,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 954.0,
             "y": 718.0
@@ -6642,7 +6741,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 954.0,
             "y": 718.0
@@ -6671,7 +6770,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 954.0,
             "y": 718.0
@@ -6700,7 +6799,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 945.48975,
             "y": 698.4155
@@ -6729,7 +6828,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 839.0,
             "y": 728.0
@@ -6758,7 +6857,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 839.0,
             "y": 728.0
@@ -6787,7 +6886,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 907.16455,
             "y": 708.41675
@@ -6816,7 +6915,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 877.46826,
             "y": 707.6853
@@ -6845,7 +6944,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 872.7422,
             "y": 692.1111
@@ -6874,7 +6973,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 918.14795,
             "y": 672.9949
@@ -6903,7 +7002,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 909.0,
             "y": 632.99976
@@ -6932,7 +7031,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 925.0,
             "y": 544.00024
@@ -6961,7 +7060,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 943.6304,
             "y": 513.97656
@@ -6990,7 +7089,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 918.03125,
             "y": 500.0537
@@ -7019,7 +7118,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 900.82324,
             "y": 492.8838
@@ -7048,7 +7147,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 900.3452,
             "y": 480.4558
@@ -7077,7 +7176,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 911.33887,
             "y": 473.76367
@@ -7106,7 +7205,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 932.8491,
             "y": 481.41162
@@ -7135,7 +7234,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 971.0,
             "y": 495.0
@@ -7164,7 +7263,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 916.0,
             "y": 423.0
@@ -7193,7 +7292,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 969.0,
             "y": 411.0
@@ -7222,7 +7321,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1660.9814,
             "y": 1288.8884
@@ -7251,7 +7350,7 @@
             }
           },
           "death": 1400,
-          "alpha": 15.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1027.2124,
             "y": 388.07886
@@ -7280,7 +7379,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1035.7446,
             "y": 366.49683
@@ -7309,7 +7408,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1076.3989,
             "y": 349.93433
@@ -7338,7 +7437,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1051.606,
             "y": 320.78125
@@ -7367,7 +7466,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1047.2397,
             "y": 264.02686
@@ -7396,7 +7495,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1042.874,
             "y": 234.33984
@@ -7425,7 +7524,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1087.4048,
             "y": 222.98877
@@ -7454,7 +7553,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1121.4575,
             "y": 222.11572
@@ -7483,7 +7582,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1157.2563,
             "y": 276.25098
@@ -7512,7 +7611,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1150.2715,
             "y": 315.54272
@@ -7541,7 +7640,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1062.3452,
             "y": 387.0747
@@ -7570,7 +7669,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1055.0879,
             "y": 419.73022
@@ -7599,7 +7698,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1660.9814,
             "y": 1288.8884
@@ -7628,7 +7727,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1660.9814,
             "y": 1288.8884
@@ -7657,7 +7756,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1660.9814,
             "y": 1288.8884
@@ -7686,7 +7785,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1660.9814,
             "y": 1288.8884
@@ -7694,8 +7793,8 @@
         },
         {
           "position": {
-            "x": 7138.115,
-            "y": 3610.315
+            "x": 7450.1597,
+            "y": 3832.0864
           },
           "initTime": 0,
           "color": {
@@ -7719,8 +7818,8 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1737.624,
-            "y": 1302.741
+            "x": 2088.9976,
+            "y": 1552.4636
           }
         },
         {
@@ -7746,7 +7845,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1771.043,
             "y": 1312.7351
@@ -7775,7 +7874,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1771.043,
             "y": 1312.7351
@@ -7804,7 +7903,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1771.043,
             "y": 1312.7351
@@ -7833,7 +7932,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1771.043,
             "y": 1312.7351
@@ -7862,7 +7961,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1771.043,
             "y": 1312.7351
@@ -7891,7 +7990,7 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1771.043,
             "y": 1312.7351
@@ -7899,8 +7998,8 @@
         },
         {
           "position": {
-            "x": 7240.124,
-            "y": 3681.3213
+            "x": 7455.655,
+            "y": 3814.5034
           },
           "initTime": 0,
           "color": {
@@ -7924,14 +8023,14 @@
           "death": null,
           "alpha": 1.0,
           "screenPosition": {
-            "x": 1852.4897,
-            "y": 1382.6965
+            "x": 2095.185,
+            "y": 1532.6648
           }
         },
         {
           "position": {
-            "x": 7294.129,
-            "y": 3722.3247
+            "x": 7249.2456,
+            "y": 3697.384
           },
           "initTime": 0,
           "color": {
@@ -7953,16 +8052,16 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
-            "x": 1913.3013,
-            "y": 1428.8679
+            "x": 1862.7607,
+            "y": 1400.7839
           }
         },
         {
           "position": {
-            "x": 7357.1343,
-            "y": 3733.3257
+            "x": 7249.2456,
+            "y": 3697.384
           },
           "initTime": 0,
           "color": {
@@ -7984,10 +8083,10 @@
             }
           },
           "death": null,
-          "alpha": 0.0,
+          "alpha": 1.0,
           "screenPosition": {
-            "x": 1984.2476,
-            "y": 1441.2556
+            "x": 1862.7607,
+            "y": 1400.7839
           }
         },
         {
@@ -13806,7 +13905,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -13835,7 +13934,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -13864,7 +13963,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -13893,7 +13992,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -13922,7 +14021,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -13951,7 +14050,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -13980,7 +14079,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -14009,7 +14108,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -14038,7 +14137,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -14067,7 +14166,7 @@
             }
           },
           "death": 1250,
-          "alpha": 13.5,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1102.0625,
             "y": 279.4436
@@ -14104,7 +14203,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14133,7 +14232,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14162,7 +14261,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14191,7 +14290,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14220,7 +14319,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14249,7 +14348,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14278,7 +14377,7 @@
             }
           },
           "death": 1000,
-          "alpha": 11.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 1034.8218,
             "y": 378.21045
@@ -14315,7 +14414,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14344,7 +14443,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14373,7 +14472,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14402,7 +14501,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14431,7 +14530,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14460,7 +14559,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14489,7 +14588,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14518,7 +14617,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14547,7 +14646,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14576,7 +14675,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 938.58545,
             "y": 499.23462
@@ -14613,7 +14712,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14642,7 +14741,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14671,7 +14770,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14700,7 +14799,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14729,7 +14828,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14758,7 +14857,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14787,7 +14886,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205
@@ -14816,7 +14915,7 @@
             }
           },
           "death": 800,
-          "alpha": 9.0,
+          "alpha": 1.0,
           "screenPosition": {
             "x": 921.0884,
             "y": 695.35205

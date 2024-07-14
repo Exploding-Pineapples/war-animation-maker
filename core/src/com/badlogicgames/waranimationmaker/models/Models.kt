@@ -56,7 +56,6 @@ class InterpolatedFloat(initValue: Float, initTime: Int) {
             setPoints.remove(time.toDouble())
             updateInterpolator()
         } else {
-            println("Cannot delete frame from object with less than 1 keyframe")
             return false
         }
 
@@ -213,9 +212,13 @@ interface ObjectWithScreenPosition {
     var screenPosition: Coordinate
 }
 
+fun projectToScreen(position: Coordinate, zoom: Float, cx: Float, cy: Float): Coordinate {
+    return Coordinate(position.x * zoom - cx * (zoom - 1) + (DISPLAY_WIDTH / 2 - cx), position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy))
+}
+
 abstract class ScreenObject : Object {
     var death: Int? = null
-    var alpha: Float = 1.0f
+    var alpha: Float = 1f
     var screenPosition: Coordinate = Coordinate(0f, 0f)
 
     fun clicked(x: Float, y: Float): Boolean
@@ -226,8 +229,14 @@ abstract class ScreenObject : Object {
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
+        alpha = (1f - (xPosition.setPoints.keys.first() - time) / 100).coerceIn(0.0, 1.0).toFloat()
+        if (death != null) {
+            if (time > death!! - 100) {
+                alpha = ((death!! - time) / 100f).coerceIn(0f, 1f)
+            }
+        }
 
-        return true
+        return shouldDraw(time)
     }
 
     fun updateScreenPosition(zoom: Float, cx: Float, cy: Float) {
@@ -239,16 +248,36 @@ abstract class ScreenObject : Object {
         screenPosition.y = position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy)
     }
 
+    fun drawAsSelected(shapeRenderer: ShapeRenderer, zoomFactor: Float, animationMode: Boolean, currentZoom: Float, currentCX: Float, currentCY: Float) { // Draw only if selected
+        if (animationMode) {
+            shapeRenderer.color = Color.ORANGE
+            shapeRenderer.rect(screenPosition.x - 6.0f, screenPosition.y - 6.0f, 2f * zoomFactor, 2f * zoomFactor) // Draws an orange square to symbolize being selected
+            shapeRenderer.color = Color.SKY
+            for (time in xPosition.setPoints.keys.first().toInt()..xPosition.setPoints.keys.last().toInt()) { // Draws entire path of the object over time
+                val position = projectToScreen(Coordinate(xPosition.interpolator.interpolateAt(time.toDouble()).toFloat(), yPosition.interpolator.interpolateAt(time.toDouble()).toFloat()), currentZoom, currentCX, currentCY)
+                shapeRenderer.circle(position.x, position.y, 0.4f * zoomFactor)
+            }
+        }
+    }
+
     override fun shouldDraw(time: Int): Boolean {
         if (time < xPosition.setPoints.keys.first()) {
             return false
         }
         if (death != null) {
-            if (time > death!! - 100) { //TODO Make it so that the number subtracted matches how long the death fade out is
+            if (time > death!! + 100) { //TODO Make it so that the number subtracted matches how long the death fade out is
                 return false
             }
         }
         return true
+    }
+
+    override fun toString(): String {
+        val output = StringBuilder()
+        output.append("Movements: " + xPosition.setPoints.keys + "\n")
+        output.append("       xs: " + xPosition.setPoints.values + "\n")
+        output.append("       ys: " + yPosition.setPoints.values + "\n")
+        return output.toString()
     }
 }
 
@@ -285,8 +314,8 @@ data class Unit(
         return texture!!
     }
 
-    fun draw(batcher: SpriteBatch, sizefactor: Float, font: BitmapFont) {
-        //draw only for the correct country
+    fun draw(shapeRenderer: ShapeRenderer, batcher: SpriteBatch, sizefactor: Float, font: BitmapFont, animationMode: Boolean) {
+        // Draw only for the correct country
         var sizePresetFactor = 1.0f
         if (size in sizePresets) {
             sizePresetFactor = sizePresets[size]!!
@@ -314,7 +343,7 @@ data class Unit(
 data class Node(
     override var position: Coordinate,
     override val initTime: Int,
-) : Object, ScreenObject() {
+) : ScreenObject(), Object  {
     var color: Color = Color.GREEN
     override var xPosition = InterpolatedFloat(position.x, initTime)
     override var yPosition = InterpolatedFloat(position.y, initTime)
@@ -323,7 +352,7 @@ data class Node(
         screenPosition = Coordinate(0f, 0f)
     }
 
-    fun update(shapeRenderer: ShapeRenderer, time: Int, camera: OrthographicCamera, animationMode: Boolean) { // Goes to time, and if animation mode is active, draws colored circle
+    fun update(shapeRenderer: ShapeRenderer, time: Int, camera: OrthographicCamera, animationMode: Boolean, sizefactor: Float) { // Goes to time, and if animation mode is active, draws colored circle
         color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
             Color.GREEN
         } else {
@@ -348,14 +377,8 @@ interface NodeCollection {
     fun getDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
         for (node in nodes) {
-            if (time >= node.xPosition.setPoints.keys.first()) {
-                if (node.death != null) {
-                    if (time <= node.death!!) {
-                        out.add(node)
-                    }
-                } else {
-                    out.add(node)
-                }
+            if (node.shouldDraw(time)) {
+                out.add(node)
             }
         }
         return out
@@ -364,14 +387,8 @@ interface NodeCollection {
     fun getNonDrawNodes(time: Int): List<Node> {
         val out = mutableListOf<Node>()
         for (node in nodes) {
-            if (time <= node.xPosition.setPoints.keys.first()) {
+            if (!node.shouldDraw(time)) {
                 out.add(node)
-            } else {
-                if (node.death != null) {
-                    if (time >= node.death!!) {
-                        out.add(node)
-                    }
-                }
             }
         }
         return out
