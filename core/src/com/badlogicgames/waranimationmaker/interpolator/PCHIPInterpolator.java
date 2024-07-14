@@ -22,6 +22,11 @@ public class PCHIPInterpolator {
         // Function to compute the PCHIP slopes
         private static double[] computeSlopes(double[] x, double[] y) {
             int n = x.length;
+
+            if (n < 2) {
+                return new double[]{};
+            }
+
             double[] h = new double[n - 1];
             double[] delta = new double[n - 1];
             double[] slopes = new double[n];
@@ -59,6 +64,17 @@ public class PCHIPInterpolator {
         public double interpolateAt(double xi) {
             int n = x.length;
 
+            if (n < 2) {
+                return y[0];
+            }
+
+            if (xi < x[0]) {
+                return y[0];
+            }
+            if (xi > x[n - 1]) {
+                return y[n - 1];
+            }
+
             // Find the interval [x_k, x_{k+1}] where xi lies
             int k = Arrays.binarySearch(x, xi);
             if (k < 0) {
@@ -80,18 +96,5 @@ public class PCHIPInterpolator {
             // Interpolated value
             return h00 * y[k] + h10 * h * slopes[k] + h01 * y[k + 1] + h11 * h * slopes[k + 1];
         }
-    }
-
-    public static void main(String[] args) {
-        double[] x = {0, 1, 2, 3, 4};
-        double[] y = {0, 1, 0, 1, 0};
-
-        Interpolator interpolator = new Interpolator(x, y);
-        DoubleUnaryOperator interpolationFunction = interpolator.interpolate();
-
-        double xi = 2.5;
-        double yi = interpolationFunction.applyAsDouble(xi);
-
-        System.out.println("Interpolated value at x = " + xi + " is y = " + yi);
     }
 }

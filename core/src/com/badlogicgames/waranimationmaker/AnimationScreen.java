@@ -37,7 +37,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Animation animation; // Contains all information about animation loaded from file
     Integer time;
 
-    Object selected;
+    ScreenObject selected;
     NodeCollection selectedNodeCollection; // if a Node is selected, this will be the Area or Line that the Node is on
 
     boolean shiftPressed;
@@ -150,7 +150,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (paused) {
             if (touchMode == TouchMode.DEFAULT) { // Default behavior: select an object to show info about it
-                ArrayList<Object> selectedThings = select(x, y);
+                ArrayList<ScreenObject> selectedThings = select(x, y);
                 if (selectedThings.isEmpty()) {
                     resetSelected();
                 } else {
@@ -159,7 +159,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
                 if (selected != null) {
-                    selected.holdPositionUntil(time, mouseX, mouseY);
+                    selected.newSetPoint(time, mouseX, mouseY);
                     if (selected.getClass() == Node.class) {
                         Object newSelection = null;
                         for (Object selection : select(x, y)) {
@@ -169,7 +169,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         }
                         if (newSelection != null) {
                             if (newSelection.getClass() == Node.class) { //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
-                                selected.holdPositionUntil(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
+                                selected.newSetPoint(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
                                 resetSelected();
                                 return true;
                             }
@@ -179,7 +179,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     return true;
                 }
 
-                ArrayList<Object> selectedThings = select(x, y);
+                ArrayList<ScreenObject> selectedThings = select(x, y);
                 if (selectedThings.isEmpty()) {
                     resetSelected();
                 } else {
@@ -190,7 +190,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 if ((selected != null) && (selected.getClass() == Node.class)) {
                     int addAtIndex = selectedNodeCollection.getNodes().indexOf((Node) selected) + 1;
                     Node node;
-                    ArrayList<Object> newSelections = select(x, y);
+                    ArrayList<ScreenObject> newSelections = select(x, y);
                     if (!newSelections.isEmpty()) {
                         Object newSelection = newSelections.get(0);
                         if (((newSelection != null) && (newSelection.getClass() == Node.class)) && (selectedNodeCollection.getNodes().contains(newSelection))) { // If the user clicks on another node on the same line, merge the nodes
@@ -221,7 +221,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 System.out.println("Checking for clicked line");
                 if (selected != null) {
                     for (Line line : animation.getLines()) {
-                        for (Object node : line.getNodes()) {
+                        for (Node node : line.getNodes()) {
                             if (node.clicked(x, y)) {
                                 Area selectedArea = (Area) selectedNodeCollection;
                                 selectedArea.getLineIDs().add(new Pair<>(line.getId(), selectedArea.getNodes().indexOf((Node) selected)));
@@ -246,32 +246,23 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     private Node createNodeAtPosition(int time, float x, float y) {
-        Node node = new Node(
-                new Coordinate(0, 0),
-                new Coordinate(x, y)
-        );
+        Node node = new Node(new Coordinate(x, y), time);
 
-        HashMap<Integer, Coordinate> hashMap = new HashMap<>();
-        hashMap.put(time, new Coordinate(x, y));
-
-        node.getMovementFrames().add(
-                new GroupedMovement<>(hashMap)
-        );
         return node;
     }
 
-    public ArrayList<Object> select(int x, int y) {
-        ArrayList<Object> output = new ArrayList<>();
-        ArrayList<Object> lowPriority = new ArrayList<>();
+    public ArrayList<ScreenObject> select(int x, int y) {
+        ArrayList<ScreenObject> output = new ArrayList<>();
+        ArrayList<ScreenObject> lowPriority = new ArrayList<>();
         for (Line line : animation.getLines()) {
-            for (Object node : line.getDrawNodes(time)) {
+            for (Node node : line.getDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Line node at " + node.getPosition() + " on line " + line.getId() + " was clicked");
                     selectedNodeCollection = line;
                     output.add(node);
                 }
             }
-            for (Object node : line.getNonDrawNodes(time)) {
+            for (Node node : line.getNonDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Line node at " + node.getPosition() + " on line " + line.getId() + " was clicked");
                     selectedNodeCollection = line;
@@ -281,14 +272,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         for (Area area : animation.getAreas()) {
-            for (Object node : area.getDrawNodes(time)) {
+            for (Node node : area.getDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Area node at " + node.getPosition() + " was clicked");
                     selectedNodeCollection = area;
                     output.add(node);
                 }
             }
-            for (Object node : area.getNonDrawNodes(time)) {
+            for (Node node : area.getNonDrawNodes(time)) {
                 if (node.clicked(x, y)) {
                     System.out.println("Area node at " + node.getPosition() + " was clicked");
                     selectedNodeCollection = area;
@@ -399,7 +390,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         //Update the nodes and draw the front lines
         if ((selected != null) && paused) { //automatically updates the selected object to go to the mouse for interactive adding
             if ((touchMode == TouchMode.MOVE)) {
-                selected.holdPositionUntil(time, mouseX, mouseY);
+                selected.newSetPoint(time, mouseX, mouseY);
             }
         }
 
@@ -467,7 +458,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     shapeRenderer.circle(node.getScreenPosition().getX(), node.getScreenPosition().getY(), 7);
                 }
             }
-            //Draw the selected node
+            //Draw the selected object
             if (selected != null) {
                 shapeRenderer.setColor(Color.ORANGE);
                 shapeRenderer.rect(selected.getScreenPosition().getX() - 6.0f, selected.getScreenPosition().getY() - 6.0f, 12.0f, 12.0f);
@@ -691,15 +682,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
         // Node required
         actions.add(Action.createBuilder(() -> {
-            HashMap<Integer, Coordinate> hashMap = new HashMap<>();
-            hashMap.put(time, new Coordinate(mouseX, mouseY));
-
             Node node = new Node(
-                    new Coordinate(0, 0),
-                    new Coordinate(mouseX, mouseY)
-            );
-            node.getMovementFrames().add(
-                    new GroupedMovement<>(hashMap)
+                    new Coordinate(mouseX, mouseY), time
             );
             Area a = new Area(new ArrayList<>(), AreaColor.RED, new ArrayList<>(), new ArrayList<>(), 0.0f);
 
@@ -760,22 +744,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             int finalNum_key = num_key;
             actions.add(Action.createBuilder(() -> {
                         Unit unit = new Unit(
-                                animation.getCountries().get(finalNum_key - 9), //number key enum number to list number
-                                null,
-                                "infantry",
-                                "XX",
-                                new ArrayList<>(),
-                                null,
-                                new Coordinate(0, 0),
                                 new Coordinate(mouseX, mouseY),
-                                0.0f
-                        );
-
-                        HashMap<Integer, Coordinate> hashMap = new HashMap<>();
-                        hashMap.put(time, new Coordinate(mouseX, mouseY));
-
-                        unit.getMovementFrames().add(
-                                new GroupedMovement<>(hashMap)
+                                time,
+                                animation.getCountries().get(finalNum_key - 9) //number key enum number to list number
                         );
 
                         System.out.println(unit);
@@ -829,7 +800,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         actions.add(Action.createBuilder(() -> {
             if (selected.removeFrame(time)) {
                 System.out.println("Deleted last frame");
-                System.out.println("New movements: " + selected.getMovementFrames());
+                System.out.println("New movements: " + selected.getXPosition().getSetPoints().keySet());
+                System.out.println("           xs: " + selected.getXPosition().getSetPoints().values());
+                System.out.println("           ys: " + selected.getYPosition().getSetPoints().values());
             } else {
                 System.out.println("Cannot delete last frame on object with less than 2 frames");
             }
