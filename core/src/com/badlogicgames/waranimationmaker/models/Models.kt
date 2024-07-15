@@ -53,13 +53,15 @@ class InterpolatedFloat(initValue: Float, initTime: Int) {
 
     fun removeFrame(time: Int): Boolean {
         if (setPoints.size > 1) {
-            setPoints.remove(time.toDouble())
-            updateInterpolator()
+            if (setPoints.remove(time.toDouble()) != null) { // Remove was successful or not
+                updateInterpolator()
+                return true
+            } else {
+                return false
+            }
         } else {
             return false
         }
-
-        return true
     }
 
     fun newSetPoint(time: Int, value: Float) {
@@ -131,13 +133,17 @@ data class Coordinate(
 
 interface Object {
     var position: Coordinate
-    var xPosition: InterpolatedFloat
-    var yPosition: InterpolatedFloat
+    var xInterpolator: InterpolatedFloat
+    var yInterpolator: InterpolatedFloat
     val initTime: Int
 
     fun goToTime(time: Int): Boolean { // Can only be called after at least one key frame has been added
-        position.x = xPosition.update(time)
-        position.y = yPosition.update(time)
+        if (xInterpolator == null) {
+            xInterpolator = InterpolatedFloat(position.x, initTime)
+            yInterpolator = InterpolatedFloat(position.y, initTime)
+        }
+        position.x = xInterpolator.update(time)
+        position.y = yInterpolator.update(time)
 
         return shouldDraw(time)
     }
@@ -147,13 +153,12 @@ interface Object {
     }
 
     fun removeFrame(time: Int): Boolean {
-        return xPosition.removeFrame(time) && yPosition.removeFrame(time)
-
+        return xInterpolator.removeFrame(time) && yInterpolator.removeFrame(time) // Both should be paired
     }
 
     fun newSetPoint(time: Int, x: Float, y: Float) {
-        xPosition.newSetPoint(time, x)
-        yPosition.newSetPoint(time, y)
+        xInterpolator.newSetPoint(time, x)
+        yInterpolator.newSetPoint(time, y)
     }
 
     // When you add a time coordinate pair to an object which hasn't had a defined movement for a long time, it will interpolate a motion the whole way, which can be undesirable
@@ -161,51 +166,49 @@ interface Object {
     // But you only want it to move starting from time 600
     // The below function is used hold the object at the last position until the desired time
     fun holdPositionUntil(time: Int) {  // Create a new movement that keeps the object at its last defined position until the current time
-        xPosition.holdValueUntil(time)
-        yPosition.holdValueUntil(time)
+        xInterpolator.holdValueUntil(time)
+        yInterpolator.holdValueUntil(time)
     }
 }
 
-interface ObjectWithZoom : Object {
+interface ObjectWithZoom {
     var zoom: Float //zoom for camera only
     var zoomInterpolator: InterpolatedFloat
-
-    override fun goToTime(time: Int): Boolean { //can only be called after at least one key frame has been added
-        if (xPosition == null) {
-            xPosition = InterpolatedFloat(position.x, initTime)
-            yPosition = InterpolatedFloat(position.y, initTime)
-            zoomInterpolator = InterpolatedFloat(zoom, initTime)
-        }
-        super.goToTime(time)
-        zoom = zoomInterpolator.update(time)
-        return true
-    }
-
-    // When you add a time coordinate pair to an object which hasn't had a defined movement for a long time, it will interpolate a motion the whole way, which can be undesirable
-    // Ex. last defined position was at time 0, you want it to move to another position at 800
-    // But you only want it to move starting from time 600
-    // The below function is used hold the object at the last position until the desired time
-    override fun holdPositionUntil(time: Int) {  // Create a new movement that keeps the object at its last defined position until the current time
-        xPosition.holdValueUntil(time)
-        yPosition.holdValueUntil(time)
-        zoomInterpolator.holdValueUntil(time)
-    }
-
-    fun newSetPoint(time: Int, x: Float, y: Float, zoom: Float) {
-        xPosition.newSetPoint(time, x)
-        yPosition.newSetPoint(time, y)
-        zoomInterpolator.newSetPoint(time, zoom)
-    }
 }
 
 data class Camera(
     override var position: Coordinate = Coordinate(x = 960.0f, y = 540.0f),
     override var zoom: Float = 1.0f,
     override val initTime: Int
-) : ObjectWithZoom {
-    override var xPosition: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
-    override var yPosition: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
+) : ScreenObject(), ObjectWithZoom, ObjectWithScreenPosition {
+    override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
+    override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
     override var zoomInterpolator: InterpolatedFloat = InterpolatedFloat(zoom, initTime)
+
+    override fun goToTime(time: Int): Boolean {
+        super.goToTime(time, zoom, position.x, position.y) // Call ScreenObject's goToTime to set screen position
+        if (zoomInterpolator == null) {
+            zoomInterpolator = InterpolatedFloat(zoom, initTime)
+        }
+        zoom = zoomInterpolator.update(time)
+        return true
+    }
+
+    override fun holdPositionUntil(time: Int) {  // Create a new movement that keeps the object at its last defined position until the current time
+        super.holdPositionUntil(time)
+        zoomInterpolator.holdValueUntil(time)
+    }
+
+    override fun removeFrame(time: Int): Boolean {
+        val zoomResult = zoomInterpolator.removeFrame(time)
+        val positionResult = super.removeFrame(time)
+        return zoomResult || positionResult // If either a zoom or position frame is removed it is a success
+    }
+
+    fun newSetPoint(time: Int, x: Float, y: Float, zoom: Float) {
+        super.newSetPoint(time, x, y)
+        zoomInterpolator.newSetPoint(time, zoom)
+    }
 }
 
 interface ObjectWithScreenPosition {
@@ -229,7 +232,7 @@ abstract class ScreenObject : Object {
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
-        alpha = (1f - (xPosition.setPoints.keys.first() - time) / 100).coerceIn(0.0, 1.0).toFloat()
+        alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100).coerceIn(0.0, 1.0).toFloat()
         if (death != null) {
             if (time > death!! - 100) {
                 alpha = ((death!! - time) / 100f).coerceIn(0f, 1f)
@@ -248,24 +251,30 @@ abstract class ScreenObject : Object {
         screenPosition.y = position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy)
     }
 
-    fun drawAsSelected(shapeRenderer: ShapeRenderer, zoomFactor: Float, animationMode: Boolean, currentZoom: Float, currentCX: Float, currentCY: Float) { // Draw only if selected
+    // Draw only if selected
+    fun drawAsSelected(shapeRenderer: ShapeRenderer, animationMode: Boolean, currentZoom: Float, currentCX: Float, currentCY: Float) {
         if (animationMode) {
-            shapeRenderer.color = Color.ORANGE
-            shapeRenderer.rect(screenPosition.x - 6.0f, screenPosition.y - 6.0f, 2f * zoomFactor, 2f * zoomFactor) // Draws an orange square to symbolize being selected
             shapeRenderer.color = Color.SKY
-            for (time in xPosition.setPoints.keys.first().toInt()..xPosition.setPoints.keys.last().toInt()) { // Draws entire path of the object over time
-                val position = projectToScreen(Coordinate(xPosition.interpolator.interpolateAt(time.toDouble()).toFloat(), yPosition.interpolator.interpolateAt(time.toDouble()).toFloat()), currentZoom, currentCX, currentCY)
-                shapeRenderer.circle(position.x, position.y, 0.4f * zoomFactor)
+            for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat(), yInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat()), currentZoom, currentCX, currentCY)
+                shapeRenderer.circle(position.x, position.y, 2f)
             }
+            shapeRenderer.color = Color.PURPLE
+            for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat(), yInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat()), currentZoom, currentCX, currentCY)
+                shapeRenderer.circle(position.x, position.y, 4f)
+            }
+            shapeRenderer.color = Color.ORANGE
+            shapeRenderer.rect(screenPosition.x - 6.0f, screenPosition.y - 6.0f, 12f, 12f) // Draws an orange square to symbolize being selected
         }
     }
 
     override fun shouldDraw(time: Int): Boolean {
-        if (time < xPosition.setPoints.keys.first()) {
+        if (time < xInterpolator.setPoints.keys.first()) {
             return false
         }
         if (death != null) {
-            if (time > death!! + 100) { //TODO Make it so that the number subtracted matches how long the death fade out is
+            if (time > death!!) {
                 return false
             }
         }
@@ -274,9 +283,9 @@ abstract class ScreenObject : Object {
 
     override fun toString(): String {
         val output = StringBuilder()
-        output.append("Movements: " + xPosition.setPoints.keys + "\n")
-        output.append("       xs: " + xPosition.setPoints.values + "\n")
-        output.append("       ys: " + yPosition.setPoints.values + "\n")
+        output.append("Movements: " + xInterpolator.setPoints.keys + "\n")
+        output.append("       xs: " + xInterpolator.setPoints.values + "\n")
+        output.append("       ys: " + yInterpolator.setPoints.values + "\n")
         return output.toString()
     }
 }
@@ -286,8 +295,8 @@ data class Unit(
     override val initTime: Int,
     val image: String,
 ) : ScreenObject(), ObjectWithScreenPosition {
-    override var xPosition: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
-    override var yPosition: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
+    override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
+    override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
     var name: String? = null
     var type: String = "infantry"
     var size: String = "XX"
@@ -314,7 +323,7 @@ data class Unit(
         return texture!!
     }
 
-    fun draw(shapeRenderer: ShapeRenderer, batcher: SpriteBatch, sizefactor: Float, font: BitmapFont, animationMode: Boolean) {
+    fun draw(batcher: SpriteBatch, sizefactor: Float, font: BitmapFont) {
         // Draw only for the correct country
         var sizePresetFactor = 1.0f
         if (size in sizePresets) {
@@ -345,14 +354,14 @@ data class Node(
     override val initTime: Int,
 ) : ScreenObject(), Object  {
     var color: Color = Color.GREEN
-    override var xPosition = InterpolatedFloat(position.x, initTime)
-    override var yPosition = InterpolatedFloat(position.y, initTime)
+    override var xInterpolator = InterpolatedFloat(position.x, initTime)
+    override var yInterpolator = InterpolatedFloat(position.y, initTime)
 
     init {
         screenPosition = Coordinate(0f, 0f)
     }
 
-    fun update(shapeRenderer: ShapeRenderer, time: Int, camera: OrthographicCamera, animationMode: Boolean, sizefactor: Float) { // Goes to time, and if animation mode is active, draws colored circle
+    fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
         color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
             Color.GREEN
         } else {
@@ -363,6 +372,9 @@ data class Node(
                 color = Color.RED
             }
         }
+    }
+
+    fun draw(shapeRenderer: ShapeRenderer, animationMode: Boolean) {
         if (animationMode) {
             shapeRenderer.color = color
             shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
@@ -370,45 +382,66 @@ data class Node(
     }
 }
 
-interface NodeCollection {
-    val nodes: MutableList<Node>
-    var alpha: Float
+abstract class NodeCollection {
+    abstract val nodes: MutableList<Node>
+    @Transient var drawNodes: MutableList<Node> = mutableListOf()
+    @Transient var nonDrawNodes: MutableList<Node> = mutableListOf()
+    abstract var alpha: Float
 
-    fun getDrawNodes(time: Int): List<Node> {
+    fun updateDrawNodes(time: Int){
         val out = mutableListOf<Node>()
         for (node in nodes) {
             if (node.shouldDraw(time)) {
                 out.add(node)
             }
         }
-        return out
+        drawNodes = out
     }
 
-    fun getNonDrawNodes(time: Int): List<Node> {
+    fun updateNonDrawNodes(time: Int) {
         val out = mutableListOf<Node>()
         for (node in nodes) {
             if (!node.shouldDraw(time)) {
                 out.add(node)
             }
         }
-        return out
+        nonDrawNodes = out
     }
 }
 
 data class Area (
-    override val nodes: MutableList<Node> = mutableListOf(),
-    var color: AreaColor = AreaColor.RED,
-    var lineIDs: List<Pair<Int, Int>> = mutableListOf(),
-    @Transient var drawPoly: MutableList<FloatArray> = mutableListOf(),
-    override var alpha: Float
-) : NodeCollection {
-    fun calculatePolygon(lines: List<Pair<Line, Int>>, time: Int) {
+    override val nodes: MutableList<Node>
+) : NodeCollection() {
+    var color: AreaColor = AreaColor.RED
+    var lineIDAndOrder: List<Pair<Int, Int>> = mutableListOf() // Stores the lineIDs which correspond to lines and an integer which represents at what index in nodes should the line's points be inserted
+    override var alpha: Float = 0.2f
+    @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
+
+    fun calculatePolygon(time: Int, animation: Animation) {
+        // Converts lineIDs into Line objects from the lineIDAndOrder list
+        val convertedLineIDs: MutableList<Pair<Line, Int>> = ArrayList()
+
+        if (lineIDAndOrder == null) {
+            lineIDAndOrder = mutableListOf()
+        }
+
+        for ((first, second) in lineIDAndOrder) {
+            val line = animation.getLineByID(first)
+
+            if (line != null) {
+                convertedLineIDs.add(Pair(line, second))
+            } else {
+                println("Line with ID $first not found")
+            }
+        }
+
         val border1D = DoubleArray(nodes.size * 2)
         var poly = DoubleArray(0)
 
         var n = 0
-        val nodes = getDrawNodes(time)
-        while (n < nodes.size) {
+        updateDrawNodes(time)
+        updateNonDrawNodes(time)
+        while (n < drawNodes.size) {
             val node = nodes[n]
             border1D[2 * n] = node.screenPosition.x.toDouble()
             border1D[2 * n + 1] = node.screenPosition.y.toDouble()
@@ -416,17 +449,17 @@ data class Area (
         }
 
         var lastBorderIndex = 0
-        for (l in lines) {
+        for (lineIntPair in convertedLineIDs) {
             //flattens interpolatedX and interpolatedY points into 1D array
-            val line: Line = l.first
+            val line: Line = lineIntPair.first
             val linePoly = DoubleArray(line.interpolatedX.size * 2)
             for (i in line.interpolatedX.indices) {
                 linePoly[i * 2] = line.interpolatedX[i].toDouble()
                 linePoly[i * 2 + 1] = line.interpolatedY[i].toDouble()
             }
 
-            poly += border1D.slice(lastBorderIndex until l.second * 2)
-            lastBorderIndex = l.second * 2
+            poly += border1D.slice(lastBorderIndex until lineIntPair.second * 2)
+            lastBorderIndex = lineIntPair.second * 2
             poly += linePoly
         }
         poly += border1D.slice(lastBorderIndex until border1D.size)
@@ -450,6 +483,14 @@ data class Area (
             j += 3
         }
     }
+
+    fun update(time: Int, zoom: Float, cx: Float, cy: Float, animation: Animation) {
+        for (node in nodes) {
+            node.goToTime(time, zoom, cx, cy)
+        }
+        calculatePolygon(time, animation)
+    }
+
     fun draw(shapeRenderer: ShapeRenderer) {
         shapeRenderer.color = color.color
         for (triangle in drawPoly) {
@@ -461,19 +502,24 @@ data class Area (
 data class Line(
     val id: Int,
     override val nodes: MutableList<Node> = mutableListOf(),
-    @Transient var interpolatedX: Array<Float> = arrayOf(),
-    @Transient var interpolatedY: Array<Float> = arrayOf(),
-    var lineThickness: Float = 5.0f,
-    var color: AreaColor = AreaColor.RED,
-    override var alpha: Float
-) : NodeCollection {
+) : NodeCollection() {
+    @Transient var interpolatedX: Array<Float> = arrayOf()
+    @Transient var interpolatedY: Array<Float> = arrayOf()
+    var lineThickness: Float = 5.0f
+    var color: AreaColor = AreaColor.RED
+    override var alpha: Float = 1.0f
 
-    fun interpolate(num: Int, time: Int) : Boolean {
+    fun update(linesPerNode: Int, time: Int) : Boolean {
+        lineThickness = 5.0f
+        color = AreaColor.RED
         //reset values to nothing by default
         interpolatedX = arrayOf()
         interpolatedY = arrayOf()
 
-        val drawNodes = getDrawNodes(time)
+        updateDrawNodes(time)
+        updateNonDrawNodes(time)
+        val numLines = drawNodes.size * linesPerNode
+
         val xValues = DoubleArray(drawNodes.size)
         val yValues = DoubleArray(drawNodes.size)
         val evalAt = DoubleArray(drawNodes.size)
@@ -492,32 +538,32 @@ data class Line(
         }
 
         if (drawNodes.size >= AnimationScreen.MIN_LINE_SIZE) {
-            interpolatedX = Array(num + 1) { 0.0f }
-            interpolatedY = Array(num + 1) { 0.0f }
+            interpolatedX = Array(numLines + 1) { 0.0f }
+            interpolatedY = Array(numLines + 1) { 0.0f }
 
             val xInterpolator = Interpolator(evalAt, xValues)
             val yInterpolator = Interpolator(evalAt, yValues)
 
             i = 0
             var eval: Double
-            while (i < num) {
-                eval = (drawNodes.size.toFloat() - 1.00) * i / num
+            while (i < numLines) {
+                eval = (drawNodes.size - 1.00) * i / numLines
                 interpolatedX[i] = xInterpolator.interpolateAt(eval).toFloat()
                 interpolatedY[i] = yInterpolator.interpolateAt(eval).toFloat()
                 i++
             }
 
-            interpolatedX[num] = xInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
-            interpolatedY[num] = yInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
+            interpolatedX[numLines] = xInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
+            interpolatedY[numLines] = yInterpolator.interpolateAt((drawNodes.size.toFloat() - 1.00)).toFloat()
             return true
         }
         return false
     }
 
-    fun update(shapeRenderer: ShapeRenderer, linesPerNode: Int, time: Int) {
-        shapeRenderer.color = color.color
-        if (interpolate(linesPerNode * nodes.size, time)) {
-            for (i in 0 until AnimationScreen.LINES_PER_NODE * getDrawNodes(time).size) {
+    fun draw(shapeRenderer: ShapeRenderer) {
+        if (drawNodes.size >= AnimationScreen.MIN_LINE_SIZE) {
+            shapeRenderer.color = color.color
+            for (i in 0 until AnimationScreen.LINES_PER_NODE * drawNodes.size) {
                 shapeRenderer.rectLine(
                     interpolatedX[i],
                     interpolatedY[i],
@@ -580,7 +626,7 @@ data class Animation @JvmOverloads constructor(
     fun getDrawUnits(time: Int): List<Unit> {
         val out = mutableListOf<Unit>()
         for (unit in units) {
-            if (time >= unit.xPosition.setPoints.keys.first()) {
+            if (time >= unit.xInterpolator.setPoints.keys.first()) {
                 if (unit.death != null) {
                     if (time <= unit.death!!) {
                         out.add(unit)
@@ -596,7 +642,7 @@ data class Animation @JvmOverloads constructor(
     fun getNonDrawUnits(time: Int): List<Unit> {
         val out = mutableListOf<Unit>()
         for (unit in units) {
-            if (time <= unit.xPosition.setPoints.keys.first()) {
+            if (time <= unit.xInterpolator.setPoints.keys.first()) {
                 out.add(unit)
             } else {
                 if (unit.death != null) {

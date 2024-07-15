@@ -5,18 +5,18 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogicgames.waranimationmaker.models.*;
-import com.badlogicgames.waranimationmaker.models.Animation;
 import com.badlogicgames.waranimationmaker.models.Object;
+import com.badlogicgames.waranimationmaker.models.*;
 import kotlin.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.badlogicgames.waranimationmaker.Assets.loadTexture;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
@@ -25,11 +25,11 @@ import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDT
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 10;
     public static final int DEFAULT_UNIT_HEIGHT = 10;
-    public static final int MIN_LINE_SIZE = 5; //minimum number of nodes needed to draw a line
+    public static final int MIN_LINE_SIZE = 2; //minimum number of nodes needed to draw a line
     public static final int LINES_PER_NODE = 12; //number of straight lines per node on a spline
 
     WarAnimationMaker game; // Contains some variables common to all screens
-    OrthographicCamera camera;
+    OrthographicCamera camera; // Camera whose properties directly draw the screen
 
     float mouseX; // Mouse real X position
     float mouseY; // Mouse real Y position
@@ -207,7 +207,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     selectedNodeCollection.getNodes().add(addAtIndex, node);
                 } else { //
                     animation.setLineID(animation.getLineID() + 1);
-                    Line newLine = new Line(animation.getLineID(), new ArrayList<>(), new Float[0], new Float[0], 5.0f, AreaColor.RED, 0.0f);
+                    Line newLine = new Line(animation.getLineID(), new ArrayList<>());
                     animation.getLines().add(newLine);
                     Node node = createNodeAtMouse(time);
                     newLine.getNodes().add(node);
@@ -224,7 +224,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         for (Node node : line.getNodes()) {
                             if (node.clicked(x, y)) {
                                 Area selectedArea = (Area) selectedNodeCollection;
-                                selectedArea.getLineIDs().add(new Pair<>(line.getId(), selectedArea.getNodes().indexOf((Node) selected)));
+                                selectedArea.getLineIDAndOrder().add(new Pair<>(line.getId(), selectedArea.getNodes().indexOf((Node) selected)));
                                 touchMode = TouchMode.DEFAULT;
                                 resetSelected();
                                 System.out.println("Area set to line");
@@ -246,23 +246,21 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     private Node createNodeAtPosition(int time, float x, float y) {
-        Node node = new Node(new Coordinate(x, y), time);
-
-        return node;
+        return new Node(new Coordinate(x, y), time);
     }
 
-    public ArrayList<ScreenObject> select(int x, int y) {
+    public ArrayList<ScreenObject> select(int x, int y) { //TODO make this take in type and boolean whether to search for nonDrawNodes or not
         ArrayList<ScreenObject> output = new ArrayList<>();
         ArrayList<ScreenObject> lowPriority = new ArrayList<>();
         for (Line line : animation.getLines()) {
-            for (Node node : line.getDrawNodes(time)) {
+            for (Node node : line.getDrawNodes()) {
                 if (node.clicked(x, y)) {
                     System.out.println("Line node at " + node.getPosition() + " on line " + line.getId() + " was clicked");
                     selectedNodeCollection = line;
                     output.add(node);
                 }
             }
-            for (Node node : line.getNonDrawNodes(time)) {
+            for (Node node : line.getNonDrawNodes()) {
                 if (node.clicked(x, y)) {
                     System.out.println("Line node at " + node.getPosition() + " on line " + line.getId() + " was clicked");
                     selectedNodeCollection = line;
@@ -272,14 +270,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         for (Area area : animation.getAreas()) {
-            for (Node node : area.getDrawNodes(time)) {
+            for (Node node : area.getDrawNodes()) {
                 if (node.clicked(x, y)) {
                     System.out.println("Area node at " + node.getPosition() + " was clicked");
                     selectedNodeCollection = area;
                     output.add(node);
                 }
             }
-            for (Node node : area.getNonDrawNodes(time)) {
+            for (Node node : area.getNonDrawNodes()) {
                 if (node.clicked(x, y)) {
                     System.out.println("Area node at " + node.getPosition() + " was clicked");
                     selectedNodeCollection = area;
@@ -340,12 +338,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        camera.zoom *= 1 - 0.05f * amountY;
+        if (paused) {
+            camera.zoom *= 1 - 0.05f * amountY;
+        }
         return true;
     }
 
-    @Override
-    public void render(float delta) {
+    public void update() {
         ctrlPressed = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT));
         shiftPressed = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT));
 
@@ -368,6 +367,34 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             updateCam();
         }
         camera.update();
+        origin.goToTime(0, camera.zoom, camera.position.x, camera.position.y);
+
+        if ((selected != null) && paused) { // Update the selected object to go to mouse in move mode
+            if ((touchMode == TouchMode.MOVE)) {
+                selected.newSetPoint(time, mouseX, mouseY);
+            }
+        }
+
+        for (Line line : animation.getLines()) { // Interpolate lines and update all nodes
+            for (Node node : line.getNodes()) {
+                node.update(time, camera);
+            }
+            line.update(LINES_PER_NODE, time);
+        }
+        for (Area area : animation.getAreas()) { // Calculate area polygons
+            for (Node node : area.getNodes()) {
+                node.update(time, camera);
+            }
+            area.update(time, camera.zoom, camera.position.x, camera.position.y, animation);
+        }
+        for (Unit unit : animation.getUnits()) {
+            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
+        }
+    }
+
+    @Override
+    public void render(float delta) {
+        update();
 
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -375,74 +402,50 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         //Draw background
         game.batcher.begin();
 
-        origin.goToTime(0, camera.zoom, camera.position.x, camera.position.y);
         game.batcher.draw(fullMap, origin.getScreenPosition().getX(),
                 origin.getScreenPosition().getY(),
                 fullMap.getWidth() * camera.zoom,
                 fullMap.getHeight() * camera.zoom);
         game.batcher.end();
 
-        //Draw the colored areas to the screen
-        game.batcher.begin();
-        Texture texture = colorLayer.getColorBufferTexture();
-        TextureRegion textureRegion = new TextureRegion(texture);
-        textureRegion.flip(false, true);
-        game.batcher.setColor(1,1,1,0.2f); //default is white 1,1,1,1
-        game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        game.batcher.setColor(1,1,1, 1);
-        game.batcher.end();
-
-        //Update the nodes and draw the front lines
-        if ((selected != null) && paused) { //automatically updates the selected object to go to the mouse for interactive adding
-            if ((touchMode == TouchMode.MOVE)) {
-                selected.newSetPoint(time, mouseX, mouseY);
-            }
-        }
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        for (Line line : animation.getLines()) {
-            line.update(shapeRenderer, LINES_PER_NODE, time);
-        }
-        shapeRenderer.end();
-
-        // Update and draw area polygons
+        // Draw area polygons
         colorLayer.begin();
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.CLEAR);
-        shapeRenderer.rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        shapeRenderer.rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT); // Clear the color layer
 
-        for (Area area : animation.getAreas()) {
-            for (Node node : area.getNodes()) {
-                node.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            }
-
-            //Since the area function requires lines and not line IDs, all the line IDs are turned into lines using the instance method of animation.getLineByID and then passed into the area.calculatePolygon() function
-            List<Pair<Integer, Integer>> lineIDs = area.getLineIDs();
-            List<Pair<Line, Integer>> convertedLineIDs = new ArrayList<>();
-
-            for (Pair<Integer, Integer> line : lineIDs) {
-                convertedLineIDs.add(new Pair<>(animation.getLineByID(line.getFirst()), line.getSecond()));
-            }
-
-            area.calculatePolygon(convertedLineIDs, time);
+        for (Area area : animation.getAreas()) { // Draw areas to the color layer
             area.draw(shapeRenderer);
         }
+
         shapeRenderer.end();
         colorLayer.end();
 
-        //Update and draw units
+        // Draw the color layer to the screen TODO replace color layer
         game.batcher.begin();
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (Unit unit : animation.getUnits()) {
-            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
-            unit.draw(shapeRenderer, game.batcher, zoomFactor, game.bitmapFont, animationMode);
-        }
-        shapeRenderer.end();
-        game.batcher.setColor(1, 1, 1, 1.0f); // Resets to no transparency
+        TextureRegion textureRegion = new TextureRegion(colorLayer.getColorBufferTexture());
+        textureRegion.flip(false, true);
+        game.batcher.setColor(1,1,1,0.2f); // Draw the color layers with transparency
+        game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         game.batcher.end();
 
+        shapeRenderer.end();
+
+        // Draw Units and Lines
+        game.batcher.begin();
+        game.batcher.setColor(255,255,255, 1); // Resets to no transparency
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (Unit unit : animation.getUnits()) {
+            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
+        }
+        shapeRenderer.end();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (Line line : animation.getLines()) {
+            line.draw(shapeRenderer);
+        }
+        shapeRenderer.end();
+        game.batcher.setColor(1, 1, 1, 1.0f);
+        game.batcher.end();
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -450,26 +453,27 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (animationMode) {shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);}
         for (Line line : animation.getLines()) {
             for (Node node : line.getNodes()) {
-                node.update(shapeRenderer, time, camera, animationMode, zoomFactor);
+                node.draw(shapeRenderer, animationMode);
             }
         }
         if (animationMode) { shapeRenderer.end(); }
 
-
         if (animationMode) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
             //Draw area polygon nodes
-            shapeRenderer.setColor(Color.BLUE);
+            shapeRenderer.setColor(Color.BLUE); //TODO make a different area node class
             for (Area area : animation.getAreas()) {
                 for (Node node : area.getNodes()) {
                     shapeRenderer.circle(node.getScreenPosition().getX(), node.getScreenPosition().getY(), 7);
                 }
             }
+
             //Draw the selected object
             if (selected != null) {
-                selected.drawAsSelected(shapeRenderer, zoomFactor, animationMode, camera.zoom, camera.position.x, camera.position.y);
+                selected.drawAsSelected(shapeRenderer, animationMode, camera.zoom, camera.position.x, camera.position.y);
             }
-            shapeRenderer.end();
+
             //Draw the UI
             String text = Gdx.graphics.getFramesPerSecond() + " FPS \n" + "Time: " + time;
             timeAndFPS.setText(text);
@@ -505,11 +509,19 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     if (selectedNodeCollection.getClass() == Area.class) {
                         Area selectedArea = (Area) selectedNodeCollection;
-                        selectedInfo.append(selectedArea.getLineIDs());
+                        selectedInfo.append(selectedArea.getLineIDAndOrder());
                     }
                 }
                 selectedLabel.setText(selectedInfo);
             }
+
+            // Draw contrast backgrounds for UI
+            shapeRenderer.setColor(new Color(255, 255, 255, 0.5f));
+            shapeRenderer.rect(0, DISPLAY_HEIGHT, 300, 500);
+            shapeRenderer.rect(DISPLAY_WIDTH - 200, DISPLAY_HEIGHT, 200, 500);
+
+            shapeRenderer.end();
+
             if (!UIDisplayed) {
                 leftPanel.add(timeAndFPS);
                 leftPanel.row();
@@ -687,16 +699,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
         // Node required
         actions.add(Action.createBuilder(() -> {
-            Node node = new Node(
-                    new Coordinate(mouseX, mouseY), time
-            );
-            Area a = new Area(new ArrayList<>(), AreaColor.RED, new ArrayList<>(), new ArrayList<>(), 0.0f);
+            Node node = new Node(new Coordinate(mouseX, mouseY), time);
+            Area area = new Area(new ArrayList<>());
+            area.getNodes().add(node);
 
-            animation.getAreas().add(a);
+            animation.getAreas().add(area);
 
-            selectedNodeCollection = a;
+            selectedNodeCollection = area;
             selected = node;
-            selectedNodeCollection.getNodes().add((Node) selected);
             return null;
         }, "Create new area", Input.Keys.A).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
         // Selection prohibited
@@ -716,14 +726,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             time++;
             animation.camera().goToTime(time);
             updateCam();
-            System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
+            System.out.println(animation.getLines().get(0).getDrawNodes().size());
             return null;
         }, "Step time forward 1", Input.Keys.PERIOD).build());
         actions.add(Action.createBuilder(() -> {
             time--;
             animation.camera().goToTime(time);
             updateCam();
-            System.out.println(animation.getLines().get(0).getDrawNodes(time).size());
+            System.out.println(animation.getLines().get(0).getDrawNodes().size());
             return null;
         }, "Step time back 1", Input.Keys.COMMA).build());
         actions.add(Action.createBuilder(() -> {
@@ -764,9 +774,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
-            animation.camera().newSetPoint(time, camera.position.x, camera.position.y, camera.zoom);
+            selected = animation.camera();
             return null;
-        }, "Set camera set point", Input.Keys.C).requiresControl(true).build());
+        }, "Select the camera", Input.Keys.C).requiresControl(true).build());
+        actions.add(Action.createBuilder(() -> {
+            animation.camera().getZoomInterpolator().newSetPoint(time, camera.zoom);
+            return null;
+        }, "Set a camera zoom set point", Input.Keys.Z).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
             FileHandler.INSTANCE.save();
             System.out.println("saved");
@@ -805,9 +819,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         actions.add(Action.createBuilder(() -> {
             if (selected.removeFrame(time)) {
                 System.out.println("Deleted last frame");
-                System.out.println("New movements: " + selected.getXPosition().getSetPoints().keySet());
-                System.out.println("           xs: " + selected.getXPosition().getSetPoints().values());
-                System.out.println("           ys: " + selected.getYPosition().getSetPoints().values());
+                System.out.println("New movements: " + selected.getXInterpolator().getSetPoints().keySet());
+                System.out.println("           xs: " + selected.getXInterpolator().getSetPoints().values());
+                System.out.println("           ys: " + selected.getYInterpolator().getSetPoints().values());
             } else {
                 System.out.println("Cannot delete frame on object with less than 2 frames");
             }
