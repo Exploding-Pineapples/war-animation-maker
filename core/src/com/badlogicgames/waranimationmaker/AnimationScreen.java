@@ -432,18 +432,17 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         shapeRenderer.end();
 
         // Draw Units and Lines
-        game.batcher.begin();
-        game.batcher.setColor(255,255,255, 1); // Resets to no transparency
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (Unit unit : animation.getUnits()) {
-            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
-        }
-        shapeRenderer.end();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (Line line : animation.getLines()) {
             line.draw(shapeRenderer);
         }
         shapeRenderer.end();
+
+        game.batcher.begin();
+        game.batcher.setColor(1,1,1, 1.0f); // Resets to no transparency
+        for (Unit unit : animation.getUnits()) {
+            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
+        }
         game.batcher.setColor(1, 1, 1, 1.0f);
         game.batcher.end();
 
@@ -726,14 +725,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             time++;
             animation.camera().goToTime(time);
             updateCam();
-            System.out.println(animation.getLines().get(0).getDrawNodes().size());
             return null;
         }, "Step time forward 1", Input.Keys.PERIOD).build());
         actions.add(Action.createBuilder(() -> {
             time--;
             animation.camera().goToTime(time);
             updateCam();
-            System.out.println(animation.getLines().get(0).getDrawNodes().size());
             return null;
         }, "Step time back 1", Input.Keys.COMMA).build());
         actions.add(Action.createBuilder(() -> {

@@ -30,11 +30,7 @@
       "width": 33.41452,
       "height": 33.41452,
       "death": null,
-      "alpha": 1.0,
-      "screenPosition": {
-        "x": 1018.58984,
-        "y": 575.9888
-      }
+      "alpha": 1.0
     }
   ],
   "camera": {
@@ -64,8 +60,7 @@
       }
     },
     "death": null,
-    "alpha": 0.0,
-    "screenPosition": null
+    "alpha": 0.0
   },
   "lines": [
     {
@@ -94,11 +89,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": -41.79883,
-            "y": 650.48926
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -123,11 +114,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": 665.9546,
-            "y": 688.98096
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -152,11 +139,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": 1029.7646,
-            "y": 609.51416
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -181,11 +164,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": 1080.6733,
-            "y": 569.7805
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -210,11 +189,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": 968.92285,
-            "y": 261.84546
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -239,11 +214,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": 7.867676,
-            "y": 158.78662
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -268,11 +239,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": -137.40771,
-            "y": 117.81152
-          }
+          "alpha": 1.0
         },
         {
           "position": {
@@ -297,11 +264,7 @@
             }
           },
           "death": null,
-          "alpha": 1.0,
-          "screenPosition": {
-            "x": -267.7837,
-            "y": 240.73706
-          }
+          "alpha": 1.0
         }
       ],
       "lineThickness": 5.0,

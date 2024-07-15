@@ -219,10 +219,10 @@ fun projectToScreen(position: Coordinate, zoom: Float, cx: Float, cy: Float): Co
     return Coordinate(position.x * zoom - cx * (zoom - 1) + (DISPLAY_WIDTH / 2 - cx), position.y * zoom - cy * (zoom - 1) + (DISPLAY_HEIGHT / 2 - cy))
 }
 
-abstract class ScreenObject : Object {
+abstract class ScreenObject : Object, ObjectWithScreenPosition {
     var death: Int? = null
     var alpha: Float = 1f
-    var screenPosition: Coordinate = Coordinate(0f, 0f)
+    @Transient override var screenPosition: Coordinate = Coordinate(0f, 0f)
 
     fun clicked(x: Float, y: Float): Boolean
     {
@@ -294,7 +294,7 @@ data class Unit(
     override var position: Coordinate,
     override val initTime: Int,
     val image: String,
-) : ScreenObject(), ObjectWithScreenPosition {
+) : ScreenObject() {
     override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
     override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
     var name: String? = null
@@ -340,8 +340,9 @@ data class Unit(
             width,
             height
         )
-        font.data.setScale((0.3 * sizefactor * sizePresetFactor).toFloat())
+
         font.color = Color(255.0f, 63.75f, 0.0f, alpha)
+        font.data.setScale((0.3 * sizefactor * sizePresetFactor).toFloat())
 
         font.draw(batcher, size, screenPosition.x - width / 2, screenPosition.y + height / 2)
         if (name != null) { font.draw(batcher, name, screenPosition.x - width / 2, screenPosition.y) }
