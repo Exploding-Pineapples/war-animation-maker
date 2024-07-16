@@ -143,7 +143,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public boolean touchDown(int x, int y, int pointer, int button) {
-        updateMouse(x, y);
         y = DISPLAY_HEIGHT - y;
 
         System.out.println("Clicked " + mouseX + " " + mouseY + " touch mode " + touchMode);
@@ -325,15 +324,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         return false;
     }
 
-    public boolean mouseMoved(int x, int y) {
-        updateMouse(x, y);
-        return true;
-    }
-
-    public void updateMouse(int x, int y) {
-        y = DISPLAY_HEIGHT - y;
-        mouseX = (float) ((double) x - camera.position.x * (1 - camera.zoom) - (Gdx.graphics.getWidth() / 2.0f - camera.position.x)) / camera.zoom;
-        mouseY = (float) ((double) y - camera.position.y * (1 - camera.zoom) - (Gdx.graphics.getHeight() / 2.0f - camera.position.y)) / camera.zoom;
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
     }
 
     @Override
@@ -345,6 +338,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public void update() {
+        mouseX = (float) ((double) Gdx.input.getX() - camera.position.x * (1 - camera.zoom) - (Gdx.graphics.getWidth() / 2.0f - camera.position.x)) / camera.zoom;
+        mouseY = (float) ((double) (DISPLAY_HEIGHT - Gdx.input.getY()) - camera.position.y * (1 - camera.zoom) - (Gdx.graphics.getHeight() / 2.0f - camera.position.y)) / camera.zoom;
         ctrlPressed = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT));
         shiftPressed = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT));
 
