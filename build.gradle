@@ -18,6 +18,16 @@ buildscript {
         androidGradleToolsVersion = json.androidGradleToolVersion
         gwtVersion = json.gwtVersion
         gwtGradleVersion = json.gwtPluginVersion
+        gdxControllersVersion="2.2.3"
+        lombokVersion="1.18.32"
+        unbox2dVersion="2e79e378c2"
+        shapeDrawerVersion="2.6.0"
+        graalHelperVersion="2.0.1"
+        enableGraalNative=false
+        gwtFrameworkVersion="2.11.0"
+        gwtPluginVersion="1.1.29"
+        gdxGempLibVersion="9361b54cd7"
+        gameJoltversion="0.0.5"
     }
 
     repositories {
@@ -74,6 +84,15 @@ project(":desktop") {
         implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    }
+}
+
+project(":html") {
+    apply plugin: "java"
+    apply plugin: 'java-library'
+
+    dependencies {
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     }
 }
