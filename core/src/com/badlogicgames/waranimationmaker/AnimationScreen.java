@@ -691,18 +691,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             resetSelected();
             return null;
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
-        // Node required
-        actions.add(Action.createBuilder(() -> {
-            Node node = new Node(new Coordinate(mouseX, mouseY), time);
-            Area area = new Area(new ArrayList<>());
-            area.getNodes().add(node);
-
-            animation.getAreas().add(area);
-
-            selectedNodeCollection = area;
-            selected = node;
-            return null;
-        }, "Create new area", Input.Keys.A).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
         // Selection prohibited
         actions.add(Action.createBuilder(() -> {
             time = (time / 200) * 200 + 200;
@@ -746,7 +734,31 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 System.out.println("Default Mode");
             }
             return null;
-        }, "New Node Mode", Input.Keys.NUM_1).requiresSelected(Requirement.ANY).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
+        }, "New Node Mode", Input.Keys.NUM_1).requiresSelected(Requirement.ANY).build());
+        actions.add(Action.createBuilder(() -> {
+            Node node = new Node(new Coordinate(mouseX, mouseY), time);
+            Area area = new Area(new ArrayList<>());
+            area.getNodes().add(node);
+
+            animation.getAreas().add(area);
+            selectedNodeCollection = area;
+            selected = node;
+            touchMode = TouchMode.NEW_NODE;
+            return null;
+        }, "Create new area", Input.Keys.A).requiresSelected(Requirement.REQUIRES_NOT).build());
+        actions.add(Action.createBuilder(() -> {
+            Node node = new Node(new Coordinate(mouseX, mouseY), time);
+            Area area = new Area(new ArrayList<>());
+            area.getNodes().add(node);
+
+            area.getLineIDAndOrder().add(new Pair<>(((Line) selectedNodeCollection).getId(), 0)); //TODO make it safe to accidentally select an area node
+
+            animation.getAreas().add(area);
+            selectedNodeCollection = area;
+            selected = node;
+            touchMode = TouchMode.NEW_NODE;
+            return null;
+        }, "Create new area on selected line", Input.Keys.A).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
         for (int num_key = Input.Keys.NUM_2; (num_key <= Input.Keys.NUM_9) && (num_key < animation.getCountries().size() + 9); num_key++) {
             int finalNum_key = num_key;
             actions.add(Action.createBuilder(() -> {
