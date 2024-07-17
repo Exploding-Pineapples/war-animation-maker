@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogicgames.waranimationmaker.models.Object;
 import com.badlogicgames.waranimationmaker.models.*;
 import kotlin.Pair;
@@ -59,6 +60,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     //UI
     Stage stage; // Entire UI is drawn to this
     Table selectedInfoTable;
+    VerticalGroup inputGroup;
     Table leftPanel;
     Label timeAndFPS;
     Label keyOptions;
@@ -98,6 +100,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         keyOptions = new Label("", game.skin);
         selectedLabel = new Label("", game.skin);
 
+        inputGroup = new VerticalGroup();
         selectedInfoTable = new Table();
         buildInputs(); // Builds the InputElement objects, which will be added to the selectedInfoTable
         stage.addActor(selectedInfoTable);
@@ -234,7 +237,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 }
             }
             for (InputElement inputElement : inputElements) {
-                inputElement.update(selected, selectedNodeCollection, selectedInfoTable, animationMode);
+                inputElement.update(selected, selectedNodeCollection, inputGroup, animationMode);
             }
         }
         return false;
@@ -436,8 +439,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 leftPanel.add(keyOptions).pad(10);
                 leftPanel.row();
 
-                selectedInfoTable.add(selectedLabel).left().expandX().pad(10);
-                selectedInfoTable.row();
+                selectedInfoTable.add(selectedLabel).expandX().pad(10).left();
+                selectedInfoTable.row().pad(10);
+                selectedInfoTable.add(inputGroup);
 
                 UIDisplayed = true;
             }
@@ -446,6 +450,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             leftPanel.setPosition(30, DISPLAY_HEIGHT - 30 - leftPanel.getHeight());
 
             selectedInfoTable.pack();
+            inputGroup.pack();
             selectedInfoTable.setPosition(DISPLAY_WIDTH - 30 - selectedInfoTable.getWidth(), DISPLAY_HEIGHT  - 30 - selectedInfoTable.getHeight());
         } else {
             if (UIDisplayed) {
@@ -566,7 +571,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         selectedNodeCollection = null;
 
         for (InputElement inputElement : inputElements) { // selected object is set to null, call all the inputElements to remove themselves
-            inputElement.update(selected, selectedNodeCollection, selectedInfoTable, animationMode);
+            inputElement.update(selected, selectedNodeCollection, inputGroup, animationMode);
         }
     }
 

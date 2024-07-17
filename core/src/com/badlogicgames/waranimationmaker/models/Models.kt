@@ -224,7 +224,7 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
     var alpha: Float = 1f
     @Transient override var screenPosition: Coordinate = Coordinate(0f, 0f)
 
-    fun clicked(x: Float, y: Float): Boolean
+    open fun clicked(x: Float, y: Float): Boolean
     {
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
@@ -312,6 +312,10 @@ data class Unit(
     private var texture: Texture? = null
     private var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
     private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
+
+    override fun clicked(x: Float, y: Float): Boolean {
+        return ((x in (screenPosition.x - width / 2)..(screenPosition.x + width / 2)) && (y in (screenPosition.y - height / 2)..(screenPosition.y + height / 2)))
+    }
 
     fun texture(): Texture
     {

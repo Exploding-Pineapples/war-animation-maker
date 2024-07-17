@@ -47,7 +47,7 @@ class InputElement<T> private constructor(builder: Builder<T>) {
         return true
     }
 
-    fun update(selected: Any?, selectedNodeCollection: NodeCollection?, table: Table, animationMode: Boolean) {
+    fun update(selected: Any?, selectedNodeCollection: NodeCollection?, table: VerticalGroup, animationMode: Boolean) {
         val shouldDisplay = shouldDisplay(selected, selectedNodeCollection, animationMode)
         if (shouldDisplay) {
             textField.setText(input.invoke())
@@ -57,20 +57,17 @@ class InputElement<T> private constructor(builder: Builder<T>) {
             }
         } else {
             if (displayed) {
-                val cell = table.getCell(this.table)
                 this.table.remove()
-                // remove cell from table
-                table.cells.removeValue(cell, true)
-                table.invalidate()
+                // Remove cell from table
+                table.layout()
                 displayed = false
             }
         }
     }
 
-    fun display(table: Table) {
+    fun display(table: VerticalGroup) {
         if (!displayed) {
-            table.add(this.table).pad(10f)
-            table.row()
+            table.addActor(this.table)
             displayed = true
         }
     }
