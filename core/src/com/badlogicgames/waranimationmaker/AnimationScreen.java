@@ -17,10 +17,12 @@ import kotlin.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static com.badlogicgames.waranimationmaker.Assets.loadTexture;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH;
+import static java.lang.Math.round;
 
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 10;
@@ -96,13 +98,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         keyOptions = new Label("", game.skin);
         selectedLabel = new Label("", game.skin);
 
-        selectedInfoTable = new Table().right().top();
-        selectedInfoTable.setPosition(DISPLAY_WIDTH - 30, DISPLAY_HEIGHT  - 30, 1);
+        selectedInfoTable = new Table();
         buildInputs(); // Builds the InputElement objects, which will be added to the selectedInfoTable
         stage.addActor(selectedInfoTable);
 
-        leftPanel = new Table().left().top();
-        leftPanel.setPosition(30, DISPLAY_HEIGHT - 30);
+        leftPanel = new Table();
         stage.addActor(leftPanel);
 
         game.multiplexer.clear();
@@ -309,7 +309,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         return output;
-    }
+    } //TODO make it better
 
     public boolean touchUp(int x, int y, int pointer, int button) {
         return false;
@@ -385,6 +385,77 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         for (Unit unit : animation.getUnits()) {
             unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y);
         }
+        //UI
+        if (animationMode) {
+            // Set information about keyboard options and current animator state
+            timeAndFPS.setText(Gdx.graphics.getFramesPerSecond() + " FPS \n" + "Time: " + time);
+
+            StringBuilder options = new StringBuilder();
+            StringJoiner optionsJoiner = new StringJoiner("\n");
+            options.append("Touch mode: ").append(touchMode.name()).append("\n");
+            options.append("Control pressed: ").append(ctrlPressed).append(" ").append("Shift pressed: ").append(shiftPressed).append("\n");
+            for (Action action : actions) {
+                if (action.couldExecute(shiftPressed, ctrlPressed, selected, touchMode)) {
+                    StringJoiner keysJoiner = new StringJoiner(", ");
+                    for (int key : action.getActionKeys()) {
+                        keysJoiner.add(Input.Keys.toString(key) + " ");
+                    }
+                    optionsJoiner.add(keysJoiner + action.getActionName());
+                }
+            }
+            options.append(optionsJoiner);
+            keyOptions.setText(options);
+
+            //Add information about mouse position selected object
+            StringBuilder selectedInfo = new StringBuilder("Mouse: " + round(mouseX) + ", " + round(mouseY) + "\n");
+
+            if (selected == null) {
+                selectedInfo.append("Nothing is selected");
+            } else {
+                selectedInfo.append("Selected: ").append(selected.getClass().getName().substring(43)).append("\n");
+                selectedInfo.append("x: ").append(selected.getPosition().getX()).append("\n");
+                selectedInfo.append("y: ").append(selected.getPosition().getY()).append("\n");
+                if (selectedNodeCollection != null) {
+                    selectedInfo.append("Selected ").append(selectedNodeCollection.getClass().getName().substring(43)).append(": \n");
+                    selectedInfo.append("Nodes: ").append(selectedNodeCollection.getNodes().size()).append("\n");
+                    if (selectedNodeCollection.getClass() == Line.class) {
+                        Line selectedLine = (Line) selectedNodeCollection;
+                        selectedInfo.append("LineID: ").append(selectedLine.getId()).append("\n");
+                    }
+                    if (selectedNodeCollection.getClass() == Area.class) {
+                        Area selectedArea = (Area) selectedNodeCollection;
+                        selectedInfo.append(selectedArea.getLineIDAndOrder());
+                    }
+                }
+            }
+            selectedLabel.setText(selectedInfo);
+
+            if (!UIDisplayed) {
+                leftPanel.add(timeAndFPS).left().pad(10);
+                leftPanel.row();
+                leftPanel.add(keyOptions).pad(10);
+                leftPanel.row();
+
+                selectedInfoTable.add(selectedLabel).left().expandX().pad(10);
+                selectedInfoTable.row();
+
+                UIDisplayed = true;
+            }
+
+            leftPanel.pack();
+            leftPanel.setPosition(30, DISPLAY_HEIGHT - 30 - leftPanel.getHeight());
+
+            selectedInfoTable.pack();
+            selectedInfoTable.setPosition(DISPLAY_WIDTH - 30 - selectedInfoTable.getWidth(), DISPLAY_HEIGHT  - 30 - selectedInfoTable.getHeight());
+        } else {
+            if (UIDisplayed) {
+                leftPanel.clear();
+                selectedInfoTable.clear();
+                UIDisplayed = false;
+            }
+        }
+
+        stage.act();
     }
 
     @Override
@@ -441,8 +512,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.setColor(1, 1, 1, 1.0f);
         game.batcher.end();
 
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-
         //Draw the debug circles
         if (animationMode) {shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);}
         for (Line line : animation.getLines()) {
@@ -453,7 +522,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (animationMode) { shapeRenderer.end(); }
 
         if (animationMode) {
+            Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
+            Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            // Draw contrast backgrounds for UI
+            shapeRenderer.setColor(new Color(0, 0, 0, 0.5f));
+
+            shapeRenderer.rect(leftPanel.getX(), leftPanel.getY(), leftPanel.getWidth(), leftPanel.getHeight());
+            shapeRenderer.rect(selectedInfoTable.getX(), selectedInfoTable.getY(), selectedInfoTable.getWidth(), selectedInfoTable.getHeight());
 
             //Draw area polygon nodes
             shapeRenderer.setColor(Color.BLUE); //TODO make a different area node class
@@ -468,72 +545,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 selected.drawAsSelected(shapeRenderer, animationMode, camera.zoom, camera.position.x, camera.position.y);
             }
 
-            //Draw the UI
-            String text = Gdx.graphics.getFramesPerSecond() + " FPS \n" + "Time: " + time;
-            timeAndFPS.setText(text);
-
-            //Set keyboard options and current animator state
-            StringBuilder options = new StringBuilder();
-            options.append("Touch mode: ").append(touchMode.name()).append("\n");
-            options.append("Control pressed: ").append(ctrlPressed).append(" ").append("Shift pressed: ").append(shiftPressed).append("\n");
-            for (Action action : actions) {
-                if (action.couldExecute(shiftPressed, ctrlPressed, selected, touchMode)) {
-                    for (int key : action.getActionKeys()) {
-                        options.append(Input.Keys.toString(key)).append(" ");
-                    }
-                    options.append(" ").append(action.getActionName()).append("\n");
-                }
-            }
-            keyOptions.setText(options);
-
-            //Add information about selected object
-            if (selected == null) {
-                selectedLabel.setText("Nothing is selected \n" + "Mouse: " + mouseX + ", " + mouseY);
-            } else {
-                StringBuilder selectedInfo = new StringBuilder();
-                selectedInfo.append("Selected: ").append(selected.getClass().getName().substring(37)).append("\n");
-                selectedInfo.append("x: ").append(selected.getPosition().getX()).append("\n");
-                selectedInfo.append("y: ").append(selected.getPosition().getY()).append("\n");
-                if (selectedNodeCollection != null) {
-                    selectedInfo.append("Selected ").append(selectedNodeCollection.getClass().getName().substring(37)).append(": \n");
-                    selectedInfo.append("Nodes: ").append(selectedNodeCollection.getNodes().size()).append("\n");
-                    if (selectedNodeCollection.getClass() == Line.class) {
-                        Line selectedLine = (Line) selectedNodeCollection;
-                        selectedInfo.append("LineID: ").append(selectedLine.getId()).append("\n");
-                    }
-                    if (selectedNodeCollection.getClass() == Area.class) {
-                        Area selectedArea = (Area) selectedNodeCollection;
-                        selectedInfo.append(selectedArea.getLineIDAndOrder());
-                    }
-                }
-                selectedLabel.setText(selectedInfo);
-            }
-
-            // Draw contrast backgrounds for UI
-            shapeRenderer.setColor(new Color(255, 255, 255, 0.5f));
-            shapeRenderer.rect(0, DISPLAY_HEIGHT, 300, 500);
-            shapeRenderer.rect(DISPLAY_WIDTH - 200, DISPLAY_HEIGHT, 200, 500);
-
             shapeRenderer.end();
-
-            if (!UIDisplayed) {
-                leftPanel.add(timeAndFPS);
-                leftPanel.row();
-                leftPanel.add(keyOptions);
-
-                selectedInfoTable.add(selectedLabel);
-                selectedInfoTable.row().pad(10);
-                UIDisplayed = true;
-            }
-        } else {
-            if (UIDisplayed) {
-                leftPanel.clear();
-                selectedInfoTable.clear();
-                UIDisplayed = false;
-            }
+            Gdx.gl.glDisable(Gdx.gl.GL_BLEND);
         }
 
-        stage.act();
         stage.draw();
 
         if (!paused) { //now that both update and draw are done, advance the time

@@ -1,12 +1,11 @@
 package com.badlogicgames.waranimationmaker
 
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
-import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.scenes.scene2d.ui.Table
-import com.badlogic.gdx.scenes.scene2d.ui.TextField
+import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogicgames.waranimationmaker.models.NodeCollection
+
 
 class InputElement<T> private constructor(builder: Builder<T>) {
     val table: Table = builder.table
@@ -58,7 +57,11 @@ class InputElement<T> private constructor(builder: Builder<T>) {
             }
         } else {
             if (displayed) {
+                val cell = table.getCell(this.table)
                 this.table.remove()
+                // remove cell from table
+                table.cells.removeValue(cell, true)
+                table.invalidate()
                 displayed = false
             }
         }
@@ -66,13 +69,14 @@ class InputElement<T> private constructor(builder: Builder<T>) {
 
     fun display(table: Table) {
         if (!displayed) {
-            table.add(this.table)
+            table.add(this.table).pad(10f)
             table.row()
             displayed = true
         }
     }
 
     companion object {
+
         // String, Integer, Double, Float
         private val converters = mutableMapOf<Class<*>, (String) -> Any>(
             String::class.java to {
