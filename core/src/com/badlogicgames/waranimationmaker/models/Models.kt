@@ -1,10 +1,12 @@
 package com.badlogicgames.waranimationmaker.models
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.AreaColor
@@ -327,7 +329,7 @@ data class Unit(
         return texture!!
     }
 
-    fun draw(batcher: SpriteBatch, sizefactor: Float, font: BitmapFont) {
+    fun draw(batcher: SpriteBatch, sizefactor: Float, font: BitmapFont, fontShader: ShaderProgram) {
         // Draw only for the correct country
         var sizePresetFactor = 1.0f
         if (size in sizePresets) {
@@ -337,20 +339,18 @@ data class Unit(
         height = AnimationScreen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
 
         batcher.setColor(1f, 1f, 1f, alpha)
-        batcher.draw(
-            texture(),
-            screenPosition.x - width / 2,
-            screenPosition.y - height / 2,
-            width,
-            height
-        )
+        batcher.draw(texture(), screenPosition.x - width / 2, screenPosition.y - height / 2, width, height)
 
         font.color = Color(255.0f, 63.75f, 0.0f, alpha)
-        font.data.setScale((0.3 * sizefactor * sizePresetFactor).toFloat())
+        font.data.setScale(0.1f * sizefactor * sizePresetFactor)
 
+
+        batcher.setShader(fontShader)
+        fontShader.setUniformf("scale", 0.1f * sizefactor * sizePresetFactor)
         font.draw(batcher, size, screenPosition.x - width / 2, screenPosition.y + height / 2)
         if (name != null) { font.draw(batcher, name, screenPosition.x - width / 2, screenPosition.y) }
         font.draw(batcher, type, screenPosition.x - width / 2, screenPosition.y - height / 2)
+        batcher.setShader(null)
     }
 }
 

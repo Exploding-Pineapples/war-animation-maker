@@ -512,7 +512,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.begin();
         game.batcher.setColor(1,1,1, 1.0f); // Resets to no transparency
         for (Unit unit : animation.getUnits()) {
-            unit.draw(game.batcher, zoomFactor, game.bitmapFont);
+            unit.draw(game.batcher, zoomFactor, game.bitmapFont, game.fontShader);
         }
         game.batcher.setColor(1, 1, 1, 1.0f);
         game.batcher.end();

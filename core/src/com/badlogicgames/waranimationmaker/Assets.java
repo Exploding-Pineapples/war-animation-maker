@@ -19,6 +19,8 @@ package com.badlogicgames.waranimationmaker;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import java.util.HashMap;
@@ -47,6 +49,12 @@ public class Assets {
 		final Skin skin = new Skin(Gdx.files.internal(file));
 		LOADED_SKINS.put(file, skin);
 		return skin;
+	}
+
+	public static BitmapFont loadFont() {
+		Texture texture = new Texture(Gdx.files.internal("assets/fonts/bitstream_vera_sans/distancefield.png"), true); // true enables mipmaps
+		texture.setFilter(Texture.TextureFilter.MipMapLinearNearest, Texture.TextureFilter.Linear); // linear filtering in nearest mipmap image
+		return new BitmapFont(Gdx.files.internal("assets/fonts/bitstream_vera_sans/distancefield.fnt"), new TextureRegion(texture), false);
 	}
 
 	public static void playSound (Sound sound) {

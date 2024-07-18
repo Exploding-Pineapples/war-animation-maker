@@ -1,6 +1,5 @@
 package com.badlogicgames.waranimationmaker
 
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.*
@@ -47,27 +46,27 @@ class InputElement<T> private constructor(builder: Builder<T>) {
         return true
     }
 
-    fun update(selected: Any?, selectedNodeCollection: NodeCollection?, table: VerticalGroup, animationMode: Boolean) {
+    fun update(selected: Any?, selectedNodeCollection: NodeCollection?, verticalGroup: VerticalGroup, animationMode: Boolean) {
         val shouldDisplay = shouldDisplay(selected, selectedNodeCollection, animationMode)
         if (shouldDisplay) {
             textField.setText(input.invoke())
             if (!displayed) {
-                display(table)
+                display(verticalGroup)
                 displayed = true
             }
         } else {
             if (displayed) {
                 this.table.remove()
                 // Remove cell from table
-                table.layout()
+                verticalGroup.layout()
                 displayed = false
             }
         }
     }
 
-    fun display(table: VerticalGroup) {
+    fun display(verticalGroup: VerticalGroup) {
         if (!displayed) {
-            table.addActor(this.table)
+            verticalGroup.addActor(this.table)
             displayed = true
         }
     }
