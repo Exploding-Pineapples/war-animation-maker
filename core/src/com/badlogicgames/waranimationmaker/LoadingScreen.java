@@ -3,7 +3,7 @@ package com.badlogicgames.waranimationmaker;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogicgames.waranimationmaker.models.Animation;
 
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
@@ -13,7 +13,6 @@ public class LoadingScreen extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;
     Animation animation;
     boolean loading;
-    Stage stage;
 
     public LoadingScreen(WarAnimationMaker game, Animation animation) {
         this.game = game;
@@ -23,12 +22,16 @@ public class LoadingScreen extends ScreenAdapter implements InputProcessor {
 
     @Override
     public void render(float delta) {
-        System.out.println("Loading");
         game.batcher.begin();
 
         game.gl.glClearColor(0, 0, 0, 1);
         game.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.bitmapFont.draw(game.batcher, "Loading", DISPLAY_WIDTH/2F, DISPLAY_HEIGHT/2F);
+        game.batcher.setShader(game.fontShader);
+        game.fontShader.setUniformf("outlineDistance", 0.5f);
+        GlyphLayout layout = new GlyphLayout();
+        layout.setText(game.bitmapFont, "Loading...");
+        game.bitmapFont.draw(game.batcher, layout, DISPLAY_WIDTH/2F - layout.width / 2, DISPLAY_HEIGHT/2F - layout.height / 2);
+        game.batcher.setShader(null);
         game.batcher.end();
 
         if (loading) {

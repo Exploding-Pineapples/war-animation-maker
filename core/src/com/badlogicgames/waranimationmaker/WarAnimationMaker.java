@@ -21,6 +21,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -35,16 +36,17 @@ public class WarAnimationMaker extends Game {
 	public ShaderProgram fontShader;
 	public Skin skin;
 	public InputMultiplexer multiplexer;
-
-	public Menu menu;
-
+	public GlyphLayout layout;
 	public static final int DISPLAY_WIDTH = 1920;
 	public static final int DISPLAY_HEIGHT = 1080;
+
+	public Menu menu;
 
 	@Override
 	public void create () {
 		// Initialize rendering objects
 		batcher = new SpriteBatch();
+		layout = new GlyphLayout();
 		shapeRenderer = new ShapeRenderer();
 		bitmapFont = Assets.loadFont();
 		fontShader = new ShaderProgram(Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.vert"), Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.frag"));

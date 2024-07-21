@@ -31,14 +31,26 @@ public class Assets {
 	private static final Map<String, Texture> LOADED_TEXTURES = new HashMap<>();
 	private static final Map<String, Skin> LOADED_SKINS = new HashMap<>();
 
+	public static String unitKindsPath(String file) {
+		return "assets/unitkinds/" + file;
+	}
+
+	public static String png(String file) {
+		return file + ".png";
+	}
+
 	public static Texture loadTexture (String file) {
 		if (LOADED_TEXTURES.containsKey(file)) {
 			return LOADED_TEXTURES.get(file);
 		}
 
-		final Texture texture = new Texture(Gdx.files.internal(file));
-		LOADED_TEXTURES.put(file, texture);
-		return texture;
+		try {
+			final Texture texture = new Texture(Gdx.files.internal(file));
+			LOADED_TEXTURES.put(file, texture);
+			return texture;
+		} catch (RuntimeException e) {
+			return null;
+		}
 	}
 
 	public static Skin loadSkin (String file) {

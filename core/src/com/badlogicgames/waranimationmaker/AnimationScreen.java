@@ -509,13 +509,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
         shapeRenderer.end();
 
-        game.batcher.begin();
-        game.batcher.setColor(1,1,1, 1.0f); // Resets to no transparency
         for (Unit unit : animation.getUnits()) {
-            unit.draw(game.batcher, zoomFactor, game.bitmapFont, game.fontShader);
+            Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
+            Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
+            unit.draw(game.batcher, shapeRenderer, zoomFactor, game.bitmapFont, game.fontShader, game.layout);
         }
+        Gdx.gl.glDisable(Gdx.gl.GL_BLEND);
         game.batcher.setColor(1, 1, 1, 1.0f);
-        game.batcher.end();
+
 
         //Draw the debug circles
         if (animationMode) {shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);}
@@ -607,6 +608,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             if (input != null) {
                 Unit unit = (Unit) selected;
                 unit.setType(input);
+                unit.updateTypeTexture();
             }
             return null;
         }, () -> {
@@ -631,6 +633,24 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 return "";
             }
         }, String.class, "Set name").requiredSelectedTypes(Unit.class).build());
+        inputElements.add(new InputElement.Companion.Builder<>(game.skin, (input) -> {
+            if (input != null) {
+                Unit unit = (Unit) selected;
+                for (AreaColor color : AreaColor.getEntries()) {
+                    if (input.equals(color.name())) {
+                        unit.setColor(color);
+                    }
+                }
+            }
+            return null;
+        }, () -> {
+            if (selected != null) {
+                Unit unit = (Unit) selected;
+                return unit.getColor().name();
+            } else {
+                return "";
+            }
+        }, String.class,"Set color").requiredSelectedTypes(Unit.class).build());
         // Inputs which require selected Area
         inputElements.add(new InputElement.Companion.Builder<>(game.skin, (input) -> {
             if (input != null) {

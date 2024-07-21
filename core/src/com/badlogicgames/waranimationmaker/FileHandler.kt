@@ -67,7 +67,7 @@ object FileHandler {
 
                         animations += this
 
-                        units.forEach { unit -> unit.texture() }
+                        units.forEach { unit -> unit.typeTexture() }
 
                         // preload image dimensions
                         getImageDimensions()

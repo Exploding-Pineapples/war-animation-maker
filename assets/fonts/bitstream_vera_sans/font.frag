@@ -6,8 +6,8 @@ uniform sampler2D u_texture;
 
 varying vec4 v_color;
 varying vec2 v_texCoord;
-uniform float outlineDistance = 0.25; // Between 0 and 0.5, 0 = thick outline, 0.5 = no outline
-const vec4 outlineColor = vec4(255, 255, 255, 1);
+uniform float outlineDistance = 0.2; // Between 0 and 0.5, 0 = thick outline, 0.5 = no outline
+uniform vec4 outlineColor = vec4(255, 255, 255, 1);
 
 uniform float scale = 1.0f;
 const float smoothing = 0.25f/(5.5f * scale);
