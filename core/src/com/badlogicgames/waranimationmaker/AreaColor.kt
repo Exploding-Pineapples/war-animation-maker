@@ -8,5 +8,8 @@ enum class AreaColor(val color: Color) {
     YELLOW(Color.YELLOW),
     GREEN(Color(0.0f, 1.0f, 0.0f, 1.0f)),
     BLUE(Color(0.0f, 0.0f, 1.0f, 1.0f)),
-    VIOLET(Color.VIOLET)
+    VIOLET(Color.VIOLET),
+    GRAY(Color.GRAY),
+    DARK_GRAY(Color.DARK_GRAY),
+    BLACK(Color.BLACK)
 }

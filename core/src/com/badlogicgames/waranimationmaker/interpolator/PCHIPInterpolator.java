@@ -28,9 +28,9 @@ public class PCHIPInterpolator extends Interpolator {
             delta[i] = (y[i + 1] - y[i]) / h[i];
         }
 
-        // End points: using one-sided differences
-        slopes[0] = delta[0];
-        slopes[n - 1] = delta[n - 2];
+        // End points: 0 slope
+        slopes[0] = 0;
+        slopes[n - 1] = 0;
 
         // Internal points
         for (int i = 1; i < n - 1; i++) {

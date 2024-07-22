@@ -763,7 +763,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             touchMode = TouchMode.MOVE;
             return null;
-        }, "Switch to move mode", Input.Keys.M).requiresSelected(Requirement.REQUIRES_NOT).build());
+        }, "Toggle move mode", Input.Keys.M).requiresSelected(Requirement.ANY).build());
         actions.add(Action.createBuilder(() -> {
             if (touchMode != TouchMode.NEW_NODE) {
                 touchMode = TouchMode.NEW_NODE;

@@ -4,7 +4,7 @@ import com.badlogicgames.waranimationmaker.interpolator.*
 import java.util.*
 
 class InterpolatedFloat(initValue: Float, initTime: Int) {
-    var interpolator: PCHIPInterpolator = PCHIPInterpolator(doubleArrayOf(initTime.toDouble()), doubleArrayOf(initValue.toDouble()))
+    var interpolator = PCHIPInterpolator(doubleArrayOf(initTime.toDouble()), doubleArrayOf(initValue.toDouble()))
     val setPoints: SortedMap<Double, Double> = TreeMap()
     @Transient var value: Float = initValue
 
@@ -17,9 +17,7 @@ class InterpolatedFloat(initValue: Float, initTime: Int) {
     fun updateInterpolator() {
         print("updating interpolator")
         println(setPoints)
-        interpolator = PCHIPInterpolator(doubleArrayOf(setPoints.keys.first() - 200) + setPoints.keys.toDoubleArray() + doubleArrayOf(setPoints.keys.last() + 200),
-            doubleArrayOf(setPoints.values.first()) + setPoints.values.toDoubleArray() + doubleArrayOf(setPoints.values.last()))
-        // This gives a flat slope at the end to try to keep the object in position
+        interpolator = PCHIPInterpolator(setPoints.keys.toDoubleArray(), setPoints.values.toDoubleArray())
     }
 
     fun update(time: Int): Float { // Updates value based on time and returns it
