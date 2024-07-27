@@ -2,8 +2,6 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
@@ -20,10 +18,10 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
 
-    open fun buildInputs(skin: Skin) {
+    override fun buildInputs() {
         super.buildInputs()
 
-        inputElements.add(InputElement(skin, { input ->
+        inputElements.add(InputElement(null, { input ->
             death = input
         }, label@{
             return@label death.toString()

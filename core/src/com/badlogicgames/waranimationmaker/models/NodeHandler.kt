@@ -19,7 +19,7 @@ class NodeHandler(val animation: Animation) {
 
     fun buildInputs(skin: Skin) {
         for (node in animation.nodes) {
-            node.buildInputs(skin)
+            node.buildInputs()
         }
     }
 

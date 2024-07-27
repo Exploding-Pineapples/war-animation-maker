@@ -21,6 +21,11 @@ data class Unit(
 ) : ScreenObject() {
     override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
     override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
+
+    override fun showInputs(uiVisitor: UIVisitor) {
+        uiVisitor.show(this)
+    }
+
     var color: AreaColor = AreaColor.BLUE
     var name: String? = null
     var type: String = "infantry"
@@ -38,17 +43,17 @@ data class Unit(
     private var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
     private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
 
-    override fun buildInputs(skin: Skin) {
+    override fun buildInputs() {
         super.buildInputs()
 
-        inputElements.add(InputElement(skin, { input ->
+        inputElements.add(InputElement(null, { input ->
             if (input != null) {
                 size = input
             }
         }, label@{
             return@label size
         }, String::class.java, "Set size"))
-        inputElements.add(InputElement(skin, { input ->
+        inputElements.add(InputElement(null, { input ->
             if (input != null) {
                 type = input
                 updateTypeTexture()
@@ -56,14 +61,14 @@ data class Unit(
         }, label@{
             return@label type
         }, String::class.java, "Set type"))
-        inputElements.add(InputElement(skin, { input ->
+        inputElements.add(InputElement(null, { input ->
             if (input != null) {
                 name = input
             }
         }, label@{
             return@label name
         }, String::class.java, "Set name"))
-        inputElements.add(InputElement(skin, { input ->
+        inputElements.add(InputElement(null, { input ->
             if (input != null) {
                 for (color in AreaColor.entries) {
                     if (input == color.name) {
