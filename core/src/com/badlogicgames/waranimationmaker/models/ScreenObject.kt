@@ -2,6 +2,9 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
+import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import kotlin.math.absoluteValue
@@ -10,10 +13,21 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
     var death: Int? = null
     var alpha: Float = 1f
     @Transient override var screenPosition: Coordinate = Coordinate(0f, 0f)
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     open fun clicked(x: Float, y: Float): Boolean
     {
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
+    }
+
+    open fun buildInputs(skin: Skin) {
+        super.buildInputs()
+
+        inputElements.add(InputElement(skin, { input ->
+            death = input
+        }, label@{
+            return@label death.toString()
+        }, Int::class.java, "Set death"))
     }
 
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
