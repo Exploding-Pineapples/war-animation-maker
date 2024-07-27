@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 data class Node(
     override var position: Coordinate,
     override val initTime: Int,
+    override val id: NodeID
 ) : ScreenObject(), Object  {
     var color: Color = Color.GREEN
     override var xInterpolator = InterpolatedFloat(position.x, initTime)
@@ -29,10 +30,13 @@ data class Node(
         }
     }
 
-    fun draw(shapeRenderer: ShapeRenderer, animationMode: Boolean) {
-        if (animationMode) {
-            shapeRenderer.color = color
-            shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
-        }
+    fun drawAsLineNode(shapeRenderer: ShapeRenderer) {
+        shapeRenderer.color = color
+        shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
+    }
+
+    fun drawAsAreaNode(shapeRenderer: ShapeRenderer) {
+        shapeRenderer.color = Color.BLUE
+        shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
     }
 }

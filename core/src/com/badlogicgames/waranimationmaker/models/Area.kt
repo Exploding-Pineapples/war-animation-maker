@@ -1,66 +1,32 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogicgames.waranimationmaker.AreaColor
 import earcut4j.Earcut
-import java.util.ArrayList
+import java.util.*
 
-data class Area (
-    override val nodes: MutableList<Node>
-) : NodeCollection() {
-    var color: AreaColor = AreaColor.RED
-    var lineIDAndOrder: List<Pair<Int, Int>> = mutableListOf() // Stores the lineIDs which correspond to lines and an integer which represents at what index in nodes should the line's points be inserted
+data class Area (override val id: AreaID) : NodeCollection() {
+    var orderOfLineSegments: SortedMap<Int, MutableList<LineSegment>> = sortedMapOf() // Stores the interpolated line segments to draw to
     override var alpha: Float = 0.2f
     @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
 
-    fun calculatePolygon(time: Int, animation: Animation) {
-        // Converts lineIDs into Line objects from the lineIDAndOrder list
-        val convertedLineIDs: MutableList<Pair<Line, Int>> = ArrayList()
+    override fun update() { // Takes coordinates from drawCoords and turns it into an earcut polygon in drawPoly
+        super.update()
 
-        if (lineIDAndOrder == null) {
-            lineIDAndOrder = mutableListOf()
+        if (orderOfLineSegments == null) {
+            orderOfLineSegments = sortedMapOf()
         }
 
-        for ((first, second) in lineIDAndOrder) {
-            val line = animation.getLineByID(first)
+        val poly = mutableListOf<Double>()
 
-            if (line != null) {
-                convertedLineIDs.add(Pair(line, second))
-            } else {
-                println("Line with ID $first not found")
-            }
+        for (coordinate in drawCoords) {
+            //flattens points into 1D array
+            poly.add(coordinate.x.toDouble())
+            poly.add(coordinate.y.toDouble())
         }
 
-        val border1D = DoubleArray(nodes.size * 2)
-        var poly = DoubleArray(0)
+        drawCoords.clear()
 
-        var n = 0
-        updateDrawNodes(time)
-        updateNonDrawNodes(time)
-        while (n < drawNodes.size) {
-            val node = nodes[n]
-            border1D[2 * n] = node.screenPosition.x.toDouble()
-            border1D[2 * n + 1] = node.screenPosition.y.toDouble()
-            n++
-        }
-
-        var lastBorderIndex = 0
-        for (lineIntPair in convertedLineIDs) {
-            //flattens interpolatedX and interpolatedY points into 1D array
-            val line: Line = lineIntPair.first
-            val linePoly = DoubleArray(line.interpolatedX.size * 2)
-            for (i in line.interpolatedX.indices) {
-                linePoly[i * 2] = line.interpolatedX[i].toDouble()
-                linePoly[i * 2 + 1] = line.interpolatedY[i].toDouble()
-            }
-
-            poly += border1D.slice(lastBorderIndex until lineIntPair.second * 2)
-            lastBorderIndex = lineIntPair.second * 2
-            poly += linePoly
-        }
-        poly += border1D.slice(lastBorderIndex until border1D.size)
-
-        val earcut = Earcut.earcut(poly) //turns polygon into series of triangles represented by polygon vertex indexes
+        val earcut = Earcut.earcut(poly.toDoubleArray()) //turns polygon into series of triangles represented by polygon vertex indexes
 
         drawPoly = mutableListOf()
 
@@ -80,17 +46,14 @@ data class Area (
         }
     }
 
-    fun update(time: Int, zoom: Float, cx: Float, cy: Float, animation: Animation) {
-        for (node in nodes) {
-            node.goToTime(time, zoom, cx, cy)
-        }
-        calculatePolygon(time, animation)
-    }
-
     fun draw(shapeRenderer: ShapeRenderer) {
         shapeRenderer.color = color.color
         for (triangle in drawPoly) {
             shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5])
         }
+    }
+
+    override fun toString(): String {
+        return orderOfLineSegments.toString()
     }
 }
