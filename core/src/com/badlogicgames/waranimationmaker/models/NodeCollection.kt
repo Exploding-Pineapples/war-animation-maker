@@ -1,6 +1,5 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 
@@ -9,12 +8,14 @@ abstract class NodeCollection : HasInputs {
     val nodeIDs: MutableList<NodeID> = mutableListOf()
     @Transient var drawCoords: MutableList<Coordinate> = mutableListOf()
     abstract val id: ID
-    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     var color: AreaColor = AreaColor.RED
 
-    open fun buildInputs(skin: Skin) {
+    override fun buildInputs() {
+        super.buildInputs()
+
         inputElements.add(
-            InputElement(skin, { input ->
+            InputElement(null, { input ->
                 if (input != null) {
                     for (color in AreaColor.entries) {
                         if (input == color.name) {
