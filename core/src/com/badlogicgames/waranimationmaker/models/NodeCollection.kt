@@ -25,7 +25,7 @@ abstract class NodeCollection : HasInputs {
                 }
             }, label@{
                 return@label color.name
-            }, String::class.java, "Set node collection color")
+            }, String::class.java, "Set color")
         )
     }
 
