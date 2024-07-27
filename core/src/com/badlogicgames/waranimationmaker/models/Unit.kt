@@ -7,11 +7,14 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.Assets
+import com.badlogicgames.waranimationmaker.InputElement
 
 data class Unit(
+    override val id: UnitID,
     override var position: Coordinate,
     override val initTime: Int,
     val image: String,
@@ -34,6 +37,44 @@ data class Unit(
     @Transient var countryTexture: Texture? = null
     private var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
     private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
+
+    override fun buildInputs(skin: Skin) {
+        super.buildInputs()
+
+        inputElements.add(InputElement(skin, { input ->
+            if (input != null) {
+                size = input
+            }
+        }, label@{
+            return@label size
+        }, String::class.java, "Set size"))
+        inputElements.add(InputElement(skin, { input ->
+            if (input != null) {
+                type = input
+                updateTypeTexture()
+            }
+        }, label@{
+            return@label type
+        }, String::class.java, "Set type"))
+        inputElements.add(InputElement(skin, { input ->
+            if (input != null) {
+                name = input
+            }
+        }, label@{
+            return@label name
+        }, String::class.java, "Set name"))
+        inputElements.add(InputElement(skin, { input ->
+            if (input != null) {
+                for (color in AreaColor.entries) {
+                    if (input == color.name) {
+                        this.color = color
+                    }
+                }
+            }
+        }, label@{
+            return@label color.name
+        }, String::class.java, "Set color"))
+    }
 
     override fun clicked(x: Float, y: Float): Boolean {
         return ((x in (screenPosition.x - width * 0.8f)..(screenPosition.x + width * 0.8f)) && (y in (screenPosition.y - height * 0.45f)..(screenPosition.y + height * 0.45f)))
