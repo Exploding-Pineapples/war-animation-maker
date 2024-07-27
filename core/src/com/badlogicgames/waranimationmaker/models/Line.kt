@@ -1,7 +1,6 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
@@ -14,11 +13,12 @@ data class Line(
     var lineThickness: Float = 5.0f
     override var alpha: Float = 1.0f
 
-    override fun buildInputs(skin: Skin) {
-        super.buildInputs(skin)
+    override fun buildInputs() {
+        println("building line inpuits")
+        super.buildInputs()
 
         inputElements.add(
-            InputElement(skin, { input ->
+            InputElement(null, { input ->
                 if (input != null) {
                     lineThickness = input
                 }
@@ -26,6 +26,10 @@ data class Line(
                 return@label lineThickness.toString()
             }, Float::class.java, "Set line width")
         )
+    }
+
+    override fun showInputs(uiVisitor: UIVisitor) {
+        uiVisitor.show(this)
     }
 
     fun update(animation: Animation) {

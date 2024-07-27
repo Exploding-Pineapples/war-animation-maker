@@ -24,6 +24,10 @@ data class Camera(
         zoomInterpolator.holdValueUntil(time)
     }
 
+    override fun showInputs(uiVisitor: UIVisitor) {
+        uiVisitor.show(this)
+    }
+
     override fun removeFrame(time: Int): Boolean {
         val zoomResult = zoomInterpolator.removeFrame(time)
         val positionResult = super.removeFrame(time)
