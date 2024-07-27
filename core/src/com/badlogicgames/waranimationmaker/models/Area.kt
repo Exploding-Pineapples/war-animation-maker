@@ -46,6 +46,10 @@ data class Area (override val id: AreaID) : NodeCollection() {
         }
     }
 
+    override fun showInputs(uiVisitor: UIVisitor) {
+        uiVisitor.show(this)
+    }
+
     fun draw(shapeRenderer: ShapeRenderer) {
         shapeRenderer.color = color.color
         for (triangle in drawPoly) {
