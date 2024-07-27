@@ -49,7 +49,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     boolean UIDisplayed;
 
     TouchMode touchMode;
-    List<InputElement> inputElements;
 
     GL20 gl;
     Texture fullMap; // entire background map
@@ -65,6 +64,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Label selectedLabel;
     List<Action> actions;
     Node origin;
+    UIVisitor uiVisitor;
 
     public AnimationScreen(WarAnimationMaker game, Animation animation) {
         this.animation = animation;
@@ -93,13 +93,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         buildActions();
         UIDisplayed = false;
         stage = new Stage();
-        inputElements = new ArrayList<>();
 
         timeAndFPS = new Label("", game.skin);
         keyOptions = new Label("", game.skin);
         selectedLabel = new Label("", game.skin);
 
         inputGroup = new VerticalGroup();
+        uiVisitor = new UIVisitor(inputGroup, game.skin);
         selectedInfoTable = new Table();
         stage.addActor(selectedInfoTable);
 
@@ -145,25 +145,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public ArrayList<ScreenObject> select(float x, float y) {
-        if (selected != null) {
-            selected.hideInputs(inputGroup);
-        }
-
-        ArrayList<ScreenObject> selectedThings = animation.selectObject(x, y);
-        if (selectedThings.isEmpty()) {
-            resetSelected();
-            return new ArrayList<>(0);
-        } else {
-            selected = selectedThings.get(0);
-            selected.showInputs(inputGroup);
-            selectedNodeCollections = animation.getParentsOfType(selected.getId(), NodeCollection.class);
-            return selectedThings;
-        }
+        return select(x, y, NodeCollection.class);
     }
 
     public ArrayList<ScreenObject> select(float x, float y, Class<? extends NodeCollection> clazz) {
         if (selected != null) {
-            selected.hideInputs(inputGroup);
+            selected.hideInputs(uiVisitor);
+            for (NodeCollection collection : selectedNodeCollections) {
+                collection.hideInputs(uiVisitor);
+            }
         }
 
         ArrayList<ScreenObject> selectedThings = animation.selectObject(x, y);
@@ -172,8 +162,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return new ArrayList<>(0);
         } else {
             selected = selectedThings.get(0);
-            selected.showInputs(inputGroup);
+            selected.showInputs(uiVisitor);
             selectedNodeCollections = animation.getParentsOfType(selected.getId(), clazz);
+            for (NodeCollection collection : selectedNodeCollections) {
+                collection.showInputs(uiVisitor);
+            }
             return selectedThings;
         }
     }
@@ -222,6 +215,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                             addAtIndex = selectedNodeCollection.getNodeIDs().indexOf(newSelection.getId()) + 1;
                             node = animation.createNodeAtPosition(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
                             selected = node;
+                            selected.showInputs(uiVisitor);
                             selectedNodeCollection.getNodeIDs().add(addAtIndex, node.getId());
                             return true;
                         }
@@ -229,9 +223,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     // If the user does not select another node on the same line, create a new node on the same line in front of it
                     node = animation.createNodeAtPosition(time, mouseX, mouseY);
                     selected = node;
+                    selected.showInputs(uiVisitor);
                     selectedNodeCollections.get(0).getNodeIDs().add(addAtIndex, node.getId());
                 } else {
                     selected = animation.createNodeAtPosition(time, mouseX, mouseY);
+                    selected.showInputs(uiVisitor);
                     selectedNodeCollections.add(animation.addNewLine(Collections.singletonList((NodeID) selected.getId())));
 
                     return true;
@@ -380,7 +376,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 selectedInfoTable.add(selectedLabel).expandX().pad(10).left();
                 selectedInfoTable.row().pad(10);
                 if (selected != null) {
-                    selected.showInputs(inputGroup);
+                    selected.showInputs(uiVisitor);
                 }
                 selectedInfoTable.add(inputGroup);
 
@@ -396,7 +392,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         } else {
             if (UIDisplayed) {
                 if (selected != null) {
-                    selected.hideInputs(inputGroup);
+                    selected.hideInputs(uiVisitor);
                 }
                 leftPanel.clear();
                 selectedInfoTable.clear();
@@ -465,7 +461,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             //Draw the selected object
             if (selected != null) {
-                selected.drawAsSelected(shapeRenderer, animationMode, camera.zoom, camera.position.x, camera.position.y, inputGroup);
+                selected.drawAsSelected(shapeRenderer, animationMode, camera.zoom, camera.position.x, camera.position.y);
             }
 
             shapeRenderer.end();
@@ -485,6 +481,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     private void resetSelected() {
+        selected.hideInputs(uiVisitor);
+        for (NodeCollection nodeCollection : selectedNodeCollections) {
+            nodeCollection.hideInputs(uiVisitor);
+        }
         selected = null;
         selectedNodeCollections = null;
     }
@@ -579,6 +579,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 }
             }
 
+            assert selectedLine != null;
             area.getOrderOfLineSegments().put(1, Collections.singletonList(new LineSegment(selectedLine.getId(),
                     new Pair<>(selectedLine.getNodeIDs().get(0),
                             selectedLine.getNodeIDs().get(selectedLine.getNodeIDs().size() - 1))))); //TODO make it safe to accidentally select an area node
@@ -592,15 +593,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         for (int num_key = Input.Keys.NUM_2; (num_key <= Input.Keys.NUM_9) && (num_key < animation.getCountries().size() + 9); num_key++) {
             int finalNum_key = num_key;
             actions.add(Action.createBuilder(() -> {
-                        Unit unit = animation.getUnitHandler().newUnit(
+                        selected = animation.getUnitHandler().newUnit(
                                 new Coordinate(mouseX, mouseY),
                                 time,
-                                animation.getCountries().get(finalNum_key - 9) //number key enum number to list number
+                                animation.getCountries().get(finalNum_key - 9) // Number key enum number to list number
                         );
 
-                        System.out.println(unit);
+                        System.out.println(selected);
+                        selected.showInputs(uiVisitor);
 
-                        selected = unit;
                         return null;
                     }, "Create Unit of country " + animation.getCountries().get(finalNum_key - 9), num_key
             ).requiresSelected(Requirement.REQUIRES_NOT).requiredTouchModes(TouchMode.DEFAULT, TouchMode.MOVE).build());
