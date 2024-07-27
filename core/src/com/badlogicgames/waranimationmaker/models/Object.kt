@@ -1,10 +1,12 @@
 package com.badlogicgames.waranimationmaker.models
 
-interface Object {
+interface Object : HasInputs {
     var position: Coordinate
     var xInterpolator: InterpolatedFloat
     var yInterpolator: InterpolatedFloat
     val initTime: Int
+
+    val id: ID
 
     fun goToTime(time: Int): Boolean { // Can only be called after at least one key frame has been added
         if (xInterpolator == null) {
