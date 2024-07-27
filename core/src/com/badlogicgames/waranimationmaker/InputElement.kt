@@ -5,18 +5,10 @@ import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.*
 
 
-class InputElement<T> (val skin: Skin, var output: (T?) -> Unit, val input: () -> String?, val clazz: Class<T>, var name: String, var converter: ((String) -> T)? = null) {
+class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, val input: () -> String?, val clazz: Class<T>, var name: String, var converter: ((String) -> T)? = null) {
     @Transient var table: Table? = null
     @Transient var textField: TextField? = null
     var displayed: Boolean = false
-
-    fun update(animationMode: Boolean, verticalGroup: VerticalGroup) {
-        if (animationMode) {
-            display(verticalGroup)
-        } else {
-            hide(verticalGroup)
-        }
-    }
 
     fun hide(verticalGroup: VerticalGroup) {
         if (displayed) {
@@ -28,7 +20,8 @@ class InputElement<T> (val skin: Skin, var output: (T?) -> Unit, val input: () -
         }
     }
 
-    fun display(verticalGroup: VerticalGroup) {
+    fun show(verticalGroup: VerticalGroup, inSkin: Skin?) {
+        val skin: Skin? = inSkin?: this.skin
         if (!displayed) {
             table = Table()
             val nameLabel = Label(name, skin)
@@ -64,6 +57,9 @@ class InputElement<T> (val skin: Skin, var output: (T?) -> Unit, val input: () -
                 it
             },
             Integer::class.java to {
+                it.toInt()
+            },
+            Int::class.java to {
                 it.toInt()
             },
             Float::class.java to {
