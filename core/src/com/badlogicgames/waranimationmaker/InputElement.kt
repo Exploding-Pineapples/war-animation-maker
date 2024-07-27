@@ -3,76 +3,61 @@ package com.badlogicgames.waranimationmaker
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogicgames.waranimationmaker.models.NodeCollection
 
 
-class InputElement<T> private constructor(builder: Builder<T>) {
-    val table: Table = builder.table
-    val textField: TextField = builder.textField
-    val input = builder.input
-    val requiredSelectedTypes = builder.requiredSelectedTypes
-    val requiredSelectedNodeCollectionTypes = builder.requiredSelectedNodeCollectionTypes
+class InputElement<T> (val skin: Skin, var output: (T?) -> Unit, val input: () -> String?, val clazz: Class<T>, var name: String, var converter: ((String) -> T)? = null) {
+    @Transient var table: Table? = null
+    @Transient var textField: TextField? = null
     var displayed: Boolean = false
 
-    fun shouldDisplay(selected: Any?, selectedNodeCollection: NodeCollection?, animationMode: Boolean): Boolean {
-        if (!animationMode) {
-            return false
+    fun update(animationMode: Boolean, verticalGroup: VerticalGroup) {
+        if (animationMode) {
+            display(verticalGroup)
+        } else {
+            hide(verticalGroup)
         }
-        if (selected == null) {
-            return false
-        }
-        if (requiredSelectedTypes.isNotEmpty()) {
-            var found = false
-            for (type in requiredSelectedTypes) {
-                if (type.isAssignableFrom(selected.javaClass)) {
-                    found = true
-                    break
-                }
-            }
-            if (!found) return false
-        }
-        if (requiredSelectedNodeCollectionTypes.isNotEmpty()) {
-            var found = false
-            for (type in requiredSelectedNodeCollectionTypes) {
-                if (selectedNodeCollection != null) {
-                    if (type.isAssignableFrom(selectedNodeCollection.javaClass)) {
-                        found = true
-                        break
-                    }
-                }
-            }
-            if (!found) return false
-        }
-        return true
     }
 
-    fun update(selected: Any?, selectedNodeCollection: NodeCollection?, verticalGroup: VerticalGroup, animationMode: Boolean) {
-        val shouldDisplay = shouldDisplay(selected, selectedNodeCollection, animationMode)
-        if (shouldDisplay) {
-            textField.setText(input.invoke())
-            if (!displayed) {
-                display(verticalGroup)
-                displayed = true
-            }
-        } else {
-            if (displayed) {
-                this.table.remove()
-                // Remove cell from table
-                verticalGroup.layout()
-                displayed = false
-            }
+    fun hide(verticalGroup: VerticalGroup) {
+        if (displayed) {
+            verticalGroup.layout()
+            table!!.remove()
+            table = null
+            textField = null
+            displayed = false
         }
     }
 
     fun display(verticalGroup: VerticalGroup) {
         if (!displayed) {
-            verticalGroup.addActor(this.table)
+            table = Table()
+            val nameLabel = Label(name, skin)
+            textField = TextField(input.invoke(), skin)
+            textField!!.setText(input.invoke())
+            textField!!.addListener(object : InputListener() {
+                override fun keyTyped(event: InputEvent, character: Char): Boolean {
+                    val existing = converters[clazz]
+                        ?: converter
+                        ?: throw IllegalArgumentException("No converter for $clazz")
+                    if (textField!!.text.equals("")) {
+                        output.invoke(null)
+                    } else {
+                        output.invoke(existing(textField!!.text) as T)
+                    }
+                    return true
+                }
+            })
+
+            table!!.add(nameLabel)
+            table!!.add(textField).pad(10.0f)
+            table!!.row()
+
+            verticalGroup.addActor(table)
             displayed = true
         }
     }
 
     companion object {
-
         // String, Integer, Double, Float
         private val converters = mutableMapOf<Class<*>, (String) -> Any>(
             String::class.java to {
@@ -85,49 +70,5 @@ class InputElement<T> private constructor(builder: Builder<T>) {
                 it.toFloat()
             }
         )
-
-        class Builder<T>(skin: Skin, var output: (T?) -> Unit, var input: () -> String?, private val clazz: Class<T>, var name: String) {
-            val requiredSelectedNodeCollectionTypes = mutableListOf<Class<*>>()
-            var table = Table()
-            var textField = TextField(input.invoke(), skin)
-            var nameLabel = Label(name, skin)
-            var requiredSelectedTypes = mutableListOf<Class<*>>()
-            var converter: ((String) -> T)? = null
-
-            fun requiredSelectedNodeCollectionTypes(vararg classes: Class<*>): Builder<T> {
-                requiredSelectedNodeCollectionTypes.addAll(classes)
-                return this
-            }
-
-            fun requiredSelectedTypes(vararg classes: Class<*>): Builder<T> {
-                requiredSelectedTypes.addAll(classes)
-                return this
-            }
-
-            fun converter(converter: (String) -> T): Builder<T> {
-                this.converter = converter
-                return this
-            }
-
-            fun build(): InputElement<T> {
-                table.add(nameLabel)
-                table.add(textField).pad(10.0f)
-                table.row()
-                textField.addListener(object : InputListener() {
-                    override fun keyTyped(event: InputEvent, character: Char): Boolean {
-                        val existing = converters[clazz]
-                            ?: converter
-                            ?: throw IllegalArgumentException("No converter for $clazz")
-                        if (textField.text.equals("")) {
-                            output.invoke(null)
-                        } else {
-                            output.invoke(existing(textField.text) as T)
-                        }
-                        return true
-                    }
-                })
-                return InputElement(this)
-            }
-        }
     }
 }
