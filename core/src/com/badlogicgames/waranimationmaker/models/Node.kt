@@ -13,6 +13,10 @@ data class Node(
     override var xInterpolator = InterpolatedFloat(position.x, initTime)
     override var yInterpolator = InterpolatedFloat(position.y, initTime)
 
+    override fun showInputs(uiVisitor: UIVisitor) {
+        uiVisitor.show(this)
+    }
+
     init {
         screenPosition = Coordinate(0f, 0f)
     }
