@@ -1,15 +1,17 @@
 package com.badlogicgames.waranimationmaker
 
 import com.badlogicgames.waranimationmaker.models.Animation
-import com.google.gson.GsonBuilder
-import com.google.gson.LongSerializationPolicy
+import com.badlogicgames.waranimationmaker.models.ID
+import com.google.gson.*
 import java.io.File
+import java.lang.reflect.Type
 
 object FileHandler {
     private val gson = GsonBuilder()
         .setPrettyPrinting()
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)
         .serializeNulls()
+        .registerTypeAdapter(ID::class.java, AbstractTypeSerializer<ID>())
         .create()
 
     val animations = mutableListOf<Animation>()
@@ -77,4 +79,35 @@ object FileHandler {
             }
         }
     }
+}
+
+interface AbstractTypeSerializable {
+
+    fun getAbstractType(): Type {
+        throw IllegalStateException("Serializable abstract type has not been setup")
+    }
+
+}
+
+class AbstractTypeSerializer<T : AbstractTypeSerializable> : JsonSerializer<T>, JsonDeserializer<T> {
+
+    override fun serialize(src: T, typeOf: Type, context: JsonSerializationContext): JsonElement {
+        val abstractType = src.getAbstractType() as Class<*>
+        val json = JsonObject()
+        json.addProperty("type", abstractType.name)
+        json.add("properties", context.serialize(src, src.getAbstractType()))
+        return json
+    }
+
+    override fun deserialize(json: JsonElement, typeOf: Type, context: JsonDeserializationContext): T {
+        val type = json.asJsonObject.get("type").asString
+        val properties = json.asJsonObject.get("properties")
+
+        try {
+            return context.deserialize(properties, Class.forName(type))
+        } catch (e: ClassNotFoundException) {
+            throw JsonParseException("Unknown type: $type", e)
+        }
+    }
+
 }
