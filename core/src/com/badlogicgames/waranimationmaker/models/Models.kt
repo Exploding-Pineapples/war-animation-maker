@@ -1,6 +1,7 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
@@ -29,18 +30,50 @@ interface HasInputs {
         }
     }
 
-    fun showInputs(verticalGroup: VerticalGroup) {
-        updateInputs()
-        for (inputElement in inputElements) {
-            inputElement.display(verticalGroup)
+    fun showInputs(uiVisitor: UIVisitor)
+
+    fun hideInputs(uiVisitor: UIVisitor) {
+        uiVisitor.hide(this)
+    }
+}
+
+class UIVisitor(val verticalGroup: VerticalGroup, val skin: Skin) {
+    var label: Label = Label("", skin)
+
+    fun show(hasInputs: HasInputs) {
+        hasInputs.updateInputs()
+        verticalGroup.addActor(label)
+        for (inputElement in hasInputs.inputElements) {
+            inputElement.show(verticalGroup, skin)
         }
     }
+    fun show(camera: Camera) {
+        label.setText("Camera: ")
+        show(camera as HasInputs)
+    }
+    fun show(unit: Unit) {
+        label.setText("Unit: ")
+        show(unit as HasInputs)
+    }
+    fun show(node: Node) {
+        label.setText("Node: ")
+        show(node as HasInputs)
+    }
+    fun show(area: Area) {
+        label.setText("Area: ")
+        show(area as HasInputs)
+    }
+    fun show(line: Line) {
+        label.setText("Line: ")
+        show(line as HasInputs)
+    }
 
-    fun hideInputs(verticalGroup: VerticalGroup) {
-        updateInputs()
-        for (inputElement in inputElements) {
+    fun hide(hasInputs: HasInputs) {
+        hasInputs.updateInputs()
+        for (inputElement in hasInputs.inputElements) {
             inputElement.hide(verticalGroup)
         }
+        verticalGroup.removeActor(label)
     }
 }
 
@@ -135,6 +168,7 @@ data class Animation @JvmOverloads constructor(
 
     fun addLine(line: Line): Line {
         lines.add(line)
+        line.buildInputs()
         nodeCollectionId++
         return line
     }
@@ -179,10 +213,9 @@ data class Animation @JvmOverloads constructor(
 
 
         if (type.isAssignableFrom(Unit::class.java)) {
-            for (unit in units) {
-                if (unit.clicked(x, y)) {
-                    screenObjects.add(unit)
-                }
+            val selectedUnit = unitHandler.clicked(x, y)
+            if (selectedUnit != null) {
+                screenObjects.add(selectedUnit)
             }
         }
 
@@ -190,7 +223,6 @@ data class Animation @JvmOverloads constructor(
             for (node in nodes) {
                 if (node.clicked(x, y)) {
                     screenObjects.add(node)
-
                 }
             }
         }
@@ -275,6 +307,13 @@ data class Animation @JvmOverloads constructor(
     fun buildInputs(skin: Skin) {
         nodeHandler.buildInputs(skin)
         unitHandler.buildInputs(skin)
+
+        for (line in lines) {
+            line.buildInputs()
+        }
+        for (area in areas) {
+            area.buildInputs()
+        }
     }
 
     fun update(time: Int, camera: OrthographicCamera, verticalGroup: VerticalGroup, animationMode: Boolean) {
