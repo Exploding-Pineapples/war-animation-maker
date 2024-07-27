@@ -15,8 +15,6 @@ class InterpolatedFloat(initValue: Float, initTime: Int) {
     }
 
     fun updateInterpolator() {
-        print("updating interpolator")
-        println(setPoints)
         interpolator = PCHIPInterpolator(setPoints.keys.toDoubleArray(), setPoints.values.toDoubleArray())
     }
 
