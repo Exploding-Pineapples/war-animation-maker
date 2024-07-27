@@ -566,9 +566,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         actions.add(Action.createBuilder(() -> {
             Node node = animation.createNodeAtPosition(time, mouseX, mouseY);
             Area area = animation.addNewArea(Collections.singletonList(node.getId()));
-            switchSelected(node);
-
-            System.out.println(selectedNodeCollections);
 
             for (NodeCollection nodeCollection : selectedNodeCollections) {
                 if (nodeCollection instanceof Line) {
@@ -578,6 +575,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                                     selectedLine.getNodeIDs().get(selectedLine.getNodeIDs().size() - 1)))));
                 }
             }
+            switchSelected(node);
 
             touchMode = TouchMode.NEW_NODE;
             return null;
