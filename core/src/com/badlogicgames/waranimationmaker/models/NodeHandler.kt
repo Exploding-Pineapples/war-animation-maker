@@ -66,12 +66,13 @@ class NodeHandler(val animation: Animation) {
             line.update(animation)
         }
 
-        var prevIndex = 0
-
         animation.areas.removeIf { it.nodeIDs.isEmpty() }
+
+        var prevIndex: Int
 
         for (area in animation.areas) {
             area.update()
+            prevIndex = 0
             for (entry in area.orderOfLineSegments) {
                 for (index in prevIndex..<entry.key) { // Adds the part of the border until the index
                     val node = animation.getNodeByID(area.nodeIDs[index])
