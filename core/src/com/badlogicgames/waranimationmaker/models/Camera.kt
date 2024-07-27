@@ -5,6 +5,7 @@ data class Camera(
     override var zoom: Float = 1.0f,
     override val initTime: Int
 ) : ScreenObject(), ObjectWithZoom, ObjectWithScreenPosition {
+    override val id: ID = NodeID(-1)
     override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
     override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
     override var zoomInterpolator: InterpolatedFloat = InterpolatedFloat(zoom, initTime)
