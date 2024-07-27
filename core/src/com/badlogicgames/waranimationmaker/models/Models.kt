@@ -38,33 +38,36 @@ interface HasInputs {
 }
 
 class UIVisitor(val verticalGroup: VerticalGroup, val skin: Skin) {
-    var label: Label = Label("", skin)
+    var text: String = ""
+    val labels: MutableList<Label> = mutableListOf()
 
     fun show(hasInputs: HasInputs) {
         hasInputs.updateInputs()
+        val label = Label(text, skin)
+        labels.add(label)
         verticalGroup.addActor(label)
         for (inputElement in hasInputs.inputElements) {
             inputElement.show(verticalGroup, skin)
         }
     }
     fun show(camera: Camera) {
-        label.setText("Camera: ")
+        text = "Camera: "
         show(camera as HasInputs)
     }
     fun show(unit: Unit) {
-        label.setText("Unit: ")
+        text = "Unit: "
         show(unit as HasInputs)
     }
     fun show(node: Node) {
-        label.setText("Node: ")
+        text = "Node: "
         show(node as HasInputs)
     }
     fun show(area: Area) {
-        label.setText("Area: ")
+        text = "Area: "
         show(area as HasInputs)
     }
     fun show(line: Line) {
-        label.setText("Line: ")
+        text = "Line: "
         show(line as HasInputs)
     }
 
@@ -73,7 +76,10 @@ class UIVisitor(val verticalGroup: VerticalGroup, val skin: Skin) {
         for (inputElement in hasInputs.inputElements) {
             inputElement.hide(verticalGroup)
         }
-        verticalGroup.removeActor(label)
+        for (label in labels) {
+            verticalGroup.removeActor(label)
+        }
+        labels.clear()
     }
 }
 
@@ -181,6 +187,7 @@ data class Animation @JvmOverloads constructor(
 
     fun addArea(area: Area): Area {
         areas.add(area)
+        area.buildInputs()
         nodeCollectionId++
         return area
     }
@@ -199,6 +206,7 @@ data class Animation @JvmOverloads constructor(
 
     fun createNodeAtPosition(time: Int, x: Float, y: Float): Node {
         val node = Node(Coordinate(x, y), time, NodeID(nodeId))
+        node.buildInputs()
         nodes.add(node)
         nodeId++
         return node
@@ -266,9 +274,26 @@ data class Animation @JvmOverloads constructor(
     fun getParents(id: ID) : List<NodeCollection> {
         val output: MutableList<NodeCollection> = mutableListOf()
         if (id::class.java == NodeID::class.java) {
+            val nodeID = id as NodeID
             for (area in areas) {
-                if (id.value in area.nodeIDs.map { it.value }) {
+                if (nodeID.value in area.nodeIDs.map { it.value }) {
                     output.add(area)
+                }
+                for (lineSegments in area.orderOfLineSegments.values) { // If one of the area's line segments contains this node, add the area as a parent
+                    val removeEntries: MutableList<LineSegment> = mutableListOf()
+                    for (lineSegment in lineSegments) {
+                        val line = getLineByID(lineSegment.lineID)
+                        if (line != null) {
+                            if (lineSegment.contains(nodeID, line)) {
+                                output.add(area)
+                            }
+                        } else {
+                            removeEntries.add(lineSegment)
+                        }
+                    }
+                    for (lineSegment in removeEntries) {
+                        lineSegments.remove(lineSegment)
+                    }
                 }
             }
             for (line in lines) {

@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
@@ -146,9 +145,17 @@ class NodeHandler(val animation: Animation) {
         if (animationMode) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             for (area in animation.areas) {
+                val removeIDs = mutableListOf<NodeID>()
                 for (id in area.nodeIDs) {
-                    val node = animation.getNodeByID(id)!!
-                    node.drawAsAreaNode(shapeRenderer)
+                    val node = animation.getNodeByID(id)
+                    if (node == null) {
+                        removeIDs.add(id)
+                    } else {
+                        node.drawAsAreaNode(shapeRenderer)
+                    }
+                }
+                for (removeID in removeIDs) {
+                    area.nodeIDs.remove(removeID)
                 }
             }
             shapeRenderer.end()

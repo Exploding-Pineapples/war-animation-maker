@@ -12,8 +12,8 @@
         "value": 0
       },
       "position": {
-        "x": 299.0,
-        "y": 522.0
+        "x": 1098.7958,
+        "y": 467.68625
       },
       "initTime": 0,
       "image": "assets\\flags\\bgflag.png",
@@ -24,11 +24,11 @@
             0.0
           ],
           "y": [
-            299.0
+            1098.7957763671875
           ]
         },
         "setPoints": {
-          "0.0": 299.0
+          "0.0": 1098.7957763671875
         }
       },
       "yInterpolator": {
@@ -38,32 +38,32 @@
             0.0
           ],
           "y": [
-            522.0
+            467.6862487792969
           ]
         },
         "setPoints": {
-          "0.0": 522.0
+          "0.0": 467.6862487792969
         }
       },
       "color": "RED",
       "name": "2",
       "type": "infantry",
       "size": "XX",
-      "width": 87.5,
-      "height": 87.5,
+      "width": 76.09,
+      "height": 76.09,
       "death": null,
       "alpha": 1.0
     },
     {
       "id": {
-        "value": 1
+        "value": 2
       },
       "position": {
-        "x": 570.0,
-        "y": 557.0
+        "x": 1379.8862,
+        "y": 583.15497
       },
       "initTime": 0,
-      "image": "assets\\flags\\bgflag.png",
+      "image": "assets\\flags\\naziflag.png",
       "xInterpolator": {
         "interpolator": {
           "slopes": [],
@@ -71,11 +71,11 @@
             0.0
           ],
           "y": [
-            570.0
+            1379.88623046875
           ]
         },
         "setPoints": {
-          "0.0": 570.0
+          "0.0": 1379.88623046875
         }
       },
       "yInterpolator": {
@@ -85,19 +85,19 @@
             0.0
           ],
           "y": [
-            557.0
+            583.1549682617188
           ]
         },
         "setPoints": {
-          "0.0": 557.0
+          "0.0": 583.1549682617188
         }
       },
-      "color": "BLUE",
-      "name": "4",
+      "color": "DARK_GRAY",
+      "name": "7",
       "type": "infantry",
       "size": "XX",
-      "width": 87.5,
-      "height": 87.5,
+      "width": 76.09,
+      "height": 76.09,
       "death": null,
       "alpha": 1.0
     }
@@ -107,7 +107,7 @@
       "x": 960.0,
       "y": 540.0
     },
-    "zoom": 1.0,
+    "zoom": 0.85737497,
     "initTime": 0,
     "id": {
       "type": "com.badlogicgames.waranimationmaker.models.NodeID",
@@ -150,11 +150,11 @@
           0.0
         ],
         "y": [
-          1.0
+          0.8573749661445618
         ]
       },
       "setPoints": {
-        "0.0": 1.0
+        "0.0": 0.8573749661445618
       }
     },
     "death": null,
@@ -163,146 +163,8 @@
   "nodes": [
     {
       "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 0
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 1
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 2
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 789.0,
-        "y": 633.0
+        "x": 528.4502,
+        "y": -2.3531327
       },
       "initTime": 0,
       "id": {
@@ -321,11 +183,11 @@
             0.0
           ],
           "y": [
-            789.0
+            528.4501953125
           ]
         },
         "setPoints": {
-          "0.0": 789.0
+          "0.0": 528.4501953125
         }
       },
       "yInterpolator": {
@@ -335,11 +197,11 @@
             0.0
           ],
           "y": [
-            633.0
+            -2.353132724761963
           ]
         },
         "setPoints": {
-          "0.0": 633.0
+          "0.0": -2.353132724761963
         }
       },
       "death": null,
@@ -531,8 +393,8 @@
     },
     {
       "position": {
-        "x": 939.8996,
-        "y": 882.7115
+        "x": 692.90564,
+        "y": 1070.6896
       },
       "initTime": 0,
       "id": {
@@ -551,11 +413,11 @@
             0.0
           ],
           "y": [
-            939.8995971679688
+            692.9056396484375
           ]
         },
         "setPoints": {
-          "0.0": 939.8995971679688
+          "0.0": 692.9056396484375
         }
       },
       "yInterpolator": {
@@ -565,11 +427,11 @@
             0.0
           ],
           "y": [
-            882.7114868164062
+            1070.6895751953125
           ]
         },
         "setPoints": {
-          "0.0": 882.7114868164062
+          "0.0": 1070.6895751953125
         }
       },
       "death": null,
@@ -577,12 +439,12 @@
     },
     {
       "position": {
-        "x": 0.0,
-        "y": 0.0
+        "x": 0.09327461,
+        "y": -2.3531327
       },
       "initTime": 0,
       "id": {
-        "value": 9
+        "value": 57
       },
       "color": {
         "r": 0.0,
@@ -597,11 +459,11 @@
             0.0
           ],
           "y": [
-            0.0
+            0.09327460825443268
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": 0.09327460825443268
         }
       },
       "yInterpolator": {
@@ -611,11 +473,11 @@
             0.0
           ],
           "y": [
-            0.0
+            -2.353132724761963
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": -2.353132724761963
         }
       },
       "death": null,
@@ -623,12 +485,12 @@
     },
     {
       "position": {
-        "x": 0.0,
-        "y": 0.0
+        "x": -6.9048305,
+        "y": 1070.6896
       },
       "initTime": 0,
       "id": {
-        "value": 10
+        "value": 58
       },
       "color": {
         "r": 0.0,
@@ -643,11 +505,11 @@
             0.0
           ],
           "y": [
-            0.0
+            -6.904830455780029
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": -6.904830455780029
         }
       },
       "yInterpolator": {
@@ -657,11 +519,11 @@
             0.0
           ],
           "y": [
-            0.0
+            1070.6895751953125
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": 1070.6895751953125
         }
       },
       "death": null,
@@ -669,12 +531,12 @@
     },
     {
       "position": {
-        "x": 0.0,
-        "y": 0.0
+        "x": 1081.3004,
+        "y": 873.57635
       },
       "initTime": 0,
       "id": {
-        "value": 11
+        "value": 62
       },
       "color": {
         "r": 0.0,
@@ -689,11 +551,11 @@
             0.0
           ],
           "y": [
-            0.0
+            1081.3004150390625
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": 1081.3004150390625
         }
       },
       "yInterpolator": {
@@ -703,11 +565,11 @@
             0.0
           ],
           "y": [
-            0.0
+            873.5763549804688
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": 873.5763549804688
         }
       },
       "death": null,
@@ -715,12 +577,12 @@
     },
     {
       "position": {
-        "x": 0.0,
-        "y": 0.0
+        "x": 836.3668,
+        "y": 265.90756
       },
       "initTime": 0,
       "id": {
-        "value": 12
+        "value": 63
       },
       "color": {
         "r": 0.0,
@@ -735,11 +597,11 @@
             0.0
           ],
           "y": [
-            0.0
+            836.3668212890625
           ]
         },
         "setPoints": {
-          "0.0": 0.0
+          "0.0": 836.3668212890625
         }
       },
       "yInterpolator": {
@@ -749,1863 +611,11 @@
             0.0
           ],
           "y": [
-            0.0
+            265.9075622558594
           ]
         },
         "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 13
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 14
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 15
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 17
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 19
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 20
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 21
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 22
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 23
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 25
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 26
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 27
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 28
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 29
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 30
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 32
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 879.0,
-        "y": 742.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 33
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [
-            0.0,
-            0.0
-          ],
-          "x": [
-            0.0,
-            200.0
-          ],
-          "y": [
-            754.0,
-            879.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 754.0,
-          "200.0": 879.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [
-            0.0,
-            0.0
-          ],
-          "x": [
-            0.0,
-            200.0
-          ],
-          "y": [
-            760.0,
-            742.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 760.0,
-          "200.0": 742.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 34
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 35
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 36
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 37
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 38
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 39
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 40
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 41
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 42
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 43
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 44
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 45
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 46
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 47
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 48
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 49
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 50
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 51
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 52
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 53
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 54
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 55
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 0.0,
-        "y": 0.0
-      },
-      "initTime": 0,
-      "id": {
-        "value": 56
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [],
-          "x": [
-            0.0
-          ],
-          "y": [
-            0.0
-          ]
-        },
-        "setPoints": {
-          "0.0": 0.0
+          "0.0": 265.9075622558594
         }
       },
       "death": null,
@@ -2617,83 +627,14 @@
       "id": {
         "value": 0
       },
-      "xInterpolator": {
-        "interpolator": {
-          "slopes": [
-            0.0,
-            8.145481151157073,
-            9.59668076994829,
-            0.0,
-            -13.005160251675505,
-            0.0
-          ],
-          "x": [
-            0.0,
-            12.0,
-            24.0,
-            36.0,
-            48.0,
-            60.0
-          ],
-          "y": [
-            789.0,
-            940.0,
-            1012.260986328125,
-            1295.6763916015625,
-            1180.09912109375,
-            939.8995971679688
-          ]
-        },
-        "setPoints": {
-          "0.0": 789.0,
-          "12.0": 940.0,
-          "24.0": 1012.260986328125,
-          "36.0": 1295.6763916015625,
-          "48.0": 1180.09912109375,
-          "60.0": 939.8995971679688
-        }
-      },
-      "yInterpolator": {
-        "interpolator": {
-          "slopes": [
-            0.0,
-            -11.635861833075998,
-            0.0,
-            10.288436593397565,
-            17.72852152304056,
-            0.0
-          ],
-          "x": [
-            0.0,
-            12.0,
-            24.0,
-            36.0,
-            48.0,
-            60.0
-          ],
-          "y": [
-            633.0,
-            466.0,
-            346.0313415527344,
-            424.4228210449219,
-            714.873291015625,
-            882.7114868164062
-          ]
-        },
-        "setPoints": {
-          "0.0": 633.0,
-          "12.0": 466.0,
-          "24.0": 346.0313415527344,
-          "36.0": 424.4228210449219,
-          "48.0": 714.873291015625,
-          "60.0": 882.7114868164062
-        }
-      },
       "lineThickness": 5.0,
       "alpha": 1.0,
       "nodeIDs": [
         {
           "value": 3
+        },
+        {
+          "value": 63
         },
         {
           "value": 4
@@ -2708,6 +649,9 @@
           "value": 7
         },
         {
+          "value": 62
+        },
+        {
           "value": 8
         }
       ],
@@ -2717,7 +661,7 @@
   "areas": [
     {
       "id": {
-        "value": 5
+        "value": 6
       },
       "orderOfLineSegments": {
         "1": [
@@ -2739,15 +683,18 @@
       "alpha": 0.2,
       "nodeIDs": [
         {
-          "value": 33
+          "value": 57
+        },
+        {
+          "value": 58
         }
       ],
       "color": "RED"
     }
   ],
-  "unitId": 2,
-  "nodeCollectionId": 6,
-  "nodeId": 57,
+  "unitId": 3,
+  "nodeCollectionId": 7,
+  "nodeId": 64,
   "linesPerNode": 12,
   "cachedImageDimensions": {
     "first": 2056,

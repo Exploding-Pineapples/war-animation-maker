@@ -29,6 +29,15 @@ abstract class NodeCollection : HasInputs {
         )
     }
 
+    fun indexOf(id: NodeID): Int {
+        for (index in nodeIDs.indices) {
+            if (nodeIDs[index].value == id.value) {
+                return index
+            }
+        }
+        return -1
+    }
+
     open fun update() {
         if (drawCoords == null) {
             drawCoords = mutableListOf()

@@ -8,8 +8,8 @@ import com.badlogicgames.waranimationmaker.InputElement
 data class Line(
     override val id: LineID
 ) : NodeCollection() {
-    var xInterpolator = InterpolatedFloat(0.0f, 0)
-    var yInterpolator = InterpolatedFloat(0.0f, 0)
+    @Transient var xInterpolator = InterpolatedFloat(0.0f, 0)
+    @Transient var yInterpolator = InterpolatedFloat(0.0f, 0)
     var lineThickness: Float = 5.0f
     override var alpha: Float = 1.0f
 
@@ -34,9 +34,11 @@ data class Line(
 
     fun update(animation: Animation) {
         super.update()
-        lineThickness = 5.0f
-        color = AreaColor.RED
-        //reset values to nothing by default
+
+        if (xInterpolator == null) {
+            xInterpolator = InterpolatedFloat(0.0f, 0)
+            yInterpolator = InterpolatedFloat(0.0f, 0)
+        }
 
         for (index in nodeIDs.indices) {
             val node = animation.getNodeByID(nodeIDs[index])
