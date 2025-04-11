@@ -9,6 +9,7 @@ buildscript {
         json = new JsonSlurper().parseText(versionFile.text)
     } else throw new GradleException("Unable to retrieve latest versions, please check your internet connection")
 
+
     ext {
         gdxVersion = json.libgdxRelease
         roboVMVersion = json.robovmVersion
@@ -40,10 +41,15 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.wisepersist:gwt-gradle-plugin:$gwtGradleVersion"
-        classpath "com.android.tools.build:gradle:$androidGradleToolsVersion"
-        classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$roboVMGradleVersion"
+        //classpath "org.wisepersist:gwt-gradle-plugin:$gwtGradleVersion"
+        classpath 'org.codehaus.groovy:groovy-json:3.0.9'
+        //classpath "com.android.tools.build:gradle:$androidGradleToolsVersion"
+        //classpath "com.mobidevelop.robovm:robovm-gradle-plugin:$roboVMGradleVersion"
     }
+}
+
+plugins {
+    id 'java'
 }
 
 allprojects {

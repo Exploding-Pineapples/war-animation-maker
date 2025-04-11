@@ -3,6 +3,8 @@ package com.badlogicgames.waranimationmaker.models
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
+import com.badlogicgames.waranimationmaker.InputElement
 
 data class Node(
     override var position: Coordinate,
@@ -12,9 +14,10 @@ data class Node(
     var color: Color = Color.GREEN
     override var xInterpolator = InterpolatedFloat(position.x, initTime)
     override var yInterpolator = InterpolatedFloat(position.y, initTime)
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
-    override fun showInputs(uiVisitor: UIVisitor) {
-        uiVisitor.show(this)
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.show(verticalGroup, this)
     }
 
     init {

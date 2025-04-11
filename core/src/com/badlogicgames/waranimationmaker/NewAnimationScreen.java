@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -15,15 +17,17 @@ import com.badlogicgames.waranimationmaker.models.Animation;
 import kotlin.Pair;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.badlogic.gdx.Gdx.gl;
-import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
+import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH;
 
 public class NewAnimationScreen extends ScreenAdapter implements InputProcessor {
     WarAnimationMaker game;
@@ -151,22 +155,13 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     new Thread(() -> {
-                        JFileChooser chooser = new JFileChooser();
-                        chooser.setCurrentDirectory(new File("assets"));
-                        chooser.setMultiSelectionEnabled(true);
-                        JFrame f = new JFrame();
-                        f.setVisible(true);
-                        f.toFront();
-                        f.setVisible(false);
-                        int res = chooser.showOpenDialog(f);
-                        f.dispose();
-                        if (res == JFileChooser.APPROVE_OPTION) {
-                            File[] files = chooser.getSelectedFiles();
-                            for (int i = 0; i < files.length; i++) {
-                                files[i] = new File(new File("C:\\Users\\User\\Documents\\Projects\\war-animation-maker").toURI().relativize(files[i].toURI()).getPath());
-                            }
-                            MultipleFileButton.this.files = files;
+                        Desktop desktop = Desktop.getDesktop();
+                        try {
+                            desktop.open(new File("assets"));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
+
                     }).start();
                 }
             });

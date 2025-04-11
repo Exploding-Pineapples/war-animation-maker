@@ -1,13 +1,13 @@
 package com.badlogicgames.waranimationmaker
 
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.*
 
-
-class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, val input: () -> String?, val clazz: Class<T>, var name: String, var converter: ((String) -> T)? = null) {
+abstract class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, @Transient val clazz: Class<T>, var name: String, var converter: ((String) -> T)? = null) {
     @Transient var table: Table? = null
-    @Transient var textField: TextField? = null
+    abstract var inputElement: Actor?
     var displayed: Boolean = false
 
     fun hide(verticalGroup: VerticalGroup) {
@@ -15,44 +15,16 @@ class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, val input: () 
             verticalGroup.layout()
             table!!.remove()
             table = null
-            textField = null
+            inputElement = null
             displayed = false
         }
     }
 
-    fun show(verticalGroup: VerticalGroup, inSkin: Skin?) {
-        val skin: Skin? = inSkin?: this.skin
-        if (!displayed) {
-            table = Table()
-            val nameLabel = Label(name, skin)
-            textField = TextField(input.invoke(), skin)
-            textField!!.setText(input.invoke())
-            textField!!.addListener(object : InputListener() {
-                override fun keyTyped(event: InputEvent, character: Char): Boolean {
-                    val existing = converters[clazz]
-                        ?: converter
-                        ?: throw IllegalArgumentException("No converter for $clazz")
-                    if (textField!!.text.equals("")) {
-                        output.invoke(null)
-                    } else {
-                        output.invoke(existing(textField!!.text) as T)
-                    }
-                    return true
-                }
-            })
-
-            table!!.add(nameLabel)
-            table!!.add(textField).pad(10.0f)
-            table!!.row()
-
-            verticalGroup.addActor(table)
-            displayed = true
-        }
-    }
+    abstract fun show(verticalGroup: VerticalGroup, inSkin: Skin)
 
     companion object {
         // String, Integer, Double, Float
-        private val converters = mutableMapOf<Class<*>, (String) -> Any>(
+        val converters = mutableMapOf<Class<*>, (String) -> Any>(
             String::class.java to {
                 it
             },

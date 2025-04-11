@@ -7,28 +7,26 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogicgames.waranimationmaker.AnimationScreen
-import com.badlogicgames.waranimationmaker.AreaColor
-import com.badlogicgames.waranimationmaker.Assets
-import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
+import com.badlogicgames.waranimationmaker.*
 
 data class Unit(
     override val id: UnitID,
     override var position: Coordinate,
     override val initTime: Int,
-    val image: String,
+    var image: String,
 ) : ScreenObject() {
     override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
     override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
-    override fun showInputs(uiVisitor: UIVisitor) {
-        uiVisitor.show(this)
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.show(verticalGroup ,this)
     }
 
     var color: AreaColor = AreaColor.BLUE
     var name: String? = null
-    var type: String = "infantry"
+    var type: String = "infantry.png"
     var size: String = "XX"
 
     companion object {
@@ -46,29 +44,36 @@ data class Unit(
     override fun buildInputs() {
         super.buildInputs()
 
-        inputElements.add(InputElement(null, { input ->
+        inputElements.add(TextInput(null, { input ->
             if (input != null) {
                 size = input
             }
         }, label@{
             return@label size
         }, String::class.java, "Set size"))
-        inputElements.add(InputElement(null, { input ->
+        inputElements.add(SelectBoxInput(null, { input ->
             if (input != null) {
                 type = input
                 updateTypeTexture()
             }
         }, label@{
+            println("inputting: $type")
             return@label type
-        }, String::class.java, "Set type"))
-        inputElements.add(InputElement(null, { input ->
+        }, String::class.java, "Set type", Assets.unitTypes()))
+        inputElements.add(SelectBoxInput(null, { input ->
+            image = Assets.flagsPath(input)
+            updateCountryTexture()
+        }, label@{
+            return@label image.substringAfter("assets/flags/")
+        }, String::class.java, "Set country", Assets.countryNames))
+        inputElements.add(TextInput(null, { input ->
             if (input != null) {
                 name = input
             }
         }, label@{
             return@label name
         }, String::class.java, "Set name"))
-        inputElements.add(InputElement(null, { input ->
+        inputElements.add(TextInput(null, { input ->
             if (input != null) {
                 for (color in AreaColor.entries) {
                     if (input == color.name) {
@@ -97,7 +102,7 @@ data class Unit(
     }
 
     fun updateTypeTexture() {
-        typeTexture = Assets.loadTexture(Assets.png(Assets.unitKindsPath(type)))
+        typeTexture = Assets.loadTexture(Assets.unitKindsPath(type))
     }
 
     fun typeTexture(): Texture? {

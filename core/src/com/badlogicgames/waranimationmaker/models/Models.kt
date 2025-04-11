@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
 import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.drew.imaging.ImageMetadataReader
@@ -30,18 +31,18 @@ interface HasInputs {
         }
     }
 
-    fun showInputs(uiVisitor: UIVisitor)
+    fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor)
 
-    fun hideInputs(uiVisitor: UIVisitor) {
-        uiVisitor.hide(this)
+    fun hideInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.hide(verticalGroup, this)
     }
 }
 
-class UIVisitor(val verticalGroup: VerticalGroup, val skin: Skin) {
+class UIVisitor(val skin: Skin) {
     var text: String = ""
     val labels: MutableList<Label> = mutableListOf()
 
-    fun show(hasInputs: HasInputs) {
+    fun show(verticalGroup: VerticalGroup, hasInputs: HasInputs) {
         hasInputs.updateInputs()
         val label = Label(text, skin)
         labels.add(label)
@@ -50,28 +51,28 @@ class UIVisitor(val verticalGroup: VerticalGroup, val skin: Skin) {
             inputElement.show(verticalGroup, skin)
         }
     }
-    fun show(camera: Camera) {
+    fun show(verticalGroup: VerticalGroup, camera: Camera) {
         text = "Camera: "
-        show(camera as HasInputs)
+        show(verticalGroup, camera as HasInputs)
     }
-    fun show(unit: Unit) {
+    fun show(verticalGroup: VerticalGroup, unit: Unit) {
         text = "Unit: "
-        show(unit as HasInputs)
+        show(verticalGroup, unit as HasInputs)
     }
-    fun show(node: Node) {
+    fun show(verticalGroup: VerticalGroup, node: Node) {
         text = "Node: "
-        show(node as HasInputs)
+        show(verticalGroup, node as HasInputs)
     }
-    fun show(area: Area) {
+    fun show(verticalGroup: VerticalGroup, area: Area) {
         text = "Area: "
-        show(area as HasInputs)
+        show(verticalGroup, area as HasInputs)
     }
-    fun show(line: Line) {
+    fun show(verticalGroup: VerticalGroup, line: Line) {
         text = "Line: "
-        show(line as HasInputs)
+        show(verticalGroup, line as HasInputs)
     }
 
-    fun hide(hasInputs: HasInputs) {
+    fun hide(verticalGroup: VerticalGroup, hasInputs: HasInputs) {
         hasInputs.updateInputs()
         for (inputElement in hasInputs.inputElements) {
             inputElement.hide(verticalGroup)
@@ -179,8 +180,9 @@ data class Animation @JvmOverloads constructor(
         return line
     }
 
-    fun addNewLine(nodes: List<NodeID>): Line {
+    fun addNewLine(vararg nodes: NodeID): Line {
         val newLine = Line(LineID(nodeCollectionId))
+        newLine.nodeIDInterpolators.addAll(nodes.map {InterpolatedID(0, it)})
         newLine.nodeIDs.addAll(nodes)
         return addLine(newLine)
     }
@@ -194,7 +196,7 @@ data class Animation @JvmOverloads constructor(
 
     fun addNewArea(nodes: List<NodeID>): Area {
         val newArea = Area(AreaID(nodeCollectionId))
-        newArea.nodeIDs.addAll(nodes)
+        newArea.nodeIDInterpolators.addAll(nodes.map {InterpolatedID(0, it)})
         return addArea(newArea)
     }
 
@@ -276,7 +278,7 @@ data class Animation @JvmOverloads constructor(
         if (id::class.java == NodeID::class.java) {
             val nodeID = id as NodeID
             for (area in areas) {
-                if (nodeID.value in area.nodeIDs.map { it.value }) {
+                if (nodeID in area.nodeIDs) {
                     output.add(area)
                 }
                 for (lineSegments in area.orderOfLineSegments.values) { // If one of the area's line segments contains this node, add the area as a parent
@@ -297,28 +299,31 @@ data class Animation @JvmOverloads constructor(
                 }
             }
             for (line in lines) {
-                if (id.value in line.nodeIDs.map { it.value }) {
-                    output.add(line)
+                for (lineID in line.nodeIDs) {
+                    if (id.value == lineID.value) {
+                        output.add(line)
+                        break
+                    }
                 }
             }
         }
         return output
     }
 
-    fun getParentsOfType(id: ID, type: Class<out NodeCollection>) : List<NodeCollection> {
-        val output: MutableList<NodeCollection> = mutableListOf()
+    fun <T : NodeCollection> getParentsOfType(id: ID, type: Class<out NodeCollection>) : List<T> {
+        val output: MutableList<T> = mutableListOf()
         if (id::class.java == NodeID::class.java) {
             if (type.isAssignableFrom(Area::class.java)) {
                 for (area in areas) {
-                    if (id.value in area.nodeIDs.map { it.value }) {
-                        output.add(area)
+                    if (id in area.nodeIDs) {
+                        output.add(area as T)
                     }
                 }
             }
             if (type.isAssignableFrom(Line::class.java)) {
                 for (line in lines) {
-                    if (id.value in line.nodeIDs.map { it.value }) {
-                        output.add(line)
+                    if (id in line.nodeIDs) {
+                        output.add(line as T)
                     }
                 }
             }
@@ -330,8 +335,8 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun buildInputs(skin: Skin) {
-        nodeHandler.buildInputs(skin)
-        unitHandler.buildInputs(skin)
+        nodeHandler.buildInputs()
+        unitHandler.buildInputs()
 
         for (line in lines) {
             line.buildInputs()

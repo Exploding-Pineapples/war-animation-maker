@@ -6,17 +6,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 
 
 class NodeHandler(val animation: Animation) {
-    fun newNode() {
-    }
 
-    fun buildInputs(skin: Skin) {
+    fun buildInputs() {
         for (node in animation.nodes) {
             node.buildInputs()
         }
@@ -63,7 +60,7 @@ class NodeHandler(val animation: Animation) {
         }
 
         for (line in animation.lines) { // Interpolate every line
-            line.update(animation)
+            line.update(time, animation)
         }
 
         animation.areas.removeIf { it.nodeIDs.isEmpty() }
@@ -71,7 +68,7 @@ class NodeHandler(val animation: Animation) {
         var prevIndex: Int
 
         for (area in animation.areas) {
-            area.update()
+            area.update(time)
             prevIndex = 0
             for (entry in area.orderOfLineSegments) {
                 for (index in prevIndex..<entry.key) { // Adds the part of the border until the index
@@ -90,11 +87,11 @@ class NodeHandler(val animation: Animation) {
                     if (indexFirst != -1 && indexSecond != -1) {
                         if (indexSecond > indexFirst) {
                             for (index in indexFirst * AnimationScreen.LINES_PER_NODE..indexSecond * AnimationScreen.LINES_PER_NODE) {
-                                area.drawCoords.add(Coordinate(line.xInterpolator.interpolator.interpolateAt(index.toDouble()).toFloat(), line.yInterpolator.interpolator.interpolateAt(index.toDouble()).toFloat()))
+                                area.drawCoords.add(Coordinate(line.xInterpolator.interpolator.interpolateAt(index), line.yInterpolator.interpolator.interpolateAt(index)))
                             }
                         } else {
                             for (index in indexSecond * AnimationScreen.LINES_PER_NODE..indexFirst * AnimationScreen.LINES_PER_NODE) {
-                                area.drawCoords.add(Coordinate(line.xInterpolator.interpolator.interpolateAt(index.toDouble()).toFloat(), line.yInterpolator.interpolator.interpolateAt(index.toDouble()).toFloat()))
+                                area.drawCoords.add(Coordinate(line.xInterpolator.interpolator.interpolateAt(index), line.yInterpolator.interpolator.interpolateAt(index)))
                             }
                         }
                     }
@@ -122,7 +119,7 @@ class NodeHandler(val animation: Animation) {
 
         // Draw the color layer to the screen TODO replace color layer
         batcher.begin()
-        val textureRegion: TextureRegion = TextureRegion(colorLayer.getColorBufferTexture())
+        val textureRegion = TextureRegion(colorLayer.colorBufferTexture)
         textureRegion.flip(false, true)
         batcher.setColor(1f, 1f, 1f, 0.2f) // Draw the color layers with transparency
         batcher.draw(textureRegion, 0f, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat())
@@ -146,17 +143,8 @@ class NodeHandler(val animation: Animation) {
         if (animationMode) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             for (area in animation.areas) {
-                val removeIDs = mutableListOf<NodeID>()
                 for (id in area.nodeIDs) {
-                    val node = animation.getNodeByID(id)
-                    if (node == null) {
-                        removeIDs.add(id)
-                    } else {
-                        node.drawAsAreaNode(shapeRenderer)
-                    }
-                }
-                for (removeID in removeIDs) {
-                    area.nodeIDs.remove(removeID)
+                    animation.getNodeByID(id)?.drawAsAreaNode(shapeRenderer)
                 }
             }
             shapeRenderer.end()

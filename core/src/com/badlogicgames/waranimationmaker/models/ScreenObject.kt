@@ -2,7 +2,7 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import kotlin.math.absoluteValue
@@ -11,7 +11,6 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
     var death: Int? = null
     var alpha: Float = 1f
     @Transient override var screenPosition: Coordinate = Coordinate(0f, 0f)
-    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     open fun clicked(x: Float, y: Float): Boolean
     {
@@ -21,7 +20,7 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
     override fun buildInputs() {
         super.buildInputs()
 
-        inputElements.add(InputElement(null, { input ->
+        inputElements.add(TextInput(null, { input ->
             death = input
         }, label@{
             return@label death.toString()
@@ -31,7 +30,7 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
-        alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100).coerceIn(0.0, 1.0).toFloat()
+        alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100).coerceIn(0f, 1f)
         if (death != null) {
             if (time > death!! - 100) {
                 alpha = ((death!! - time) / 100f).coerceIn(0f, 1f)
@@ -55,12 +54,12 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
         if (animationMode) {
             shapeRenderer.color = Color.SKY
             for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat(), yInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat()), currentZoom, currentCX, currentCY)
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), currentZoom, currentCX, currentCY)
                 shapeRenderer.circle(position.x, position.y, 2f)
             }
             shapeRenderer.color = Color.PURPLE
             for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat(), yInterpolator.interpolator.interpolateAt(time.toDouble()).toFloat()), currentZoom, currentCX, currentCY)
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), currentZoom, currentCX, currentCY)
                 shapeRenderer.circle(position.x, position.y, 4f)
             }
             shapeRenderer.color = Color.ORANGE

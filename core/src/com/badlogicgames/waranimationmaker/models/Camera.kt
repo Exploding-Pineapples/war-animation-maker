@@ -1,5 +1,8 @@
 package com.badlogicgames.waranimationmaker.models
 
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
+import com.badlogicgames.waranimationmaker.InputElement
+
 data class Camera(
     override var position: Coordinate = Coordinate(x = 960.0f, y = 540.0f),
     override var zoom: Float = 1.0f,
@@ -9,6 +12,7 @@ data class Camera(
     override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
     override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
     override var zoomInterpolator: InterpolatedFloat = InterpolatedFloat(zoom, initTime)
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun goToTime(time: Int): Boolean {
         super.goToTime(time, zoom, position.x, position.y) // Call ScreenObject's goToTime to set screen position
@@ -24,8 +28,8 @@ data class Camera(
         zoomInterpolator.holdValueUntil(time)
     }
 
-    override fun showInputs(uiVisitor: UIVisitor) {
-        uiVisitor.show(this)
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.show(verticalGroup, this)
     }
 
     override fun removeFrame(time: Int): Boolean {

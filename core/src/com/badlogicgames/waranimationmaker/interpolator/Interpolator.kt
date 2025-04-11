@@ -1,15 +1,14 @@
-package com.badlogicgames.waranimationmaker.interpolator;
+package com.badlogicgames.waranimationmaker.interpolator
 
-public abstract class Interpolator {
-    final double[] x;
-    final double[] y;
+abstract class Interpolator<I : Number, O>(x: Array<I>, y: Array<O>) {
+    val x: Array<I>
+    val y: Array<O>
 
-    public Interpolator(double[] x, double[] y) {
-        if (x.length != y.length) {
-            throw new IllegalArgumentException("The lengths of x and y must be the same.");
-        }
-        this.x = x;
-        this.y = y;
+    init {
+        require(x.size == y.size) { "The lengths of x and y must be the same." }
+        this.x = x
+        this.y = y
     }
-    abstract double interpolateAt(double xi);
+
+    abstract fun interpolateAt(xi: I): O
 }

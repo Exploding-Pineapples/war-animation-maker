@@ -22,9 +22,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Assets {
 
@@ -34,6 +37,9 @@ public class Assets {
 	public static String unitKindsPath(String file) {
 		return "assets/unitkinds/" + file;
 	}
+	public static String flagsPath(String file) { return "assets/flags/" + file; }
+	public static Array<String> countryNames = new Array<>();
+	public static Array<String> unitTypes = new Array<>();
 
 	public static String png(String file) {
 		return file + ".png";
@@ -50,6 +56,34 @@ public class Assets {
 			return texture;
 		} catch (RuntimeException e) {
 			return null;
+		}
+	}
+
+	public static Array<String> countryNames() {
+		if (countryNames.isEmpty()) {
+			updateCountryNames();
+		}
+		return countryNames;
+	}
+
+	public static void updateCountryNames() {
+		countryNames.clear();
+		for (File country : Objects.requireNonNull(Gdx.files.internal("assets/flags").file().listFiles())) {
+			countryNames.add(country.getName());
+		}
+	}
+
+	public static Array<String> unitTypes() {
+		if (unitTypes.isEmpty()) {
+			updateUnitTypes();
+		}
+		return unitTypes;
+	}
+
+	public static void updateUnitTypes() {
+		unitTypes.clear();
+		for (File unitType : Objects.requireNonNull(Gdx.files.internal("assets/unitkinds").file().listFiles())) {
+			unitTypes.add(unitType.getName());
 		}
 	}
 

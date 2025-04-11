@@ -1,16 +1,19 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
+import com.badlogicgames.waranimationmaker.InputElement
 import earcut4j.Earcut
 import java.util.*
 
 data class Area (override val id: AreaID) : NodeCollection() {
     var orderOfLineSegments: SortedMap<Int, MutableList<LineSegment>> = sortedMapOf() // Stores the interpolated line segments to draw to
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     override var alpha: Float = 0.2f
     @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
 
-    override fun update() { // Takes coordinates from drawCoords and turns it into an earcut polygon in drawPoly
-        super.update()
+    override fun update(time: Int) { // Takes coordinates from drawCoords and turns it into an earcut polygon in drawPoly
+        super.update(time)
 
         if (orderOfLineSegments == null) {
             orderOfLineSegments = sortedMapOf()
@@ -46,8 +49,8 @@ data class Area (override val id: AreaID) : NodeCollection() {
         }
     }
 
-    override fun showInputs(uiVisitor: UIVisitor) {
-        uiVisitor.show(this)
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.show(verticalGroup, this)
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {
