@@ -7,31 +7,43 @@ import earcut4j.Earcut
 import java.util.*
 
 data class Area (override val id: AreaID) : NodeCollection() {
-    var orderOfLineSegments: SortedMap<Int, MutableList<LineSegment>> = sortedMapOf() // Stores the interpolated line segments to draw to
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     override var alpha: Float = 0.2f
     @Transient var drawPoly: MutableList<FloatArray> = mutableListOf()
 
-    override fun update(time: Int) { // Takes coordinates from drawCoords and turns it into an earcut polygon in drawPoly
+    fun update(time: Int, animation: Animation) { // Takes coordinates from drawCoords and turns it into an earcut polygon in drawPoly
         super.update(time)
 
-        if (orderOfLineSegments == null) {
-            orderOfLineSegments = sortedMapOf()
+        for (edge in edges) {
+            drawCoords.add(animation.getNodeByID(edge.segment.first)!!.screenPosition)
+            if (edge.interpolatedCoords.isEmpty()) { // If there are no interpolated coordinates on the edge, see if there is a duplicate interpolated line edge to use
+                val firstNode = animation.getNodeByID(edge.segment.first)
+                for (otherEdge in firstNode!!.edges) {
+                    if (otherEdge != edge) {
+                        if (otherEdge.segment.second.value == edge.segment.second.value) {
+                            if (otherEdge.interpolatedCoords.isNotEmpty()) {
+                                drawCoords.addAll(otherEdge.interpolatedCoords)
+                                break
+                            }
+                        }
+                    }
+                }
+            } else {
+                drawCoords.addAll(edge.interpolatedCoords)
+            }
         }
+        drawCoords.add(animation.getNodeByID(edges.last().segment.second)!!.screenPosition)
 
-        val poly = mutableListOf<Double>()
-
-        for (coordinate in drawCoords) {
-            //flattens points into 1D array
-            poly.add(coordinate.x.toDouble())
-            poly.add(coordinate.y.toDouble())
-        }
-
+        val poly = drawCoords.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }.toDoubleArray()
         drawCoords.clear()
 
-        val earcut = Earcut.earcut(poly.toDoubleArray()) //turns polygon into series of triangles represented by polygon vertex indexes
+        val earcut = Earcut.earcut(poly) //turns polygon into series of triangles represented by polygon vertex indexes
 
-        drawPoly = mutableListOf()
+
+        if (drawPoly == null) {
+            drawPoly = mutableListOf()
+        }
+        drawPoly.clear()
 
         var j = 0
         while (j < earcut.size) {
@@ -58,9 +70,5 @@ data class Area (override val id: AreaID) : NodeCollection() {
         for (triangle in drawPoly) {
             shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5])
         }
-    }
-
-    override fun toString(): String {
-        return orderOfLineSegments.toString()
     }
 }

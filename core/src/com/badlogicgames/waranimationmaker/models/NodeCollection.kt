@@ -5,10 +5,9 @@ import com.badlogicgames.waranimationmaker.TextInput
 
 abstract class NodeCollection : HasInputs {
     abstract var alpha: Float
-    var nodeIDInterpolators: MutableList<InterpolatedID> = mutableListOf()
-    var nodeIDs: MutableList<NodeID> = mutableListOf()
+    @Transient var edges: MutableList<Edge> = mutableListOf()
     @Transient var drawCoords: MutableList<Coordinate> = mutableListOf()
-    abstract val id: ID
+    abstract val id: NodeCollectionID
     var color: AreaColor = AreaColor.RED
 
     override fun buildInputs() {
@@ -30,39 +29,28 @@ abstract class NodeCollection : HasInputs {
     }
 
     fun indexOf(id: NodeID): Int {
-        for (index in nodeIDs.indices) {
-            if (nodeIDInterpolators[index].value.value == id.value) {
+        for (index in edges.indices) {
+            if (edges[index].segment.first.value == id.value) {
                 return index
             }
         }
         return -1
     }
 
-    fun add(index: Int, time: Int, nodeID: NodeID) {
-        nodeIDInterpolators.add(index, InterpolatedID(time, nodeID))
-        nodeIDs.add(index, nodeID)
+    fun insert(index: Int, time: Int, nodeID: NodeID, animation: Animation) {
+        if (index == 0) { // If inserting to the beginning, make the node have an edge that points to
+            animation.getNodeByID(nodeID)?.edges?.add(Edge(id, Pair(nodeID, edges[1].segment.first)))
+        } else {
+            if (index == edges.size - 1) {
+                val lastNode = animation.getNodeByID(edges.last().segment.second)
+                lastNode?.edges?.add(Edge(id, Pair(lastNode.id, nodeID)))
+            }
+        }
     }
 
     open fun update(time: Int) {
         if (drawCoords == null) {
             drawCoords = mutableListOf()
-            println("initialized drawcoords")
-        }
-
-        if (nodeIDInterpolators == null) {
-            nodeIDInterpolators = nodeIDs.map { InterpolatedID(0, it)}.toMutableList()
-            println("initialized nodeIDInterpolatorss")
-        }
-
-        if (nodeIDInterpolators.size != nodeIDs.size) {
-            nodeIDInterpolators = nodeIDs.map { InterpolatedID(0, it)}.toMutableList()
-            //println("filled interpolators" + nodeIDInterpolators.get(0).setPoints)
-        }
-
-        for (index in nodeIDs.indices) {
-            nodeIDInterpolators[index].update(time)
         }
     }
-
-
 }

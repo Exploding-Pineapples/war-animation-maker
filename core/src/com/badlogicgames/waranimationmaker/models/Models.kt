@@ -6,7 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
 import com.badlogicgames.waranimationmaker.InputElement
-import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.drew.imaging.ImageMetadataReader
@@ -104,15 +103,19 @@ interface ID : Comparable<ID>, AbstractTypeSerializable {
         return value - other.value
     }
 }
+
 class UnitID(override val value: Int = -1) : ID {
     override fun getAbstractType() = UnitID::class.java
 }
-class LineID(override val value: Int = -1) : ID {
+
+abstract class NodeCollectionID : ID
+class LineID(override val value: Int = -1) : NodeCollectionID() {
     override fun getAbstractType() = LineID::class.java
 }
-class AreaID(override val value: Int = -1) : ID {
+class AreaID(override val value: Int = -1) : NodeCollectionID() {
     override fun getAbstractType() = AreaID::class.java
 }
+
 class NodeID(override val value: Int = -1) : ID {
     override fun getAbstractType() = NodeID::class.java
 }
@@ -160,8 +163,10 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun deleteObject(obj: Object): Boolean {
-        if (nodeHandler.remove(obj)) {
-            return true
+        if (obj.javaClass == Node::class.java) {
+            if (nodeHandler.remove(obj as Node)) {
+                return true
+            }
         }
         if (unitHandler.remove(obj)) {
             return true
@@ -180,10 +185,9 @@ data class Animation @JvmOverloads constructor(
         return line
     }
 
-    fun addNewLine(vararg nodes: NodeID): Line {
+    fun addNewLine(vararg edges: Edge): Line {
         val newLine = Line(LineID(nodeCollectionId))
-        newLine.nodeIDInterpolators.addAll(nodes.map {InterpolatedID(0, it)})
-        newLine.nodeIDs.addAll(nodes)
+        newLine.edges.addAll(edges)
         return addLine(newLine)
     }
 
@@ -196,13 +200,12 @@ data class Animation @JvmOverloads constructor(
 
     fun addNewArea(nodes: List<NodeID>): Area {
         val newArea = Area(AreaID(nodeCollectionId))
-        newArea.nodeIDInterpolators.addAll(nodes.map {InterpolatedID(0, it)})
         return addArea(newArea)
     }
 
     fun getAreaByID(id: AreaID): Area? = areas.firstOrNull { it.id.value == id.value }
 
-    fun getLineByID(id: LineID): Line? = lines.find { it.id.value == id.value }
+    fun getLineByID(id: LineID): Line? = lines.firstOrNull { it.id.value == id.value }
 
     fun getNodeByID(id: NodeID): Node? = nodes.firstOrNull { it.id.value == id.value }
 
@@ -276,34 +279,14 @@ data class Animation @JvmOverloads constructor(
     fun getParents(id: ID) : List<NodeCollection> {
         val output: MutableList<NodeCollection> = mutableListOf()
         if (id::class.java == NodeID::class.java) {
-            val nodeID = id as NodeID
             for (area in areas) {
-                if (nodeID in area.nodeIDs) {
+                if (area.edges.firstOrNull { it.contains(id as NodeID) } != null) {
                     output.add(area)
-                }
-                for (lineSegments in area.orderOfLineSegments.values) { // If one of the area's line segments contains this node, add the area as a parent
-                    val removeEntries: MutableList<LineSegment> = mutableListOf()
-                    for (lineSegment in lineSegments) {
-                        val line = getLineByID(lineSegment.lineID)
-                        if (line != null) {
-                            if (lineSegment.contains(nodeID, line)) {
-                                output.add(area)
-                            }
-                        } else {
-                            removeEntries.add(lineSegment)
-                        }
-                    }
-                    for (lineSegment in removeEntries) {
-                        lineSegments.remove(lineSegment)
-                    }
                 }
             }
             for (line in lines) {
-                for (lineID in line.nodeIDs) {
-                    if (id.value == lineID.value) {
-                        output.add(line)
-                        break
-                    }
+                if (line.edges.firstOrNull { it.contains(id as NodeID) } != null) {
+                    output.add(line)
                 }
             }
         }
@@ -315,14 +298,26 @@ data class Animation @JvmOverloads constructor(
         if (id::class.java == NodeID::class.java) {
             if (type.isAssignableFrom(Area::class.java)) {
                 for (area in areas) {
-                    if (id in area.nodeIDs) {
+                    for (edge in area.edges) {
+                        if (id == edge.segment.first) {
+                            output.add(area as T)
+                            break
+                        }
+                    }
+                    if (id == area.edges.last().segment.second) {
                         output.add(area as T)
                     }
                 }
             }
             if (type.isAssignableFrom(Line::class.java)) {
                 for (line in lines) {
-                    if (id in line.nodeIDs) {
+                    for (edge in line.edges) {
+                        if (id == edge.segment.first) {
+                            output.add(line as T)
+                            break
+                        }
+                    }
+                    if (id == line.edges.last().segment.second) {
                         output.add(line as T)
                     }
                 }

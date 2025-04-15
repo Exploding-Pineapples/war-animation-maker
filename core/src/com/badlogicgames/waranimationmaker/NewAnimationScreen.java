@@ -113,7 +113,8 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
                 Pair<Boolean, String> inputCheck = checkInput(nameField.getText(), selectImageButton.getFile().getPath(), countriesPaths);
                 if (inputCheck.getFirst()) {
                     for (Animation existingAnimation : FileHandler.INSTANCE.getAnimations()) {
-                        if (existingAnimation.getName().equals(animation.getName())) {
+                        if (existingAnimation.getName().equals(name)) {
+                            System.out.println("Using existing animation: " + name);
                             existingAnimation.setPath(selectImageButton.getFile().getPath());
                             existingAnimation.setName(nameField.getText());
                             existingAnimation.setCountries(countriesPaths);
@@ -125,6 +126,7 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
                         }
                     }
                     if (!animationExists) {
+                        System.out.println("Created New Animation");
                         Animation newAnimation = new Animation(selectImageButton.getFile().getPath(), nameField.getText(), Arrays.stream(addCountriesButton.files).map(File::getPath).collect(Collectors.toList()));
                         FileHandler.INSTANCE.createNewAnimation(newAnimation);
                         AnimationScreen screen = new AnimationScreen(game, newAnimation);

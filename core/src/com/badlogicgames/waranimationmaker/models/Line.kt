@@ -16,7 +16,6 @@ data class Line(
     override var alpha: Float = 1.0f
 
     override fun buildInputs() {
-        println("building line inpuits")
         super.buildInputs()
 
         inputElements.add(
@@ -42,26 +41,49 @@ data class Line(
             yInterpolator = InterpolatedFloat(0.0f, 0)
         }
 
-        for (index in nodeIDs.indices) {
-            val node = animation.getNodeByID(nodeIDs[index])
+        var node: Node?
+        for (index in edges.indices) {
+            node = animation.getNodeByID(edges[index].segment.first)
             if (node != null) {
                 xInterpolator.setPoints[index * AnimationScreen.LINES_PER_NODE] = node.screenPosition.x
                 yInterpolator.setPoints[index * AnimationScreen.LINES_PER_NODE] = node.screenPosition.y
             }
+            if (index == edges.size - 1) {
+                node = animation.getNodeByID(edges[index].segment.second)
+                if (node != null) {
+                    xInterpolator.setPoints[(index + 1) * AnimationScreen.LINES_PER_NODE] = node.screenPosition.x
+                    yInterpolator.setPoints[(index + 1) * AnimationScreen.LINES_PER_NODE] = node.screenPosition.y
+                }
+            }
         }
+
         xInterpolator.updateInterpolator()
         yInterpolator.updateInterpolator()
+
+        if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
+            for (i in edges.indices) {
+                edges[i].interpolatedCoords.clear()
+                for (j in 0 until AnimationScreen.LINES_PER_NODE) {
+                    edges[i].interpolatedCoords.add(Coordinate(
+                        xInterpolator.interpolator.interpolateAt(i * AnimationScreen.LINES_PER_NODE + j),
+                        yInterpolator.interpolator.interpolateAt(i * AnimationScreen.LINES_PER_NODE + j)
+                    ))
+                }
+                edges[i].interpolatedCoords.add(animation.getNodeByID(edges[i].segment.second)!!.screenPosition)
+            }
+        }
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {
-        if (nodeIDs.size >= AnimationScreen.MIN_LINE_SIZE) {
+        if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
             shapeRenderer.color = color.color
-            for (i in 0 until AnimationScreen.LINES_PER_NODE * nodeIDs.size) {
+            for (edge in edges) {
+                for (i in 0 until edge.interpolatedCoords.size - 1)
                 shapeRenderer.rectLine(
-                    xInterpolator.interpolator.interpolateAt(i),
-                    yInterpolator.interpolator.interpolateAt(i),
-                    xInterpolator.interpolator.interpolateAt(i + 1),
-                    yInterpolator.interpolator.interpolateAt(i + 1),
+                    edge.interpolatedCoords[i].x,
+                    edge.interpolatedCoords[i].y,
+                    edge.interpolatedCoords[i + 1].x,
+                    edge.interpolatedCoords[i + 1].y,
                     lineThickness
                 )
             }

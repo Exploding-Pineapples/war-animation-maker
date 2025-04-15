@@ -47,14 +47,12 @@ abstract class InterpolatedValue<I : Number, O>(initValue: O, initTime: I) {
             if (time.toDouble() == definedTime.toDouble()) {
                 setPoints[definedTime] = value
                 updateInterpolator()
-                println("Overwrote, new motions: $setPoints")
                 return
             }
             if (definedTime.toDouble() > time.toDouble()) {
                 setPoints[time] = value
                 updateInterpolator()
 
-                println("Inserted, new motions: $setPoints")
                 return
             }
         }

@@ -1,5 +1,5 @@
 package com.badlogicgames.waranimationmaker
 
 enum class TouchMode {
-    DEFAULT, MOVE, NEW_NODE, SET_AREA_LINE, ADD_PARENT, NEW_UNIT
+    DEFAULT, MOVE, NEW_NODE, NEW_UNIT, NEW_EDGE
 }

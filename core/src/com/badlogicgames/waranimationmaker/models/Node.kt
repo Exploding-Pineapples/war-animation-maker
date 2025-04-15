@@ -15,6 +15,8 @@ data class Node(
     override var xInterpolator = InterpolatedFloat(position.x, initTime)
     override var yInterpolator = InterpolatedFloat(position.y, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
+    @Transient var visitedBy = mutableListOf<NodeCollectionID>()
+    var edges = mutableListOf<Edge>()
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
@@ -25,6 +27,9 @@ data class Node(
     }
 
     fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
+        if (edges == null) {
+            edges = mutableListOf()
+        }
         color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
             Color.GREEN
         } else {

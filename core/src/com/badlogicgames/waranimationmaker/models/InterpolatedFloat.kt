@@ -15,7 +15,6 @@ class InterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int
     })
 
     init {
-        println("Created new Interpolated Value")
         setPoints[initTime] = initValue
         updateInterpolator()
     }
