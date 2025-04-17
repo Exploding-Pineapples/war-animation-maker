@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Array;
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean;
-import com.badlogicgames.waranimationmaker.models.Object;
 import com.badlogicgames.waranimationmaker.models.*;
 import kotlin.Pair;
 
@@ -142,6 +141,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animation.load(game.skin);
     }
 
+    public static <T> T firstOrNull(ArrayList<T> list) {
+        return list.isEmpty()? null : list.get(0);
+    }
+
     public void updateCam() {
         camera.position.x = animation.camera().getPosition().getX();
         camera.position.y = animation.camera().getPosition().getY();
@@ -169,21 +172,33 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         return false;
     }
 
-    private void resetSelected() {
-        System.out.println("resetting selected");
-        switchSelected((ScreenObject) null);
+    public void updateNewEdgeInputs() {
+        if (!selectedNodeCollections.isEmpty()) { // Update the inputs to match the new edge type
+            System.out.println("Updating new edge inputs");
+            newEdgeType = selectedNodeCollections.get(0).getClass().getSimpleName();
+            newEdgeCollectionID = selectedNodeCollections.get(0).getId().getValue();
+            newEdgeTypeInput.hide(leftGroup);
+            newEdgeCollectionIDInput.hide(leftGroup);
+            newEdgeInputsDisplayed = false;
+        }
     }
 
-    public void switchSelected(ScreenObject newSelection) {
-        // Hide previous selected object
-        System.out.println("switching selected");
+    private void clearSelected() {
+        System.out.println("resetting selected");
         if (selected != null) {
             selected.hideInputs(selectedGroup, uiVisitor);
         }
         for (NodeCollection collection : selectedNodeCollections) {
             collection.hideInputs(selectedGroup, uiVisitor);
         }
+        selected = null;
         selectedEdges.clear();
+        selectedNodeCollections.clear();
+    }
+
+    public <T extends ScreenObject> void switchSelected(T newSelection) {
+        clearSelected(); // Hide previous selected object
+        System.out.println("switching selected");
 
         selected = newSelection;
 
@@ -195,54 +210,45 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 collection.showInputs(selectedGroup, uiVisitor);
             }
         } else {
-            selectedNodeCollections = new ArrayList<>();
+            selectedNodeCollections.clear();
             newEdgeCollectionID = animation.getLines().size() + animation.getAreas().size(); // New ID needed per node collection concurrently on screen TODO make it safe
         }
     }
 
     public void switchSelected(ArrayList<Edge> newSelections) {
-        // Hide previous selected object
+        clearSelected();
         System.out.println("switching selected to an edge");
-        if (selected != null) {
-            selected.hideInputs(selectedGroup, uiVisitor);
-        }
-        for (NodeCollection collection : selectedNodeCollections) {
-            collection.hideInputs(selectedGroup, uiVisitor);
-        }
 
         selectedEdges = newSelections;
         // Show new selected object
+        selectedNodeCollections.clear();
         if (!newSelections.isEmpty()) {
-            selectedNodeCollections.clear();
             for (Edge newSelection : newSelections) {
                 NodeCollection nodeCollection = animation.getNodeCollectionByID(newSelection.getCollectionID());
-                selectedNodeCollections.add(nodeCollection);
-                nodeCollection.showInputs(selectedGroup, uiVisitor);
+                if (nodeCollection != null) {
+                    selectedNodeCollections.add(nodeCollection);
+                    nodeCollection.showInputs(selectedGroup, uiVisitor);
+                }
             }
         } else {
-            selectedNodeCollections = new ArrayList<>();
             newEdgeCollectionID = animation.getLines().size() + animation.getAreas().size(); // New ID needed per node collection concurrently on screen TODO make it safe
         }
     }
 
-    public ArrayList<ScreenObject> selectScreenObject(float x, float y) {
-        ArrayList<ScreenObject> selectedThings = animation.selectObject(x, y);
-        if (selectedThings.isEmpty()) {
-            resetSelected();
-            return new ArrayList<>();
-        } else {
-            return selectedThings;
-        }
+    public <T extends ObjectClickable> ArrayList<T> selectNewScreenObject(float x, float y, T selected, Class<T> type) {
+        ArrayList<T> selectedThings = new ArrayList<>();
+        selectedThings.add(selected);
+        return selectNewScreenObject(x, y, selectedThings, type);
     }
 
-    public ArrayList<Edge> selectEdge(float x, float y) {
-        ArrayList<Edge> selectedThings = animation.selectObjectWithType(x, y, Edge.class);
-        if (selectedThings.isEmpty()) {
-            resetSelected();
-            return new ArrayList<>();
-        } else {
-            return selectedThings;
-        }
+    public <T extends ObjectClickable> ArrayList<T> selectNewScreenObject(float x, float y, ArrayList<T> selected, Class<T> type) {
+        ArrayList<T> selectedThings = animation.selectObjectWithType(x, y, type);
+        selectedThings.removeIf(selected::contains);
+        return selectedThings;
+    }
+
+    public <T extends ObjectClickable> T selectScreenObject(float x, float y, Class<T> type) {
+        return firstOrNull(animation.selectObjectWithType(x, y, type));
     }
 
     public boolean touchDown(int x, int y, int pointer, int button) {
@@ -252,37 +258,30 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (paused) {
             if (touchMode == TouchMode.DEFAULT) { // Default behavior: select an object to show info about it
-                ArrayList<ScreenObject> selectedThings = selectScreenObject(x, y);
+                ArrayList<ScreenObject> selectedThings = animation.selectObjectWithType(x, y, ScreenObject.class);
                 if (!selectedThings.isEmpty()) {
                     switchSelected(selectedThings.get(0));
                 } else {
-                    switchSelected(selectEdge(x, y));
+                    switchSelected(animation.selectObjectWithType(x, y, Edge.class));
                 }
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
                 if (selected != null) {
-                    selected.newSetPoint(time, mouseX, mouseY);
                     if (selected.getClass() == Node.class) {
-                        Object newSelection = null;
-                        for (ObjectClickable selection : selectScreenObject(x, y)) {
-                            if (selection != selected) {
-                                if (selection.getClass().isAssignableFrom(Object.class)) {
-                                    newSelection = (Object) selection;
-                                }
-                            }
-                        }
-                        if (newSelection != null) {
-                            if (newSelection.getClass() == Node.class) { //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
-                                selected.newSetPoint(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
-                                resetSelected();
-                                return true;
-                            }
+                        ArrayList<Node> selectedNodes = selectNewScreenObject(x, y, (Node) selected, Node.class);
+                        if (!selectedNodes.isEmpty()) {
+                            //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
+                            Node newSelection = selectedNodes.get(0);
+                            selected.newSetPoint(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
+                            clearSelected();
+                            return true;
                         }
                     }
-                    resetSelected();
+                    selected.newSetPoint(time, mouseX, mouseY);
+                    clearSelected();
                     return true;
                 }
-                switchSelected(selectScreenObject(x, y).isEmpty() ? null : selectScreenObject(x, y).get(0));
+                switchSelected(selectScreenObject(x, y, ScreenObject.class));
             }
 
             if (touchMode == TouchMode.NEW_NODE) { // Will create a new Node. If a node is selected and has exactly 1 edge pointing away from it, the new node will be inserted between the selected node and the next node
@@ -301,20 +300,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (touchMode == TouchMode.NEW_EDGE) {
                 if (selected == null || selected.getClass() != Node.class) {
-                    switchSelected(selectScreenObject(x, y).isEmpty() ? null : selectScreenObject(x, y).get(0));
-                    if (!selectedNodeCollections.isEmpty()) {
-                        newEdgeType = selectedNodeCollections.get(0).getClass().getSimpleName();
-                        newEdgeCollectionID = selectedNodeCollections.get(0).getId().getValue();
-                        newEdgeInputsDisplayed = false;
-                    }
+                    switchSelected((Node) firstOrNull(animation.selectObjectWithType(x, y, Node.class)));
+                    updateNewEdgeInputs();
                 } else {
-                    Node newSelection = null;
-                    System.out.println("Creating edge with selected node");
-                    for (ObjectClickable object : selectScreenObject(x, y)) {
-                        if (object.getClass() == Node.class && !object.equals(selected)) {
-                            newSelection = (Node) object;
-                        }
-                    }
+                    Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
                     if (newSelection != null) {
                         System.out.println("New Edge Type: " + newEdgeType);
                         if (newEdgeType.equals("Line")) {
@@ -622,7 +611,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         // Selection required
         actions.add(Action.createBuilder(() -> {
             selected.holdPositionUntil(time);
-            resetSelected();
+            clearSelected();
             return null;
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
         // Selection prohibited
@@ -664,7 +653,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 System.out.println("New Node Mode");
             } else {
                 touchMode = TouchMode.DEFAULT;
-                resetSelected();
+                clearSelected();
                 System.out.println("Default Mode");
             }
             return null;
@@ -682,6 +671,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 touchMode = TouchMode.DEFAULT;
             } else {
                 touchMode = TouchMode.NEW_EDGE;
+                updateNewEdgeInputs();
             }
             return null;
         }, "Switch to New Edge Mode", Input.Keys.E).requiresControl(true).build());
@@ -717,12 +707,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             for (Edge edge : selectedEdges) {
                 edge.getDeath().newSetPoint(time, !edge.getDeath().getValue());
             }
-            resetSelected();
+            clearSelected();
             return null;
         }, "Set death of an object", Input.Keys.D).requiresControl(true).build());
         // Key presses which require selected Object
         actions.add(Action.createBuilder(() -> {
-            resetSelected();
+            clearSelected();
             System.out.println("Deselected object");
             return null;
         }, "Deselect Object", Input.Keys.D).description("Deselects object").requiresSelected(Requirement.REQUIRES).build());
@@ -734,13 +724,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 animation.getNodeHandler().removeEdge(edge);
             }
             System.out.println("Deleted object");
-            resetSelected();
+            clearSelected();
             return null;
         }, "Delete selected unit", Input.Keys.FORWARD_DEL).clearRequiredSelectedTypes().requiredSelectedTypes(Unit.class).build());
         actions.add(Action.createBuilder(() -> {
             animation.deleteObject(selected);
 
-            resetSelected();
+            clearSelected();
 
             System.out.println("Deleted object");
             return null;
@@ -754,7 +744,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             } else {
                 System.out.println("Cannot delete frame on object with less than 2 frames");
             }
-            resetSelected();
+            clearSelected();
             touchMode = TouchMode.DEFAULT;
             return null;
         }, "Delete last frame of selected object", Input.Keys.ESCAPE, Input.Keys.DEL).requiresSelected(Requirement.REQUIRES).build());
