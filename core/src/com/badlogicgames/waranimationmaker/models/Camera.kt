@@ -2,6 +2,7 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
 
 data class Camera(
     override var position: Coordinate = Coordinate(x = 960.0f, y = 540.0f),

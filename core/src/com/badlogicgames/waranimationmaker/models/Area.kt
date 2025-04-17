@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
 import earcut4j.Earcut
-import java.util.*
 
 data class Area (override val id: AreaID) : NodeCollection() {
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
@@ -16,29 +15,26 @@ data class Area (override val id: AreaID) : NodeCollection() {
 
         for (edge in edges) {
             drawCoords.add(animation.getNodeByID(edge.segment.first)!!.screenPosition)
-            if (edge.interpolatedCoords.isEmpty()) { // If there are no interpolated coordinates on the edge, see if there is a duplicate interpolated line edge to use
+            if (edge.screenCoords.isEmpty()) { // If there are no interpolated coordinates on the edge, see if there is a duplicate interpolated line edge to use
                 val firstNode = animation.getNodeByID(edge.segment.first)
-                for (otherEdge in firstNode!!.edges) {
-                    if (otherEdge != edge) {
-                        if (otherEdge.segment.second.value == edge.segment.second.value) {
-                            if (otherEdge.interpolatedCoords.isNotEmpty()) {
-                                drawCoords.addAll(otherEdge.interpolatedCoords)
-                                break
-                            }
-                        }
-                    }
+                val otherInterpolatedEdge = firstNode!!.edges.find { it != edge && it.segment.second.value == edge.segment.second.value }
+                if (otherInterpolatedEdge != null) {
+                    drawCoords.addAll(otherInterpolatedEdge.screenCoords)
+                    edge.screenCoords = otherInterpolatedEdge.screenCoords
+                } else {
+                    edge.screenCoords = mutableListOf(animation.getNodeByID(edge.segment.first)!!.screenPosition, animation.getNodeByID(edge.segment.second)!!.screenPosition)
                 }
-            } else {
-                drawCoords.addAll(edge.interpolatedCoords)
             }
+            drawCoords.addAll(edge.screenCoords.subList(0, edge.screenCoords.size - 1))
         }
-        drawCoords.add(animation.getNodeByID(edges.last().segment.second)!!.screenPosition)
+        if (edges.isNotEmpty()) {
+            drawCoords.add(animation.getNodeByID(edges.last().segment.second)!!.screenPosition)
+        }
 
         val poly = drawCoords.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }.toDoubleArray()
         drawCoords.clear()
 
         val earcut = Earcut.earcut(poly) //turns polygon into series of triangles represented by polygon vertex indexes
-
 
         if (drawPoly == null) {
             drawPoly = mutableListOf()

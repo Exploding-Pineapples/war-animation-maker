@@ -1,6 +1,5 @@
-package com.badlogicgames.waranimationmaker.models
+package com.badlogicgames.waranimationmaker.interpolator
 
-import com.badlogicgames.waranimationmaker.interpolator.*
 import com.badlogicgames.waranimationmaker.utilities.toDoubleArray
 
 class InterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int, Float>(initValue, initTime) {

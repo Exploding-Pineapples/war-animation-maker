@@ -58,11 +58,7 @@ class UnitHandler(
         val out = mutableListOf<Unit>()
         for (unit in animation.units) {
             if (time >= unit.xInterpolator.setPoints.keys.first()) {
-                if (unit.death != null) {
-                    if (time <= unit.death!!) {
-                        out.add(unit)
-                    }
-                } else {
+                if (!unit.death.value) {
                     out.add(unit)
                 }
             }
@@ -76,10 +72,8 @@ class UnitHandler(
             if (time <= unit.xInterpolator.setPoints.keys.first()) {
                 out.add(unit)
             } else {
-                if (unit.death != null) {
-                    if (time >= unit.death!!) {
-                        out.add(unit)
-                    }
+                if (unit.death.value) {
+                    out.add(unit)
                 }
             }
         }

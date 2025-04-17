@@ -1,6 +1,5 @@
-package com.badlogicgames.waranimationmaker.models
+package com.badlogicgames.waranimationmaker.interpolator
 
-import com.badlogicgames.waranimationmaker.interpolator.Interpolator
 import java.util.*
 
 abstract class InterpolatedValue<I : Number, O>(initValue: O, initTime: I) {
@@ -13,7 +12,7 @@ abstract class InterpolatedValue<I : Number, O>(initValue: O, initTime: I) {
         if (setPoints.isEmpty()) {
             throw IllegalArgumentException("Movement frames can not be empty when goToTime is called")
         }
-        if (interpolator == null) { // Is null when animation is first opened because interpolator is @Transient
+        if (interpolator == null) { // Interpolator may not be serialized
             updateInterpolator()
         }
 

@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.*
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
 
 data class Unit(
     override val id: UnitID,

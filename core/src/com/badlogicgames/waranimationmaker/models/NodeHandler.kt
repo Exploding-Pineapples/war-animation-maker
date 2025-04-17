@@ -33,6 +33,16 @@ class NodeHandler(val animation: Animation) {
         return animation.nodes.remove(removeNode)
     }
 
+    fun removeEdge(removeEdge: Edge) : Boolean {
+        var removed = false
+        for (node in animation.nodes) {
+            if (node.edges.remove(removeEdge)) {
+                removed = true
+            }
+        }
+        return removed
+    }
+
     fun getDrawNodes(time: Int): MutableList<Node> {
         val out = mutableListOf<Node>()
         for (node in animation.nodes) {
@@ -53,57 +63,60 @@ class NodeHandler(val animation: Animation) {
         return out
     }
 
-    fun traverse(node: Node, nodeCollections: MutableList<NodeCollection>, currentBranch: NodeCollection) {
+    fun traverse(node: Node, nodeCollections: MutableList<NodeCollection>, currentBranch: NodeCollection, time: Int) {
         val visited = (node.visitedBy.find { (it.value == currentBranch.id.value && it.javaClass == currentBranch.id::class.java) } != null)
-        //println("visited: $visited, this id: ${currentBranch.javaClass} ${currentBranch.id.value}, those ids: ${node.visitedBy.map {it.value}}")
         if (visited) {
-            val nodeCollection = nodeCollections.firstOrNull {it.id.value == currentBranch.id.value}
-            if (nodeCollection != null) {
+            //println("visited: $visited, this id: ${currentBranch.javaClass.simpleName} ${currentBranch.id.value}, those ids: ${node.visitedBy.map { it.value }}")
+            val matchingNodeCollections = nodeCollections.filter { it.id.value == currentBranch.id.value }
+            for (nodeCollection in matchingNodeCollections) {
                 if (node.id.value == nodeCollection.edges.first().segment.first.value) { // If the current node is the first node of an existing Node Collection with the same CollectionID, this branch is part of that Node Collection, so add this branch at the beginning of it
-                    //println("$currentBranch added to beginning of another node collection")
+                    //println("${currentBranch.javaClass.simpleName} ${currentBranch.id.value} added to beginning of another node collection")
                     nodeCollection.edges.addAll(0, currentBranch.edges)
+                    return
+                }
+            }
+            if (currentBranch.edges.isNotEmpty()) {
+                if (node.id.value == currentBranch.edges.first().segment.first.value) { // If the current node is the first node of the current branch, it is forming a loop, so add it to the list
+                    //println("${currentBranch.javaClass.simpleName} ${currentBranch.id.value} ended by loop forming")
+                    nodeCollections.add(currentBranch)
+                } else {
+                    //println("Not added: ${currentBranch.edges}")
                 }
             } else {
-                if (node.id.value == currentBranch.edges.first().segment.first.value) { // If the current node is the first node of the current branch, it is forming a loop, so add it to the list
-                    //println("$currentBranch ended by loop forming")
-                    nodeCollections.add(currentBranch)
-                }
+                println("Empty: ${currentBranch.edges}")
             }
             return
         }
+
         node.visitedBy.add(currentBranch.id)
 
         var reachedEnd = true
 
-        for (edge in node.edges) { // Traverses every available edge from the node
-            val nextNode = animation.getNodeByID(edge.segment.second)!!
-            if (edge.collectionID.value == currentBranch.id.value) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
-                reachedEnd = false
-                traverse(nextNode, nodeCollections, currentBranch.apply { edges.add(edge) })
-            } else { // If edge is not a member of the current branch, start constructing a new Node Collection with that node id
-                if (edge.collectionID.javaClass == AreaID::class.java) {
-                    traverse(
-                        nextNode,
-                        nodeCollections,
-                        Area(edge.collectionID as AreaID).apply { edges.add(edge) })
-                }
-                if (edge.collectionID.javaClass == LineID::class.java) {
-                    traverse(
-                        nextNode,
-                        nodeCollections,
-                        Line(edge.collectionID as LineID).apply { edges.add(edge) })
+        if (node.shouldDraw(time)) {
+            for (edge in node.edges) { // Traverses every available edge from the node
+                val nextNode = animation.getNodeByID(edge.segment.second)!!
+                if (nextNode.shouldDraw(time) && !edge.death.value) {
+                    if (edge.collectionID.value == currentBranch.id.value) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
+                        reachedEnd = false
+                        traverse(nextNode, nodeCollections, currentBranch.apply { edges.add(edge) }, time)
+                    }
                 }
             }
         }
 
         if (reachedEnd) { // If no edges continue the Node Collection that is being constructed, that means the end has been reached, so add the current branch to the end and stop
-            val existingNodeCollection = nodeCollections.firstOrNull { it.id.value == currentBranch.id.value}
-            if (existingNodeCollection == null) {
-                nodeCollections.add(currentBranch)
+            if (nodeCollections.find {it.id.value == currentBranch.id.value} != null) {
+                if (currentBranch.javaClass == Line::class.java) {
+                    nodeCollections.add(Line(LineID(nodeCollections.size)).apply { edges = currentBranch.edges })
+                }
+                if (currentBranch.javaClass == Area::class.java) {
+                    nodeCollections.add(Area(AreaID(nodeCollections.size)).apply { edges = currentBranch.edges })
+                }
+                println("Created new Node Collection with new ID")
             } else {
-                existingNodeCollection.edges.addAll(currentBranch.edges)
+                nodeCollections.add(currentBranch)
             }
-            //println("$currentBranch ended by reaching end")
+            //println("${currentBranch.javaClass.simpleName} ${currentBranch.id.value} ended by reaching end")
             return
         }
     }
@@ -111,41 +124,54 @@ class NodeHandler(val animation: Animation) {
     fun update(time: Int, camera: OrthographicCamera) {
         val nodeCollections = mutableListOf<NodeCollection>()
         for (node in animation.nodes) {
-            if (node.visitedBy == null) {
+            if (node.visitedBy == null) { // visitedBy not serialized
                 node.visitedBy = mutableListOf()
             }
             node.visitedBy.clear()
+            for (edge in node.edges) {
+                if (edge.screenCoords == null) { // interpolatedCoords not serialized
+                    edge.screenCoords = mutableListOf()
+                }
+                edge.update(time)
+            }
+            node.update(time, camera)
         }
         for (node in animation.nodes) {
-            node.update(time, camera)
-            if (node.visitedBy.isEmpty()) {
+            if (node.visitedBy.isEmpty() && !node.death.value) {
                 for (edge in node.edges) {
                     if (edge.collectionID.javaClass == AreaID::class.java) {
                         traverse(
                             node,
                             nodeCollections,
-                            Area(edge.collectionID as AreaID))
+                            Area(edge.collectionID as AreaID),
+                            time)
                     }
                     if (edge.collectionID.javaClass == LineID::class.java) {
                         traverse(
                             node,
                             nodeCollections,
-                            Line(edge.collectionID as LineID))
+                            Line(edge.collectionID as LineID),
+                            time)
                     }
                 }
             }
         }
+        // Run update to cause all node collections to initialize their non-serialized variables, and clear all edges
+        animation.lines.forEach { if (it.edges == null) { it.update(time) }; it.edges.clear() }
+        animation.areas.forEach { if (it.edges == null) { it.update(time, animation) }; it.edges.clear() }
 
         for (nodeCollection in nodeCollections) {
             if (nodeCollection.javaClass == Line::class.java) {
                 val existingLine = animation.lines.firstOrNull{ it.id.value == nodeCollection.id.value }
                 if (existingLine != null) {
                     //println("Used existing line: " + existingLine.id.value)
-                    existingLine.edges = nodeCollection.edges
+                    existingLine.edges.clear()
+                    existingLine.edges.addAll(nodeCollection.edges)
                     existingLine.update(time, animation)
                 } else {
-                    println("Created new line: " + nodeCollection.id.value)
+                    //println("Warning: Created new line: " + nodeCollection.id.value)
                     animation.lines.add(nodeCollection as Line)
+                    nodeCollection.buildInputs()
                     nodeCollection.update(time, animation)
                 }
             }
@@ -156,10 +182,12 @@ class NodeHandler(val animation: Animation) {
             if (nodeCollection.javaClass == Area::class.java) {
                 val existingArea = animation.areas.firstOrNull{ it.id.value == nodeCollection.id.value }
                 if (existingArea != null) {
-                    existingArea.edges = nodeCollection.edges
+                    //println("Used existing area: " + existingArea.id.value)
+                    existingArea.edges.clear()
+                    existingArea.edges.addAll(nodeCollection.edges)
                     existingArea.update(time, animation)
                 } else {
-                    println("Created new line: " + nodeCollection.id.value)
+                    //println("Warning: Created new area: " + nodeCollection.id.value)
                     animation.areas.add(nodeCollection as Area)
                     nodeCollection.buildInputs()
                     nodeCollection.update(time, animation)

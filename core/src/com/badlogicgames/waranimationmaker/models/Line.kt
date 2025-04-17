@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.TextInput
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
 
 data class Line(
     override val id: LineID
@@ -62,14 +63,15 @@ data class Line(
 
         if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
             for (i in edges.indices) {
-                edges[i].interpolatedCoords.clear()
+                val edge = edges[i]
+                edge.screenCoords.clear()
                 for (j in 0 until AnimationScreen.LINES_PER_NODE) {
-                    edges[i].interpolatedCoords.add(Coordinate(
+                    edges[i].screenCoords.add(Coordinate(
                         xInterpolator.interpolator.interpolateAt(i * AnimationScreen.LINES_PER_NODE + j),
                         yInterpolator.interpolator.interpolateAt(i * AnimationScreen.LINES_PER_NODE + j)
                     ))
                 }
-                edges[i].interpolatedCoords.add(animation.getNodeByID(edges[i].segment.second)!!.screenPosition)
+                edge.screenCoords.add(animation.getNodeByID(edge.segment.second)!!.screenPosition)
             }
         }
     }
@@ -78,12 +80,12 @@ data class Line(
         if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
             shapeRenderer.color = color.color
             for (edge in edges) {
-                for (i in 0 until edge.interpolatedCoords.size - 1)
+                for (i in 0 until edge.screenCoords.size - 1)
                 shapeRenderer.rectLine(
-                    edge.interpolatedCoords[i].x,
-                    edge.interpolatedCoords[i].y,
-                    edge.interpolatedCoords[i + 1].x,
-                    edge.interpolatedCoords[i + 1].y,
+                    edge.screenCoords[i].x,
+                    edge.screenCoords[i].y,
+                    edge.screenCoords[i + 1].x,
+                    edge.screenCoords[i + 1].y,
                     lineThickness
                 )
             }

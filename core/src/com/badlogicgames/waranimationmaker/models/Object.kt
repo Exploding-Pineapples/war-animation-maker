@@ -1,5 +1,7 @@
 package com.badlogicgames.waranimationmaker.models
 
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+
 interface Object : HasInputs {
     var position: Coordinate
     var xInterpolator: InterpolatedFloat
@@ -16,12 +18,10 @@ interface Object : HasInputs {
         position.x = xInterpolator.update(time)
         position.y = yInterpolator.update(time)
 
-        return shouldDraw(time)
-    }
-
-    fun shouldDraw(time: Int): Boolean {
         return true
     }
+
+    fun shouldDraw(time: Int): Boolean
 
     fun removeFrame(time: Int): Boolean {
         return xInterpolator.removeFrame(time) && yInterpolator.removeFrame(time) // Both should be paired

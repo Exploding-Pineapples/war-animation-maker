@@ -8,6 +8,9 @@ import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedValue
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import java.io.File
@@ -90,6 +93,14 @@ interface ObjectWithZoom {
 
 interface ObjectWithScreenPosition {
     var screenPosition: Coordinate
+}
+
+interface ObjectWithDeath {
+    var death: InterpolatedBoolean
+}
+
+interface ObjectClickable {
+    fun clicked(x: Float, y: Float) : Boolean
 }
 
 fun projectToScreen(position: Coordinate, zoom: Float, cx: Float, cy: Float): Coordinate {
@@ -203,6 +214,16 @@ data class Animation @JvmOverloads constructor(
         return addArea(newArea)
     }
 
+    fun getNodeCollectionByID(id: NodeCollectionID): NodeCollection? {
+        if (id.javaClass == LineID::class.java) {
+            return getLineByID(id as LineID) as NodeCollection
+        }
+        if (id.javaClass == AreaID::class.java) {
+            return getAreaByID(id as AreaID) as NodeCollection
+        }
+        return null
+    }
+
     fun getAreaByID(id: AreaID): Area? = areas.firstOrNull { it.id.value == id.value }
 
     fun getLineByID(id: LineID): Line? = lines.firstOrNull { it.id.value == id.value }
@@ -221,21 +242,26 @@ data class Animation @JvmOverloads constructor(
         return selectObjectWithType(x, y, ScreenObject::class.java)
     }
 
-    fun selectObjectWithType(x: Float, y: Float, type: Class<out ScreenObject>): ArrayList<ScreenObject> {
-        val screenObjects = ArrayList<ScreenObject>()
-
+    fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, type: Class<out ObjectClickable>): ArrayList<T> {
+        val screenObjects = ArrayList<T>()
 
         if (type.isAssignableFrom(Unit::class.java)) {
             val selectedUnit = unitHandler.clicked(x, y)
             if (selectedUnit != null) {
-                screenObjects.add(selectedUnit)
+                screenObjects.add(selectedUnit as T)
             }
         }
 
         if (type.isAssignableFrom(Node::class.java)) {
+            screenObjects.addAll(nodes.filter { it.clicked(x, y) }.map {it as T})
+        }
+
+        if (type.isAssignableFrom(Edge::class.java)) {
             for (node in nodes) {
-                if (node.clicked(x, y)) {
-                    screenObjects.add(node)
+                for (edge in node.edges) {
+                    if (edge.clicked(x, y)) {
+                        screenObjects.add(edge as T)
+                    }
                 }
             }
         }

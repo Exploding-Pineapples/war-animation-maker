@@ -483,7 +483,8 @@
       },
       "lineThickness": 5.0,
       "alpha": 1.0,
-      "color": "RED"
+      "color": "RED",
+      "updated": false
     }
   ],
   "areas": [
@@ -492,14 +493,16 @@
         "value": 6
       },
       "alpha": 0.2,
-      "color": "RED"
+      "color": "RED",
+      "updated": false
     },
     {
       "id": {
         "value": 7
       },
       "alpha": 0.2,
-      "color": "BLUE"
+      "color": "BLUE",
+      "updated": false
     }
   ],
   "unitId": 3,

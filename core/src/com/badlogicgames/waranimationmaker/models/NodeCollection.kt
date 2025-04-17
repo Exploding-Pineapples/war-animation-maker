@@ -49,8 +49,12 @@ abstract class NodeCollection : HasInputs {
     }
 
     open fun update(time: Int) {
+        // Initialize non-serialized instance variables
         if (drawCoords == null) {
             drawCoords = mutableListOf()
+        }
+        if (edges == null) {
+            edges = mutableListOf()
         }
     }
 }

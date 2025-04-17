@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
 
 data class Node(
     override var position: Coordinate,
@@ -27,7 +28,7 @@ data class Node(
     }
 
     fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
-        if (edges == null) {
+        if (edges == null) { // Edges not serialized
             edges = mutableListOf()
         }
         color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
@@ -35,10 +36,8 @@ data class Node(
         } else {
             Color.YELLOW
         }
-        if (death != null) {
-            if (time > death!!) {
-                color = Color.RED
-            }
+        if (death.value) {
+            color = Color.RED
         }
     }
 

@@ -2,45 +2,42 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import kotlin.math.absoluteValue
 
-abstract class ScreenObject : Object, ObjectWithScreenPosition {
-    var death: Int? = null
+abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath, ObjectClickable {
+    override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
     var alpha: Float = 1f
     @Transient override var screenPosition: Coordinate = Coordinate(0f, 0f)
 
-    open fun clicked(x: Float, y: Float): Boolean
+    override fun clicked(x: Float, y: Float): Boolean
     {
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
-    }
-
-    override fun buildInputs() {
-        super.buildInputs()
-
-        inputElements.add(TextInput(null, { input ->
-            death = input
-        }, label@{
-            return@label death.toString()
-        }, Int::class.java, "Set death"))
     }
 
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
         alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100).coerceIn(0f, 1f)
-        if (death != null) {
-            if (time > death!! - 100) {
-                alpha = ((death!! - time) / 100f).coerceIn(0f, 1f)
+        death.update(time)
+        var deathTime: Int? = null
+        for (i in 0..<death.interpolator.x.size) { // Search for the last time the object was dead, used for fading out
+            if (death.interpolator.y[i] && death.interpolator.x[i] >= time) {
+                deathTime = death.interpolator.x[i]
+            }
+        }
+        if (deathTime != null) {
+            if (time > deathTime - 100) {
+                alpha = ((deathTime - time) / 100f).coerceIn(0f, 1f)
             }
         }
 
         return shouldDraw(time)
     }
 
-    fun updateScreenPosition(zoom: Float, cx: Float, cy: Float) {
+    private fun updateScreenPosition(zoom: Float, cx: Float, cy: Float) {
         if (screenPosition == null) { // Is null when animation is first opened because screenPosition is @Transient
             screenPosition = Coordinate(0f, 0f)
         }
@@ -71,12 +68,7 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition {
         if (time < xInterpolator.setPoints.keys.first()) {
             return false
         }
-        if (death != null) {
-            if (time > death!!) {
-                return false
-            }
-        }
-        return true
+        return !death.value
     }
 
     override fun toString(): String {

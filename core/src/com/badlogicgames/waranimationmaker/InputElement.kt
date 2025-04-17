@@ -36,6 +36,9 @@ abstract class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, @Tran
             },
             Float::class.java to {
                 it.toFloat()
+            },
+            Boolean::class.java to {
+                it.toBoolean()
             }
         )
     }
