@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.utils.Array;
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean;
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID;
 import com.badlogicgames.waranimationmaker.models.*;
@@ -72,7 +73,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     String newUnitCountry;
     SelectBoxInput<String> newUnitCountryInput;
     Integer newEdgeCollectionID;
-    TextInput<Integer> newEdgeCollectionIDInput;
+    SelectBoxInput<Integer> newEdgeCollectionIDInput;
     boolean newEdgeInputsDisplayed;
     boolean newUnitInputsDisplayed;
 
@@ -113,7 +114,18 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         newUnitInputsDisplayed = false;
 
         newEdgeCollectionID = 0;
-        newEdgeCollectionIDInput = new TextInput<>(game.skin, (Integer input) -> { newEdgeCollectionID = input; return null; }, () -> String.valueOf(newEdgeCollectionID), Integer.class, "New Edge ID", null);
+        Array<Integer> idChoices = new Array<>();
+        idChoices.add(animation.getEdgeCollectionId(true));
+        for (EdgeCollection edgeCollection : animation.getEdgeCollections()) {
+            idChoices.add(edgeCollection.getId().getValue());
+        }
+        newEdgeCollectionIDInput = new SelectBoxInput<>(game.skin,
+                (Integer input) -> { newEdgeCollectionID = input; return null; },
+                () -> newEdgeCollectionID,
+                Integer.class,
+                "CollectionID of New Edge",
+                idChoices,
+        null);
         newEdgeInputsDisplayed = false;
 
         selectedLabel = new Label("", game.skin);
@@ -445,6 +457,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.NEW_EDGE) {
+                Array<Integer> idChoices = new Array<>();
+                idChoices.add(animation.getEdgeCollectionId(true));
+                for (EdgeCollection edgeCollection : animation.getEdgeCollections()) {
+                    idChoices.add(edgeCollection.getId().getValue());
+                }
+                newEdgeCollectionIDInput.getChoices().clear();
+                newEdgeCollectionIDInput.getChoices().addAll(idChoices);
                 if (!newEdgeInputsDisplayed) {
                     newEdgeCollectionIDInput.show(leftGroup, game.skin);
                     newEdgeInputsDisplayed = true;

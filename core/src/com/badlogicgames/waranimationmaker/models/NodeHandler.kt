@@ -149,7 +149,13 @@ class NodeHandler(val animation: Animation) {
         for (edgeCollection in edgeCollections) {
             val existingNodeCollection = animation.getEdgeCollectionByID(edgeCollection.id)
             if (existingNodeCollection == null) {
-                println("Warning: Created edge collection ${edgeCollection.id.value}")
+                val newId = animation.getEdgeCollectionId()
+                edgeCollection.edges.forEach { // Do not reuse a previous ID, as they will point to the same Edge Collection object
+                    it.collectionID.setPoints.clear()
+                    it.collectionID.newSetPoint(time, newId, true)
+                    it.collectionID.update(time)
+                }
+                println("Warning: Created edge collection $newId")
                 animation.edgeCollections.add(edgeCollection)
                 edgeCollection.buildInputs()
             } else {

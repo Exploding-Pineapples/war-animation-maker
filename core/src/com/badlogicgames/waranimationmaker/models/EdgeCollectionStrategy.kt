@@ -75,12 +75,10 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
         for (edge in edges) {
             if (!edge.death.value) {
                 drawCoords.add(animation.getNodeByID(edge.segment.first)!!.screenPosition)
-                if (edge.screenCoords.isEmpty()) { // If there are no interpolated coordinates on the edge, see if there is a duplicate interpolated line edge to use
+                if (edge.screenCoords.size <= 2) { // If there are no interpolated coordinates on the edge, see if there is a duplicate interpolated line edge to use
                     val firstNode = animation.getNodeByID(edge.segment.first)
-                    val otherInterpolatedEdge =
-                        firstNode!!.edges.find { it != edge && it.segment.second.value == edge.segment.second.value }
+                    val otherInterpolatedEdge = firstNode!!.edges.find { (it != edge && it.segment.second.value == edge.segment.second.value) && it.screenCoords.size > 2 }
                     if (otherInterpolatedEdge != null) {
-                        drawCoords.addAll(otherInterpolatedEdge.screenCoords)
                         edge.screenCoords = otherInterpolatedEdge.screenCoords
                     } else {
                         edge.screenCoords = mutableListOf(

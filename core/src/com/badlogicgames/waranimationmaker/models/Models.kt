@@ -143,6 +143,13 @@ data class Animation @JvmOverloads constructor(
         return edgeCollectionId
     }
 
+    fun getEdgeCollectionId(noIncrement: Boolean): Int {
+        if (!noIncrement) {
+            edgeCollectionId++
+        }
+        return edgeCollectionId
+    }
+
     fun load(skin: Skin) {
         unitHandler = UnitHandler(this)
         nodeHandler = NodeHandler(this)
