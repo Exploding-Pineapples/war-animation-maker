@@ -2,9 +2,10 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID
 import java.awt.geom.Line2D.ptSegDist
 
-class Edge(val collectionID: NodeCollectionID, var segment: Pair<NodeID, NodeID>, @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
+class Edge(val collectionID: InterpolatedID, var segment: Pair<NodeID, NodeID>, @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
            override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)) : ObjectWithDeath, ObjectClickable {
     override fun clicked(x: Float, y: Float): Boolean {
         if (screenCoords.size > 1) {
@@ -42,7 +43,11 @@ class Edge(val collectionID: NodeCollectionID, var segment: Pair<NodeID, NodeID>
         if (death == null) {
             death = InterpolatedBoolean(false, 0)
         }
+        if (screenCoords == null) {
+            screenCoords = mutableListOf()
+        }
         death.update(time)
+        collectionID.update(time)
     }
     fun drawAsSelected(shapeRenderer: ShapeRenderer, animationMode: Boolean) {
         if (animationMode) {

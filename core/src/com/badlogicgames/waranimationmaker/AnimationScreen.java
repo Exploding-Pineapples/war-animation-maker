@@ -5,19 +5,20 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.utils.Array;
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean;
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID;
 import com.badlogicgames.waranimationmaker.models.*;
 import kotlin.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 import static com.badlogicgames.waranimationmaker.Assets.loadTexture;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
@@ -41,7 +42,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Integer time;
 
     ScreenObject selected;
-    List<NodeCollection> selectedNodeCollections; // if a Node is selected, this will be the Area or Line that the Node is on
+    List<EdgeCollection> selectedEdgeCollections; // if a Node is selected, this will be the Area or Line that the Node is on
     List<Edge> selectedEdges;
 
     boolean shiftPressed;
@@ -70,8 +71,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     UIVisitor uiVisitor;
     String newUnitCountry;
     SelectBoxInput<String> newUnitCountryInput;
-    String newEdgeType;
-    SelectBoxInput<String> newEdgeTypeInput;
     Integer newEdgeCollectionID;
     TextInput<Integer> newEdgeCollectionIDInput;
     boolean newEdgeInputsDisplayed;
@@ -97,7 +96,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animationMode = true;
 
         //UI
-        selectedNodeCollections = new ArrayList<>();
+        selectedEdgeCollections = new ArrayList<>();
         selectedEdges = new ArrayList<>();
         touchMode = TouchMode.DEFAULT;
         actions = new ArrayList<>();
@@ -111,12 +110,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         newUnitCountryInput = new SelectBoxInput<>(game.skin, (String input) -> {newUnitCountry = input; return null;}, () -> null, String.class, "New Unit Country", Assets.countryNames(), null);
         newUnitCountry = Assets.countryNames().first();
-        Array<String> edgeTypes = new Array<>();
-        edgeTypes.add("Area", "Line");
         newUnitInputsDisplayed = false;
 
-        newEdgeTypeInput = new SelectBoxInput<>(game.skin, (String input) -> { newEdgeType = input; return null; }, () -> newEdgeType, String.class, "New Edge Type", edgeTypes, null);
-        newEdgeType = edgeTypes.first();
         newEdgeCollectionID = 0;
         newEdgeCollectionIDInput = new TextInput<>(game.skin, (Integer input) -> { newEdgeCollectionID = input; return null; }, () -> String.valueOf(newEdgeCollectionID), Integer.class, "New Edge ID", null);
         newEdgeInputsDisplayed = false;
@@ -173,65 +168,61 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public void updateNewEdgeInputs() {
-        if (!selectedNodeCollections.isEmpty()) { // Update the inputs to match the new edge type
+        if (!selectedEdgeCollections.isEmpty()) { // Update the inputs to match the new edge type
             System.out.println("Updating new edge inputs");
-            newEdgeType = selectedNodeCollections.get(0).getClass().getSimpleName();
-            newEdgeCollectionID = selectedNodeCollections.get(0).getId().getValue();
-            newEdgeTypeInput.hide(leftGroup);
+            newEdgeCollectionID = selectedEdgeCollections.get(0).getId().getValue();
             newEdgeCollectionIDInput.hide(leftGroup);
             newEdgeInputsDisplayed = false;
         }
     }
 
     private void clearSelected() {
-        System.out.println("resetting selected");
         if (selected != null) {
             selected.hideInputs(selectedGroup, uiVisitor);
         }
-        for (NodeCollection collection : selectedNodeCollections) {
+        for (EdgeCollection collection : selectedEdgeCollections) {
             collection.hideInputs(selectedGroup, uiVisitor);
         }
         selected = null;
         selectedEdges.clear();
-        selectedNodeCollections.clear();
+        selectedEdgeCollections.clear();
     }
 
     public <T extends ScreenObject> void switchSelected(T newSelection) {
         clearSelected(); // Hide previous selected object
-        System.out.println("switching selected");
 
         selected = newSelection;
 
         // Show new selected object
         if (selected != null) {
-            selectedNodeCollections = animation.getParents(selected.getId());
+            System.out.println("Selected: " + selected.getClass().getSimpleName() + " " + selected.getId().getValue());
+            selectedEdgeCollections = animation.getParents(selected.getId());
             selected.showInputs(selectedGroup, uiVisitor);
-            for (NodeCollection collection : selectedNodeCollections) {
+            for (EdgeCollection collection : selectedEdgeCollections) {
                 collection.showInputs(selectedGroup, uiVisitor);
             }
         } else {
-            selectedNodeCollections.clear();
-            newEdgeCollectionID = animation.getLines().size() + animation.getAreas().size(); // New ID needed per node collection concurrently on screen TODO make it safe
+            newEdgeCollectionID = animation.getEdgeCollections().size(); // New ID needed per node collection concurrently on screen TODO make it safe
         }
     }
 
     public void switchSelected(ArrayList<Edge> newSelections) {
         clearSelected();
-        System.out.println("switching selected to an edge");
 
         selectedEdges = newSelections;
-        // Show new selected object
-        selectedNodeCollections.clear();
+
         if (!newSelections.isEmpty()) {
             for (Edge newSelection : newSelections) {
-                NodeCollection nodeCollection = animation.getNodeCollectionByID(newSelection.getCollectionID());
-                if (nodeCollection != null) {
-                    selectedNodeCollections.add(nodeCollection);
-                    nodeCollection.showInputs(selectedGroup, uiVisitor);
+                System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
+                EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
+                if (edgeCollection != null) {
+                    System.out.println("selected edge collection " + edgeCollection.getId().getValue());
+                    selectedEdgeCollections.add(edgeCollection);
+                    edgeCollection.showInputs(selectedGroup, uiVisitor);
                 }
             }
         } else {
-            newEdgeCollectionID = animation.getLines().size() + animation.getAreas().size(); // New ID needed per node collection concurrently on screen TODO make it safe
+            newEdgeCollectionID = animation.getEdgeCollections().size(); // New ID needed per node collection concurrently on screen TODO make it safe
         }
     }
 
@@ -305,15 +296,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 } else {
                     Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
                     if (newSelection != null) {
-                        System.out.println("New Edge Type: " + newEdgeType);
-                        if (newEdgeType.equals("Line")) {
-                            ((Node) selected).getEdges().add(new Edge(new LineID(newEdgeCollectionID), new Pair<>(((Node) selected).getId(), newSelection.getId()), new ArrayList<>(), new InterpolatedBoolean(false, time)));
-                            System.out.println("Made a line edge");
-                        }
-                        if (newEdgeType.equals("Area")) {
-                            ((Node) selected).getEdges().add(new Edge(new AreaID(newEdgeCollectionID), new Pair<>(((Node) selected).getId(), newSelection.getId()), new ArrayList<>(), new InterpolatedBoolean(false, time)));
-                            System.out.println("Made an area edge");
-                        }
+                        ((Node) selected).getEdges().add(new Edge(new InterpolatedID(time, newEdgeCollectionID), new Pair<>(((Node) selected).getId(), newSelection.getId()), new ArrayList<>(), new InterpolatedBoolean(false, time)));
                         System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
                     }
                     switchSelected(newSelection);
@@ -436,17 +419,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     selectedInfo.append("Edges: ").append(nodes).append("\n");
                 }
-                for (NodeCollection nodeCollection : selectedNodeCollections) {
-                    selectedInfo.append("Selected ").append(nodeCollection.getClass().getSimpleName()).append(": \n");
-                    selectedInfo.append("# Edges: ").append(nodeCollection.getEdges().size()).append("\n");
-                    if (nodeCollection.getClass() == Line.class) {
-                        Line selectedLine = (Line) nodeCollection;
-                        selectedInfo.append("NodeCollectionID: ").append(selectedLine.getId().getValue()).append("\n");
-                    }
-                    if (nodeCollection.getClass() == Area.class) {
-                        Area selectedArea = (Area) nodeCollection;
-                        selectedInfo.append("NodeCollectionID: ").append(selectedArea.getId().getValue()).append("\n");
-                    }
+                for (EdgeCollection edgeCollection : selectedEdgeCollections) {
+                    selectedInfo.append("Selected ").append(edgeCollection.getClass().getSimpleName()).append(": \n");
+                    selectedInfo.append("# Edges: ").append(edgeCollection.getEdges().size()).append("\n");
+                    selectedInfo.append("EdgeCollectionID: ").append(edgeCollection.getId().getValue()).append("\n");
                 }
             }
             selectedLabel.setText(selectedInfo);
@@ -470,13 +446,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (touchMode == TouchMode.NEW_EDGE) {
                 if (!newEdgeInputsDisplayed) {
-                    newEdgeTypeInput.show(leftGroup, game.skin);
                     newEdgeCollectionIDInput.show(leftGroup, game.skin);
                     newEdgeInputsDisplayed = true;
                 }
             } else {
                 if (newEdgeInputsDisplayed) {
-                    newEdgeTypeInput.hide(leftGroup);
                     newEdgeCollectionIDInput.hide(leftGroup);
                     newEdgeInputsDisplayed = false;
                 }
@@ -527,28 +501,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.draw(fullMap, origin.getX(), origin.getY(), fullMap.getWidth() * camera.zoom, fullMap.getHeight() * camera.zoom);
         game.batcher.end();
 
-        // Draw area polygons
-        colorLayer.begin();
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.CLEAR);
-        shapeRenderer.rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT); // Clear the color layer
-
-        for (Area area : animation.getAreas()) { // Draw areas to the color layer
-            area.draw(shapeRenderer);
-        }
-
-        shapeRenderer.end();
-        colorLayer.end();
-
-        // Draw the color layer to the screen
-        game.batcher.begin();
-        TextureRegion textureRegion = new TextureRegion(colorLayer.getColorBufferTexture());
-        textureRegion.flip(false, true);
-        game.batcher.setColor(1,1,1,0.2f); // Draw the color layers with transparency
-        game.batcher.draw(textureRegion, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        game.batcher.end();
-
-        shapeRenderer.end();
+        animation.getNodeHandler().draw(game.batcher, shapeRenderer, colorLayer, animationMode);
 
         // Draw Units and Lines
         animation.getNodeHandler().draw(game.batcher, shapeRenderer, colorLayer, animationMode);
@@ -658,14 +611,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             return null;
         }, "New Node Mode", Input.Keys.NUM_1).requiresSelected(Requirement.ANY).build());
-        actions.add(Action.createBuilder(() -> {
-            Node newNode = animation.createNodeAtPosition(time, mouseX, mouseY);
-            selectedNodeCollections.add(animation.addNewArea(Collections.singletonList(newNode.getId())));
-            switchSelected(newNode);
-
-            touchMode = TouchMode.NEW_NODE;
-            return null;
-        }, "Create new area", Input.Keys.A).requiresSelected(Requirement.REQUIRES_NOT).build());
         actions.add(Action.createBuilder(() -> {
             if (touchMode == TouchMode.NEW_EDGE) {
                 touchMode = TouchMode.DEFAULT;

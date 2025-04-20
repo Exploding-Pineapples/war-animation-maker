@@ -16,7 +16,7 @@ data class Node(
     override var xInterpolator = InterpolatedFloat(position.x, initTime)
     override var yInterpolator = InterpolatedFloat(position.y, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
-    @Transient var visitedBy = mutableListOf<NodeCollectionID>()
+    @Transient var visitedBy = mutableListOf<EdgeCollectionID>()
     var edges = mutableListOf<Edge>()
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
@@ -31,6 +31,10 @@ data class Node(
         if (edges == null) { // Edges not serialized
             edges = mutableListOf()
         }
+        if (visitedBy == null) { // Visited by not serialized
+            visitedBy = mutableListOf()
+        }
+        visitedBy.clear() // Clear to prepare to be traversed
         color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
             Color.GREEN
         } else {

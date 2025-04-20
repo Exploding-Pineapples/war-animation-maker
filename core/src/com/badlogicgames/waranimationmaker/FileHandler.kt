@@ -1,8 +1,6 @@
 package com.badlogicgames.waranimationmaker
 
-import com.badlogicgames.waranimationmaker.models.Animation
-import com.badlogicgames.waranimationmaker.models.ID
-import com.badlogicgames.waranimationmaker.models.NodeCollectionID
+import com.badlogicgames.waranimationmaker.models.*
 import com.google.gson.*
 import java.io.File
 import java.lang.reflect.Type
@@ -13,7 +11,8 @@ object FileHandler {
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)
         .serializeNulls()
         .registerTypeAdapter(ID::class.java, AbstractTypeSerializer<ID>())
-        .registerTypeAdapter(NodeCollectionID::class.java, AbstractTypeSerializer<NodeCollectionID>())
+        .registerTypeAdapter(AnyEdgeCollectionStrategy::class.java, AbstractTypeSerializer<AnyEdgeCollectionStrategy>())
+        .registerTypeAdapter(EdgeCollectionContext::class.java, AbstractTypeSerializer<EdgeCollectionContext>())
         .create()
 
     val animations = mutableListOf<Animation>()

@@ -4,15 +4,15 @@ import java.util.*
 
 abstract class InterpolatedValue<I : Number, O>(initValue: O, initTime: I) {
     abstract var interpolator: Interpolator<I, O>
-    val setPoints: SortedMap<I, O> = TreeMap()
+    var setPoints: SortedMap<I, O> = TreeMap()
     var value: O = initValue
 
     abstract fun updateInterpolator()
     open fun update(time: I): O { // Updates value based on time and returns it
         if (setPoints.isEmpty()) {
-            throw IllegalArgumentException("Movement frames can not be empty when goToTime is called")
+            throw IllegalArgumentException("Set points can not be empty when update is called")
         }
-        if (interpolator == null) { // Interpolator may not be serialized
+        if (interpolator == null) { // Interpolator not serialized
             updateInterpolator()
         }
 
@@ -35,24 +35,27 @@ abstract class InterpolatedValue<I : Number, O>(initValue: O, initTime: I) {
     }
 
     fun newSetPoint(time: I, value: O) {
-        if (time.toDouble() > setPoints.keys.last().toDouble()) { // Adds time and value to the end
-            setPoints[time] = value
-            updateInterpolator()
-            println("Appended, new motions: $setPoints")
-            return
-        }
+        setPoints[time] = value
+        updateInterpolator()
+    }
 
-        for (definedTime in setPoints.keys) {
-            if (time.toDouble() == definedTime.toDouble()) {
-                setPoints[definedTime] = value
-                updateInterpolator()
-                return
-            }
-            if (definedTime.toDouble() > time.toDouble()) {
-                setPoints[time] = value
-                updateInterpolator()
+    fun newSetPoint(time: I, value: O, removeDuplicates: Boolean) {
+        newSetPoint(time, value)
 
-                return
+        if (removeDuplicates) { // Remove all set points after the new set point that have the same value in a row
+            var found = false
+            for (definedTime in setPoints.keys) {
+                if (definedTime.toDouble() >= time.toDouble()) {
+                    if (found) { // If the last set point already exists
+                        if (setPoints[definedTime] == value) {
+                            setPoints.remove(definedTime)
+                        } else {
+                            return
+                        }
+                    } else {
+                        found = true
+                    }
+                }
             }
         }
     }

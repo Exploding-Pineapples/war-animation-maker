@@ -2,76 +2,13 @@
   "path": "X:\\Animation Maker\\war-animation-maker\\assets\\maps\\fast load.png",
   "name": "My Animation",
   "countries": [],
-  "units": [
-    {
-      "id": {
-        "value": 0
-      },
-      "position": {
-        "x": 1106.9602,
-        "y": 465.35355
-      },
-      "initTime": 0,
-      "image": "assets\\flags\\bgflag.png",
-      "xInterpolator": {
-        "setPoints": {
-          "0": 1106.9602
-        },
-        "value": 1106.9602
-      },
-      "yInterpolator": {
-        "setPoints": {
-          "0": 465.35355
-        },
-        "value": 465.35355
-      },
-      "color": "RED",
-      "name": "2",
-      "type": "infantry",
-      "size": "XX",
-      "width": 76.09,
-      "height": 76.09,
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "id": {
-        "value": 2
-      },
-      "position": {
-        "x": 1379.8862,
-        "y": 583.15497
-      },
-      "initTime": 0,
-      "image": "assets\\flags\\naziflag.png",
-      "xInterpolator": {
-        "setPoints": {
-          "0": 1379.8862
-        },
-        "value": 1379.8862
-      },
-      "yInterpolator": {
-        "setPoints": {
-          "0": 583.15497
-        },
-        "value": 583.15497
-      },
-      "color": "DARK_GRAY",
-      "name": "7",
-      "type": "infantry",
-      "size": "XX",
-      "width": 76.09,
-      "height": 76.09,
-      "death": null,
-      "alpha": 1.0
-    }
-  ],
+  "units": [],
   "camera": {
     "position": {
       "x": 960.0,
       "y": 540.0
     },
-    "zoom": 0.85737497,
+    "zoom": 1.0,
     "initTime": 0,
     "id": {
       "type": "com.badlogicgames.waranimationmaker.models.NodeID",
@@ -93,18 +30,222 @@
     },
     "zoomInterpolator": {
       "setPoints": {
-        "0": 0.85737497
+        "0": 1.0
       },
-      "value": 0.85737497
+      "value": 1.0
     },
-    "death": null,
+    "death": {
+      "setPoints": {
+        "0": false
+      },
+      "value": false
+    },
     "alpha": 1.0
   },
   "nodes": [
     {
       "position": {
-        "x": 528.4502,
-        "y": -2.3531327
+        "x": 637.0,
+        "y": 794.0
+      },
+      "initTime": 0,
+      "id": {
+        "value": 0
+      },
+      "color": {
+        "r": 0.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "xInterpolator": {
+        "setPoints": {
+          "0": 637.0
+        },
+        "value": 637.0
+      },
+      "yInterpolator": {
+        "setPoints": {
+          "0": 794.0
+        },
+        "value": 794.0
+      },
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 0
+            },
+            "value": 0
+          },
+          "segment": {
+            "first": {
+              "value": 0
+            },
+            "second": {
+              "value": 1
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        },
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 0
+            },
+            "second": {
+              "value": 5
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
+      "alpha": 1.0
+    },
+    {
+      "position": {
+        "x": 638.0,
+        "y": 666.0
+      },
+      "initTime": 0,
+      "id": {
+        "value": 1
+      },
+      "color": {
+        "r": 0.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "xInterpolator": {
+        "setPoints": {
+          "0": 638.0
+        },
+        "value": 638.0
+      },
+      "yInterpolator": {
+        "setPoints": {
+          "0": 666.0
+        },
+        "value": 666.0
+      },
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 0
+            },
+            "value": 0
+          },
+          "segment": {
+            "first": {
+              "value": 1
+            },
+            "second": {
+              "value": 2
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
+      "alpha": 1.0
+    },
+    {
+      "position": {
+        "x": 609.0,
+        "y": 503.0
+      },
+      "initTime": 0,
+      "id": {
+        "value": 2
+      },
+      "color": {
+        "r": 0.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "xInterpolator": {
+        "setPoints": {
+          "0": 609.0
+        },
+        "value": 609.0
+      },
+      "yInterpolator": {
+        "setPoints": {
+          "0": 503.0
+        },
+        "value": 503.0
+      },
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 0
+            },
+            "value": 0
+          },
+          "segment": {
+            "first": {
+              "value": 2
+            },
+            "second": {
+              "value": 3
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
+      "alpha": 1.0
+    },
+    {
+      "position": {
+        "x": 843.0,
+        "y": 396.0
       },
       "initTime": 0,
       "id": {
@@ -118,24 +259,52 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 528.4502
+          "0": 843.0
         },
-        "value": 528.4502
+        "value": 843.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": -2.3531327
+          "0": 396.0
         },
-        "value": -2.3531327
+        "value": 396.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 0
+            },
+            "value": 0
+          },
+          "segment": {
+            "first": {
+              "value": 3
+            },
+            "second": {
+              "value": 4
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 940.0,
-        "y": 466.0
+        "x": 1146.0,
+        "y": 303.0
       },
       "initTime": 0,
       "id": {
@@ -149,26 +318,29 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 940.0,
-          "200": 990.32513
+          "0": 1146.0
         },
-        "value": 940.0
+        "value": 1146.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 466.0,
-          "200": 623.97723
+          "0": 303.0
         },
-        "value": 466.0
+        "value": 303.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 1012.261,
-        "y": 346.03134
+        "x": 706.0,
+        "y": 840.0
       },
       "initTime": 0,
       "id": {
@@ -182,24 +354,52 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 1012.261
+          "0": 706.0
         },
-        "value": 1012.261
+        "value": 706.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 346.03134
+          "0": 840.0
         },
-        "value": 346.03134
+        "value": 840.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 5
+            },
+            "second": {
+              "value": 6
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 1295.6764,
-        "y": 424.42282
+        "x": 852.0,
+        "y": 826.0
       },
       "initTime": 0,
       "id": {
@@ -213,24 +413,52 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 1295.6764
+          "0": 852.0
         },
-        "value": 1295.6764
+        "value": 852.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 424.42282
+          "0": 826.0
         },
-        "value": 424.42282
+        "value": 826.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 6
+            },
+            "second": {
+              "value": 7
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 1180.0991,
-        "y": 714.8733
+        "x": 966.0,
+        "y": 814.0
       },
       "initTime": 0,
       "id": {
@@ -244,24 +472,78 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 1180.0991
+          "0": 966.0,
+          "200": 988.0
         },
-        "value": 1180.0991
+        "value": 966.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 714.8733
+          "0": 814.0,
+          "200": 656.0
         },
-        "value": 714.8733
+        "value": 814.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 7
+            },
+            "second": {
+              "value": 8
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false,
+              "200": true
+            },
+            "value": false
+          }
+        },
+        {
+          "collectionID": {
+            "setPoints": {
+              "200": 1
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 7
+            },
+            "second": {
+              "value": 10
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": true,
+              "200": false
+            },
+            "value": true
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 692.90564,
-        "y": 1070.6896
+        "x": 1018.0,
+        "y": 739.0
       },
       "initTime": 0,
       "id": {
@@ -275,28 +557,59 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 692.90564
+          "0": 1018.0,
+          "200": 1021.0
         },
-        "value": 692.90564
+        "value": 1018.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 1070.6896
+          "0": 739.0,
+          "200": 707.0
         },
-        "value": 1070.6896
+        "value": 739.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1,
+              "200": 4
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 8
+            },
+            "second": {
+              "value": 9
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 0.09327461,
-        "y": -2.3531327
+        "x": 1046.0,
+        "y": 639.0
       },
       "initTime": 0,
       "id": {
-        "value": 57
+        "value": 9
       },
       "color": {
         "r": 0.0,
@@ -306,28 +619,81 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 0.09327461
+          "0": 1046.0,
+          "200": 1060.0
         },
-        "value": 0.09327461
+        "value": 1046.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": -2.3531327
+          "0": 639.0,
+          "200": 673.0
         },
-        "value": -2.3531327
+        "value": 639.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 9
+            },
+            "second": {
+              "value": 10
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false,
+              "200": true
+            },
+            "value": false
+          }
+        },
+        {
+          "collectionID": {
+            "setPoints": {
+              "200": 4
+            },
+            "value": 4
+          },
+          "segment": {
+            "first": {
+              "value": 9
+            },
+            "second": {
+              "value": 13
+            }
+          },
+          "death": {
+            "setPoints": {
+              "200": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": -6.9048305,
-        "y": 1070.6896
+        "x": 1075.0,
+        "y": 543.0
       },
       "initTime": 0,
       "id": {
-        "value": 58
+        "value": 10
       },
       "color": {
         "r": 0.0,
@@ -337,28 +703,59 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": -6.9048305
+          "0": 1075.0,
+          "200": 988.0
         },
-        "value": -6.9048305
+        "value": 1075.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 1070.6896
+          "0": 543.0,
+          "200": 656.0
         },
-        "value": 1070.6896
+        "value": 543.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1,
+              "200": 3
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 10
+            },
+            "second": {
+              "value": 11
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 1081.3004,
-        "y": 873.57635
+        "x": 1097.0,
+        "y": 443.0
       },
       "initTime": 0,
       "id": {
-        "value": 62
+        "value": 11
       },
       "color": {
         "r": 0.0,
@@ -368,143 +765,257 @@
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 1081.3004
+          "0": 1097.0
         },
-        "value": 1081.3004
+        "value": 1097.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 873.57635
+          "0": 443.0
         },
-        "value": 873.57635
+        "value": 443.0
       },
-      "edges": null,
-      "death": null,
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "0": 1,
+              "200": 3
+            },
+            "value": 1
+          },
+          "segment": {
+            "first": {
+              "value": 11
+            },
+            "second": {
+              "value": 4
+            }
+          },
+          "death": {
+            "setPoints": {
+              "0": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
       "alpha": 1.0
     },
     {
       "position": {
-        "x": 836.3668,
-        "y": 265.90756
+        "x": 988.0,
+        "y": 656.0
       },
-      "initTime": 0,
+      "initTime": 200,
       "id": {
-        "value": 63
+        "value": 12
       },
       "color": {
-        "r": 0.0,
+        "r": 1.0,
         "g": 1.0,
         "b": 0.0,
         "a": 1.0
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 836.3668
+          "200": 988.0
         },
-        "value": 836.3668
+        "value": 988.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": 265.90756
+          "200": 656.0
         },
-        "value": 265.90756
+        "value": 656.0
       },
-      "edges": null,
-      "death": null,
-      "alpha": 1.0
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "200": 4
+            },
+            "value": 4
+          },
+          "segment": {
+            "first": {
+              "value": 12
+            },
+            "second": {
+              "value": 8
+            }
+          },
+          "death": {
+            "setPoints": {
+              "200": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
+        "setPoints": {
+          "0": false
+        },
+        "value": false
+      },
+      "alpha": 0.0
     },
     {
       "position": {
-        "x": 2059.2673,
-        "y": -4.081746
+        "x": 988.0,
+        "y": 656.0
       },
-      "initTime": 0,
+      "initTime": 200,
       "id": {
-        "value": 64
+        "value": 13
       },
       "color": {
-        "r": 0.0,
+        "r": 1.0,
         "g": 1.0,
         "b": 0.0,
         "a": 1.0
       },
       "xInterpolator": {
         "setPoints": {
-          "0": 2059.2673
+          "200": 988.0
         },
-        "value": 2059.2673
+        "value": 988.0
       },
       "yInterpolator": {
         "setPoints": {
-          "0": -4.081746
+          "200": 656.0
         },
-        "value": -4.081746
+        "value": 656.0
       },
-      "edges": null,
-      "death": null,
-      "alpha": 1.0
-    },
-    {
-      "position": {
-        "x": 2062.9685,
-        "y": 1076.6792
-      },
-      "initTime": 0,
-      "id": {
-        "value": 65
-      },
-      "color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0,
-        "a": 1.0
-      },
-      "xInterpolator": {
+      "edges": [
+        {
+          "collectionID": {
+            "setPoints": {
+              "200": 4
+            },
+            "value": 4
+          },
+          "segment": {
+            "first": {
+              "value": 13
+            },
+            "second": {
+              "value": 12
+            }
+          },
+          "death": {
+            "setPoints": {
+              "200": false
+            },
+            "value": false
+          }
+        }
+      ],
+      "death": {
         "setPoints": {
-          "0": 2062.9685
+          "0": false
         },
-        "value": 2062.9685
+        "value": false
       },
-      "yInterpolator": {
-        "setPoints": {
-          "0": 1076.6792
-        },
-        "value": 1076.6792
-      },
-      "edges": null,
-      "death": null,
-      "alpha": 1.0
+      "alpha": 0.0
     }
   ],
-  "lines": [
+  "edgeCollections": [
     {
       "id": {
         "value": 0
       },
-      "lineThickness": 5.0,
-      "alpha": 1.0,
-      "color": "RED"
-    }
-  ],
-  "areas": [
-    {
-      "id": {
-        "value": 6
+      "alpha": 255.0,
+      "edgeCollectionStrategy": {
+        "type": "com.badlogicgames.waranimationmaker.models.AreaStrategy",
+        "properties": {}
       },
-      "alpha": 0.2,
-      "color": "RED"
+      "edgeCollectionContext": {
+        "type": "com.badlogicgames.waranimationmaker.models.AreaContext",
+        "properties": {
+          "color": "RED"
+        }
+      }
     },
     {
       "id": {
-        "value": 7
+        "value": 1
       },
-      "alpha": 0.2,
-      "color": "BLUE"
+      "alpha": 255.0,
+      "edgeCollectionStrategy": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineStrategy",
+        "properties": {}
+      },
+      "edgeCollectionContext": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineContext",
+        "properties": {
+          "width": 5.0,
+          "color": "RED"
+        }
+      }
+    },
+    {
+      "id": {
+        "value": 2
+      },
+      "alpha": 255.0,
+      "edgeCollectionStrategy": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineStrategy",
+        "properties": {}
+      },
+      "edgeCollectionContext": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineContext",
+        "properties": {
+          "width": 5.0,
+          "color": "RED"
+        }
+      }
+    },
+    {
+      "id": {
+        "value": 3
+      },
+      "alpha": 255.0,
+      "edgeCollectionStrategy": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineStrategy",
+        "properties": {}
+      },
+      "edgeCollectionContext": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineContext",
+        "properties": {
+          "width": 5.0,
+          "color": "RED"
+        }
+      }
+    },
+    {
+      "id": {
+        "value": 4
+      },
+      "alpha": 255.0,
+      "edgeCollectionStrategy": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineStrategy",
+        "properties": {}
+      },
+      "edgeCollectionContext": {
+        "type": "com.badlogicgames.waranimationmaker.models.LineContext",
+        "properties": {
+          "width": 5.0,
+          "color": "RED"
+        }
+      }
     }
   ],
-  "unitId": 3,
-  "nodeCollectionId": 9,
-  "nodeId": 67,
+  "unitId": 0,
+  "edgeCollectionId": 4,
+  "nodeId": 14,
   "linesPerNode": 12,
   "cachedImageDimensions": {
     "first": 2056,

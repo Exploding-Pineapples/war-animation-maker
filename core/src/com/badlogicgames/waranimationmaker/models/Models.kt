@@ -10,7 +10,6 @@ import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedValue
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import java.io.File
@@ -65,13 +64,9 @@ class UIVisitor(val skin: Skin) {
         text = "Node: "
         show(verticalGroup, node as HasInputs)
     }
-    fun show(verticalGroup: VerticalGroup, area: Area) {
-        text = "Area: "
-        show(verticalGroup, area as HasInputs)
-    }
-    fun show(verticalGroup: VerticalGroup, line: Line) {
-        text = "Line: "
-        show(verticalGroup, line as HasInputs)
+    fun show(verticalGroup: VerticalGroup, edgeCollection: EdgeCollection) {
+        text = "Edge Collection: "
+        show(verticalGroup, edgeCollection as HasInputs)
     }
 
     fun hide(verticalGroup: VerticalGroup, hasInputs: HasInputs) {
@@ -119,12 +114,8 @@ class UnitID(override val value: Int = -1) : ID {
     override fun getAbstractType() = UnitID::class.java
 }
 
-abstract class NodeCollectionID : ID
-class LineID(override val value: Int = -1) : NodeCollectionID() {
-    override fun getAbstractType() = LineID::class.java
-}
-class AreaID(override val value: Int = -1) : NodeCollectionID() {
-    override fun getAbstractType() = AreaID::class.java
+class EdgeCollectionID(override val value: Int = -1) : ID {
+    override fun getAbstractType() = EdgeCollectionID::class.java
 }
 
 class NodeID(override val value: Int = -1) : ID {
@@ -138,15 +129,19 @@ data class Animation @JvmOverloads constructor(
     val units: MutableList<Unit> = mutableListOf(),
     private var camera: Camera? = null,
     val nodes: MutableList<Node> = mutableListOf(),
-    val lines: MutableList<Line> = mutableListOf(),
-    val areas: MutableList<Area> = mutableListOf(),
+    val edgeCollections: MutableList<EdgeCollection> = mutableListOf(),
     var unitId: Int = 0,
-    var nodeCollectionId: Int = 0,
+    private var edgeCollectionId: Int = 0,
     var nodeId: Int = 0,
     val linesPerNode: Int = 12
 )
 {
     private var cachedImageDimensions: Pair<Int, Int>? = null
+
+    fun getEdgeCollectionId(): Int {
+        edgeCollectionId++
+        return edgeCollectionId
+    }
 
     fun load(skin: Skin) {
         unitHandler = UnitHandler(this)
@@ -185,48 +180,9 @@ data class Animation @JvmOverloads constructor(
         return false
     }
 
-    fun emptyLine(): Line {
-        return addLine(Line(LineID(nodeCollectionId)))
+    fun getEdgeCollectionByID(id: EdgeCollectionID): EdgeCollection? {
+        return edgeCollections.find { it.id.value == id.value }
     }
-
-    fun addLine(line: Line): Line {
-        lines.add(line)
-        line.buildInputs()
-        nodeCollectionId++
-        return line
-    }
-
-    fun addNewLine(vararg edges: Edge): Line {
-        val newLine = Line(LineID(nodeCollectionId))
-        newLine.edges.addAll(edges)
-        return addLine(newLine)
-    }
-
-    fun addArea(area: Area): Area {
-        areas.add(area)
-        area.buildInputs()
-        nodeCollectionId++
-        return area
-    }
-
-    fun addNewArea(nodes: List<NodeID>): Area {
-        val newArea = Area(AreaID(nodeCollectionId))
-        return addArea(newArea)
-    }
-
-    fun getNodeCollectionByID(id: NodeCollectionID): NodeCollection? {
-        if (id.javaClass == LineID::class.java) {
-            return getLineByID(id as LineID) as NodeCollection
-        }
-        if (id.javaClass == AreaID::class.java) {
-            return getAreaByID(id as AreaID) as NodeCollection
-        }
-        return null
-    }
-
-    fun getAreaByID(id: AreaID): Area? = areas.firstOrNull { it.id.value == id.value }
-
-    fun getLineByID(id: LineID): Line? = lines.firstOrNull { it.id.value == id.value }
 
     fun getNodeByID(id: NodeID): Node? = nodes.firstOrNull { it.id.value == id.value }
 
@@ -243,30 +199,30 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, type: Class<out ObjectClickable>): ArrayList<T> {
-        val screenObjects = ArrayList<T>()
+        val objects = ArrayList<T>()
 
         if (type.isAssignableFrom(Unit::class.java)) {
             val selectedUnit = unitHandler.clicked(x, y)
             if (selectedUnit != null) {
-                screenObjects.add(selectedUnit as T)
+                objects.add(selectedUnit as T)
             }
         }
 
         if (type.isAssignableFrom(Node::class.java)) {
-            screenObjects.addAll(nodes.filter { it.clicked(x, y) }.map {it as T})
+            objects.addAll(nodes.filter { it.clicked(x, y) }.map {it as T})
         }
 
         if (type.isAssignableFrom(Edge::class.java)) {
             for (node in nodes) {
                 for (edge in node.edges) {
                     if (edge.clicked(x, y)) {
-                        screenObjects.add(edge as T)
+                        objects.add(edge as T)
                     }
                 }
             }
         }
 
-        return screenObjects
+        return objects
     }
 
     fun selectDraw(x: Float, y: Float, type: Class<out ScreenObject> = ScreenObject::class.java, time: Int): List<ScreenObject> {
@@ -302,55 +258,35 @@ data class Animation @JvmOverloads constructor(
         return output
     }
 
-    fun getParents(id: ID) : List<NodeCollection> {
-        val output: MutableList<NodeCollection> = mutableListOf()
+    fun getParents(id: ID) : List<EdgeCollection> {
+        val output: MutableList<EdgeCollection> = mutableListOf()
         if (id::class.java == NodeID::class.java) {
-            for (area in areas) {
-                if (area.edges.firstOrNull { it.contains(id as NodeID) } != null) {
-                    output.add(area)
-                }
-            }
-            for (line in lines) {
-                if (line.edges.firstOrNull { it.contains(id as NodeID) } != null) {
-                    output.add(line)
+            for (edgeCollection in edgeCollections) {
+                if (edgeCollection.edges.firstOrNull {it.contains(id as NodeID)} != null) {
+                    output.add(edgeCollection)
                 }
             }
         }
+
         return output
     }
 
-    fun <T : NodeCollection> getParentsOfType(id: ID, type: Class<out NodeCollection>) : List<T> {
+    @Suppress("UNCHECKED_CAST")
+    fun <T : EdgeCollectionStrategy<EdgeCollectionContext>> getParentsOfType(id: ID, type: Class<out EdgeCollectionContext>) : List<T> {
         val output: MutableList<T> = mutableListOf()
         if (id::class.java == NodeID::class.java) {
-            if (type.isAssignableFrom(Area::class.java)) {
-                for (area in areas) {
-                    for (edge in area.edges) {
-                        if (id == edge.segment.first) {
-                            output.add(area as T)
-                            break
+            for (edgeCollection in edgeCollections) {
+                if (edgeCollection.edgeCollectionStrategy?.javaClass == type) {
+                    for (edge in edgeCollection.edges) {
+                        if (edge.contains(id as NodeID)) {
+                            output.add(edgeCollection as T)
                         }
-                    }
-                    if (id == area.edges.last().segment.second) {
-                        output.add(area as T)
-                    }
-                }
-            }
-            if (type.isAssignableFrom(Line::class.java)) {
-                for (line in lines) {
-                    for (edge in line.edges) {
-                        if (id == edge.segment.first) {
-                            output.add(line as T)
-                            break
-                        }
-                    }
-                    if (id == line.edges.last().segment.second) {
-                        output.add(line as T)
                     }
                 }
             }
         }
 
-        println("Selected Node Collections " + output)
+        println("Selected Node Collections $output")
 
         return output
     }
@@ -359,11 +295,8 @@ data class Animation @JvmOverloads constructor(
         nodeHandler.buildInputs()
         unitHandler.buildInputs()
 
-        for (line in lines) {
-            line.buildInputs()
-        }
-        for (area in areas) {
-            area.buildInputs()
+        for (edgeCollection in edgeCollections) {
+            edgeCollection.buildInputs()
         }
     }
 
