@@ -13,7 +13,7 @@ open class EdgeCollection(open val id: EdgeCollectionID) : HasInputs {
     @Transient
     var edges: MutableList<Edge> = mutableListOf()
     var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
-    var edgeCollectionContext: EdgeCollectionContext? = EdgeCollectionContext(edges, AreaColor.RED)
+    var edgeCollectionContext: AnyEdgeCollectionContext? = EdgeCollectionContext(edges, AreaColor.RED)
     @Transient
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 

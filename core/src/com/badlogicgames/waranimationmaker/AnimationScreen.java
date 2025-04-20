@@ -213,8 +213,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             for (EdgeCollection collection : selectedEdgeCollections) {
                 collection.showInputs(selectedGroup, uiVisitor);
             }
-        } else {
-            newEdgeCollectionID = animation.getEdgeCollections().size(); // New ID needed per node collection concurrently on screen TODO make it safe
         }
     }
 
@@ -225,16 +223,16 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (!newSelections.isEmpty()) {
             for (Edge newSelection : newSelections) {
-                System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
-                EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
-                if (edgeCollection != null) {
-                    System.out.println("selected edge collection " + edgeCollection.getId().getValue());
-                    selectedEdgeCollections.add(edgeCollection);
-                    edgeCollection.showInputs(selectedGroup, uiVisitor);
+                if (!newSelection.getDeath().getValue()) {
+                    System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
+                    EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
+                    if (edgeCollection != null) {
+                        System.out.println("selected edge collection " + edgeCollection.getId().getValue());
+                        selectedEdgeCollections.add(edgeCollection);
+                        edgeCollection.showInputs(selectedGroup, uiVisitor);
+                    }
                 }
             }
-        } else {
-            newEdgeCollectionID = animation.getEdgeCollections().size(); // New ID needed per node collection concurrently on screen TODO make it safe
         }
     }
 
@@ -288,7 +286,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.NEW_NODE) { // Will create a new Node. If a node is selected and has exactly 1 edge pointing away from it, the new node will be inserted between the selected node and the next node
-                System.out.println("nodes: " + animation.getNodes());
                 Node newNode = animation.createNodeAtPosition(time, mouseX, mouseY);
                 if ((selected != null) && (selected.getClass() == Node.class)) {
                     if (((Node) selected).getEdges().size() == 1) {
@@ -458,7 +455,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (touchMode == TouchMode.NEW_EDGE) {
                 Array<Integer> idChoices = new Array<>();
-                idChoices.add(animation.getEdgeCollectionId(true));
+                idChoices.add(animation.getEdgeCollectionId(true) + 1);
                 for (EdgeCollection edgeCollection : animation.getEdgeCollections()) {
                     idChoices.add(edgeCollection.getId().getValue());
                 }

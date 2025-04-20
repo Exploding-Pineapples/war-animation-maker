@@ -8,7 +8,12 @@ import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
 import earcut4j.Earcut
 import java.lang.reflect.Type
 
-open class EdgeCollectionContext(@Transient var edges: MutableList<Edge> = mutableListOf(), var color: AreaColor = AreaColor.RED) : AbstractTypeSerializable {
+interface AnyEdgeCollectionContext : AbstractTypeSerializable {
+    var edges: MutableList<Edge>
+    var color: AreaColor
+}
+
+open class EdgeCollectionContext(@Transient override var edges: MutableList<Edge> = mutableListOf(), override var color: AreaColor = AreaColor.RED) : AnyEdgeCollectionContext {
     override fun getAbstractType(): Type {
         return EdgeCollectionContext::class.java
     }
@@ -31,11 +36,11 @@ class LineContext(var width: Float = 5.0f) : EdgeCollectionContext() {
 }
 
 interface AnyEdgeCollectionStrategy : AbstractTypeSerializable {
-    fun updateAny(time: Int, animation: Animation, context: EdgeCollectionContext)
-    fun drawAny(shapeRenderer: ShapeRenderer, context: EdgeCollectionContext)
+    fun updateAny(time: Int, animation: Animation, context: AnyEdgeCollectionContext)
+    fun drawAny(shapeRenderer: ShapeRenderer, context: AnyEdgeCollectionContext)
 }
 
-open class EdgeCollectionStrategy<T : EdgeCollectionContext> : AnyEdgeCollectionStrategy {
+open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollectionStrategy {
     open fun update(time: Int, animation: Animation, context: T) {
         for (edge in context.edges) {
             edge.screenCoords.clear()
@@ -47,11 +52,11 @@ open class EdgeCollectionStrategy<T : EdgeCollectionContext> : AnyEdgeCollection
         context.edges.forEach { it.drawAsSelected(shapeRenderer, true) }
     }
 
-    override fun updateAny(time: Int, animation: Animation, context: EdgeCollectionContext) {
+    override fun updateAny(time: Int, animation: Animation, context: AnyEdgeCollectionContext) {
         update(time, animation, context as T)
     }
 
-    override fun drawAny(shapeRenderer: ShapeRenderer, context: EdgeCollectionContext) {
+    override fun drawAny(shapeRenderer: ShapeRenderer, context: AnyEdgeCollectionContext) {
         draw(shapeRenderer, context as T)
     }
 
