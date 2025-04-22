@@ -56,4 +56,11 @@ class Edge(val collectionID: InterpolatedID, var segment: Pair<NodeID, NodeID>, 
             }
         }
     }
+    fun shouldDraw(time: Int): Boolean {
+        val firstTime = death.setPoints.keys.firstOrNull() ?: return false
+        if (time < firstTime) {
+            return false
+        }
+        return !death.value
+    }
 }

@@ -223,7 +223,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (!newSelections.isEmpty()) {
             for (Edge newSelection : newSelections) {
-                if (!newSelection.getDeath().getValue()) {
+                if (newSelection.shouldDraw(time)) {
                     System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
                     EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
                     if (edgeCollection != null) {
@@ -644,7 +644,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             return null;
             }, "Create Unit", Input.Keys.U
-        ).requiresSelected(Requirement.REQUIRES_NOT).build());
+        ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
             selected = animation.camera();

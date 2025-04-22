@@ -98,7 +98,7 @@ class NodeHandler(val animation: Animation) {
         if (node.shouldDraw(time)) {
             for (edge in node.edges) { // Traverses every available edge from the node
                 val nextNode = animation.getNodeByID(edge.segment.second)!!
-                if (nextNode.shouldDraw(time) && !edge.death.value) {
+                if (nextNode.shouldDraw(time) && edge.shouldDraw(time)) {
                     if (edge.collectionID.value == currentBranch.id.value) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
                         reachedEnd = false
                         traverse(nextNode, edgeCollections, currentBranch.apply { edges.add(edge) }, time)
@@ -138,9 +138,12 @@ class NodeHandler(val animation: Animation) {
         for (i in 0..<edgeCollections.size) {
             val edgeCollection = edgeCollections[i]
             if (edgeCollection.id.value in usedIDs) {
+                val existingNodeCollection = animation.getEdgeCollectionByID(edgeCollection.id)!!
                 val newId = animation.getEdgeCollectionId()
-                edgeCollection.edges.forEach { it.collectionID.newSetPoint(time, newId, true); it.collectionID.update(time) }
+                println("existing node collection edges before: ${existingNodeCollection.edges}")
                 edgeCollections[i] = EdgeCollection(EdgeCollectionID(newId))
+                println("existing node collection edges after: ${existingNodeCollection.edges}")
+                edgeCollection.edges.forEach { it.collectionID.newSetPoint(time, newId, true); it.collectionID.update(time) }
                 println("Resolved duplicate ID, New ID: $newId, new edge collection size: ${edgeCollection.edges.size}")
             }
             usedIDs.add(edgeCollection.id.value)

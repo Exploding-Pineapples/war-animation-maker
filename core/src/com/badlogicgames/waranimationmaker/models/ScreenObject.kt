@@ -20,17 +20,18 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath,
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
-        alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100).coerceIn(0f, 1f)
+        alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100f).coerceIn(0f, 1f)
         death.update(time)
+
         var deathTime: Int? = null
         for (i in 0..<death.interpolator.x.size) { // Search for the last time the object was dead, used for fading out
-            if (death.interpolator.y[i] && death.interpolator.x[i] >= time) {
+            if (death.interpolator.y[i] && (death.interpolator.x[i] >= time || i == death.interpolator.x.size - 1)) {
                 deathTime = death.interpolator.x[i]
             }
         }
         if (deathTime != null) {
             if (time > deathTime - 100) {
-                alpha = ((deathTime - time) / 100f).coerceIn(0f, 1f)
+                alpha = ((-time + deathTime) / 100f).coerceIn(0f, 1f)
             }
         }
 
@@ -65,10 +66,7 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath,
     }
 
     override fun shouldDraw(time: Int): Boolean {
-        if (time < xInterpolator.setPoints.keys.first()) {
-            return false
-        }
-        return !death.value
+        return time >= xInterpolator.setPoints.keys.first() - 100
     }
 
     override fun toString(): String {

@@ -33,8 +33,9 @@ data class Unit(
     companion object {
         val sizePresets = mapOf(
             "XX" to 1.0f,
-            "X" to 0.75f,
-            "III" to 0.5f,
+            "X" to 0.8f,
+            "III" to 0.65f,
+            "II" to 0.55f,
         )
     }
     @Transient private var typeTexture: Texture? = null
@@ -70,6 +71,8 @@ data class Unit(
         inputElements.add(TextInput(null, { input ->
             if (input != null) {
                 name = input
+            } else {
+                name = ""
             }
         }, label@{
             return@label name
@@ -88,7 +91,7 @@ data class Unit(
     }
 
     override fun clicked(x: Float, y: Float): Boolean {
-        return ((x in (screenPosition.x - width * 0.8f)..(screenPosition.x + width * 0.8f)) && (y in (screenPosition.y - height * 0.45f)..(screenPosition.y + height * 0.45f)))
+        return ((x in (screenPosition.x - width * 0.5f)..(screenPosition.x + width * 0.5f)) && (y in (screenPosition.y - height * 0.5f)..(screenPosition.y + height * 0.5f)))
     }
 
     fun updateCountryTexture() {
@@ -122,17 +125,16 @@ data class Unit(
         width = AnimationScreen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor
         height = AnimationScreen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
 
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         shapeRenderer.color = Color(color.color.r, color.color.g, color.color.b, alpha)
-        shapeRenderer.rect(screenPosition.x - width * 0.8f, screenPosition.y - height * 0.45f, width * 1.6f, height * 0.9f)
+        shapeRenderer.rect(screenPosition.x - width * 0.5f, screenPosition.y - height * 0.5f, width, height)
         shapeRenderer.color = Color(Color.LIGHT_GRAY.r, Color.LIGHT_GRAY.g, Color.LIGHT_GRAY.b, alpha)
         val padding = 0.75f
-        shapeRenderer.rect(screenPosition.x - width * 0.8f + padding * sizefactor * sizePresetFactor,
-            screenPosition.y - height * 0.45f + padding * sizefactor * sizePresetFactor,
-            width * 1.6f - 2 * padding * sizefactor * sizePresetFactor,
-            height * 0.9f - 2 * padding  * sizefactor * sizePresetFactor)
+        shapeRenderer.rect(screenPosition.x - width * 0.5f + padding * sizefactor * sizePresetFactor,
+            screenPosition.y - height * 0.5f + padding * sizefactor * sizePresetFactor,
+            width - 2 * padding * sizefactor * sizePresetFactor,
+            height - 2 * padding * sizefactor * sizePresetFactor)
 
         shapeRenderer.end()
 
@@ -140,10 +142,13 @@ data class Unit(
 
         batcher.setColor(1f, 1f, 1f, alpha)
         if (typeTexture() != null) {
-            batcher.draw(typeTexture, screenPosition.x, screenPosition.y - height / 3, width / 1.5f, height / 1.5f)
+            batcher.draw(typeTexture, screenPosition.x - width / 3f, screenPosition.y - height / 3f, width / 1.5f, height / 1.5f)
         }
         if (countryTexture() != null) {
-            batcher.draw(countryTexture, screenPosition.x - width / 1.5f, screenPosition.y - height / 3, width / 1.5f, height / 1.5f)
+            batcher.draw(countryTexture,
+                screenPosition.x - width / 2f + padding * sizefactor * sizePresetFactor,
+                screenPosition.y + height / 2f - height / 4f - padding * sizefactor * sizePresetFactor,
+                width / 4.0f, height / 4.0f)
         }
 
         if (color == null) {
@@ -151,18 +156,20 @@ data class Unit(
         }
 
         font.color = Color(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha)
-        font.data.setScale(0.12f * sizefactor * sizePresetFactor)
+        font.data.setScale(0.07f * sizefactor * sizePresetFactor)
         batcher.setShader(fontShader)
-        fontShader.setUniformf("scale", 0.12f * sizefactor * sizePresetFactor)
-        fontShader.setUniformf("outlineDistance", 0.2f)
+        //fontShader.setUniformf("scale", 0.07f * sizefactor * sizePresetFactor)
+        fontShader.setUniformf("outlineDistance", 0.05f)
         fontShader.setUniformf("outlineColor", color.color.r, color.color.g, color.color.b, alpha)
-        layout.setText(font, size)
 
-        font.draw(batcher, layout, screenPosition.x - layout.width / 2, screenPosition.y + height / 2 + layout.height)
+        layout.setText(font, size)
+        font.draw(batcher, layout, screenPosition.x - layout.width / 2, screenPosition.y + height / 2)
+
         if (name != null) {
             layout.setText(font, name)
-            font.draw(batcher, name, screenPosition.x - layout.width / 2, screenPosition.y - height / 2)
+            font.draw(batcher, name, screenPosition.x - layout.width / 2, screenPosition.y - height / 2 + layout.height)
         }
+
         batcher.setShader(null)
 
         batcher.end()

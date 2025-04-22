@@ -25,6 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -82,7 +83,10 @@ public class Assets {
 
 	public static void updateUnitTypes() {
 		unitTypes.clear();
-		for (File unitType : Objects.requireNonNull(Gdx.files.internal("assets/unitkinds").file().listFiles())) {
+
+		FilenameFilter filter = (dir, name) -> name.toLowerCase().endsWith(".png");
+
+		for (File unitType : Objects.requireNonNull(Gdx.files.internal("assets/unitkinds").file().listFiles(filter))) {
 			unitTypes.add(unitType.getName());
 		}
 	}

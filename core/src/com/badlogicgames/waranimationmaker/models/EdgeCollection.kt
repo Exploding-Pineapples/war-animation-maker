@@ -13,7 +13,7 @@ open class EdgeCollection(open val id: EdgeCollectionID) : HasInputs {
     @Transient
     var edges: MutableList<Edge> = mutableListOf()
     var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
-    var edgeCollectionContext: AnyEdgeCollectionContext? = EdgeCollectionContext(edges, AreaColor.RED)
+    var edgeCollectionContext: AnyEdgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
     @Transient
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
@@ -60,19 +60,19 @@ open class EdgeCollection(open val id: EdgeCollectionID) : HasInputs {
             edges = mutableListOf()
         }
         edges.clear()
+        edgeCollectionContext.edges = mutableListOf()
         if (edgeCollectionStrategy == null) {
             edgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
             //println("Edge collection strategy not set for update")
         }
         if (edgeCollectionContext == null) {
             edgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
-        } else {
-            edgeCollectionContext!!.edges = edges
         }
     }
 
     fun update(time: Int, animation: Animation) {
-        edgeCollectionStrategy.updateAny(time, animation, edgeCollectionContext!!)
+        edgeCollectionContext.edges.addAll(edges)
+        edgeCollectionStrategy.updateAny(time, animation, edgeCollectionContext)
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {
@@ -83,6 +83,6 @@ open class EdgeCollection(open val id: EdgeCollectionID) : HasInputs {
         if (edgeCollectionContext == null) {
             edgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
         }
-        edgeCollectionStrategy.drawAny(shapeRenderer, edgeCollectionContext!!)
+        edgeCollectionStrategy.drawAny(shapeRenderer, edgeCollectionContext)
     }
 }
