@@ -110,7 +110,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         leftGroup = new VerticalGroup();
 
         newUnitCountryInput = new SelectBoxInput<>(game.skin, (String input) -> {newUnitCountry = input; return null;}, () -> null, String.class, "New Unit Country", Assets.countryNames(), null);
-        newUnitCountry = Assets.countryNames().first();
+        if (!Assets.countryNames().isEmpty()) {
+            newUnitCountry = Assets.countryNames().first();
+        } else {
+            newUnitCountry = "";
+        }
         newUnitInputsDisplayed = false;
 
         newEdgeCollectionID = 0;
