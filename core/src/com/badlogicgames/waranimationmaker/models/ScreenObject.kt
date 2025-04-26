@@ -48,16 +48,16 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath,
     }
 
     // Draw only if selected
-    fun drawAsSelected(shapeRenderer: ShapeRenderer, animationMode: Boolean, currentZoom: Float, currentCX: Float, currentCY: Float) {
+    fun drawAsSelected(shapeRenderer: ShapeRenderer, animationMode: Boolean, camera: Camera) {
         if (animationMode) {
             shapeRenderer.color = Color.SKY
             for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), currentZoom, currentCX, currentCY)
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
                 shapeRenderer.circle(position.x, position.y, 2f)
             }
             shapeRenderer.color = Color.PURPLE
             for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), currentZoom, currentCX, currentCY)
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
                 shapeRenderer.circle(position.x, position.y, 4f)
             }
             shapeRenderer.color = Color.ORANGE

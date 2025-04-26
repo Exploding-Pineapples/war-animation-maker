@@ -204,7 +204,7 @@ class NodeHandler(val animation: Animation) {
 
         //Draw the debug circles
         if (animationMode) {
-            animation.nodes.forEach { it.drawAsLineNode(shapeRenderer) }
+            animation.nodes.forEach { it.draw(shapeRenderer) }
         }
         shapeRenderer.end()
     }

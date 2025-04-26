@@ -81,7 +81,9 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
         table.row().pad(10);
 
         selectImageButton = new FileButton("Select Background Image", game.skin, "small");
-        selectImageButton.setFile(new File(animation.getPath()));
+        if (animation.getMapPath() != null) { // safety
+            selectImageButton.setFile(new File(animation.getMapPath()));
+        }
         table.add(selectImageButton.getTextButton()).height(40);
         table.row();
 
@@ -115,7 +117,7 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
                     for (Animation existingAnimation : FileHandler.INSTANCE.getAnimations()) {
                         if (existingAnimation.getName().equals(name)) {
                             System.out.println("Using existing animation: " + name);
-                            existingAnimation.setPath(selectImageButton.getFile().getPath());
+                            existingAnimation.setMapPath(selectImageButton.getFile().getPath());
                             existingAnimation.setName(nameField.getText());
                             existingAnimation.setCountries(countriesPaths);
                             animationExists = true;

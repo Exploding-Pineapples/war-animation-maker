@@ -34,7 +34,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int LINES_PER_NODE = 12; // Number of straight lines per node on a spline
 
     WarAnimationMaker game; // Contains some variables common to all screens
-    OrthographicCamera camera; // Camera whose properties directly draw the screen
+    OrthographicCamera orthographicCamera; // Camera whose properties directly draw the screen
 
     float mouseX; // Mouse real X position
     float mouseY; // Mouse real Y position
@@ -83,12 +83,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         gl = game.gl;
 
         // Camera
-        camera = new OrthographicCamera(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        camera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
+        orthographicCamera = new OrthographicCamera(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        orthographicCamera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
         animation.camera();
         // Graphics init
         shapeRenderer = game.shapeRenderer;
-        fullMap = loadTexture(animation.getPath());
+        fullMap = loadTexture(animation.getMapPath());
         colorLayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
 
         // Animation init
@@ -149,7 +149,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         // Final init
         animation.camera().goToTime(time);
         updateCam();
-        animation.load(game.skin);
+        animation.load();
     }
 
     public static <T> T firstOrNull(ArrayList<T> list) {
@@ -157,9 +157,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public void updateCam() {
-        camera.position.x = animation.camera().getPosition().getX();
-        camera.position.y = animation.camera().getPosition().getY();
-        camera.zoom = animation.camera().getZoom();
+        orthographicCamera.position.x = animation.camera().getPosition().getX();
+        orthographicCamera.position.y = animation.camera().getPosition().getY();
+        orthographicCamera.zoom = animation.camera().getZoom();
     }
 
     public boolean keyDown(int keycode) {
@@ -351,36 +351,36 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         if (paused) {
-            camera.zoom *= 1 - 0.05f * amountY;
+            orthographicCamera.zoom *= 1 - 0.05f * amountY;
         }
         return true;
     }
 
-    public void update() {
-        mouseX = (float) ((double) Gdx.input.getX() - camera.position.x * (1 - camera.zoom) - (Gdx.graphics.getWidth() / 2.0f - camera.position.x)) / camera.zoom;
-        mouseY = (float) ((double) (DISPLAY_HEIGHT - Gdx.input.getY()) - camera.position.y * (1 - camera.zoom) - (Gdx.graphics.getHeight() / 2.0f - camera.position.y)) / camera.zoom;
+    private void update() {
+        mouseX = (float) ((double) Gdx.input.getX() - orthographicCamera.position.x * (1 - orthographicCamera.zoom) - (Gdx.graphics.getWidth() / 2.0f - orthographicCamera.position.x)) / orthographicCamera.zoom;
+        mouseY = (float) ((double) (DISPLAY_HEIGHT - Gdx.input.getY()) - orthographicCamera.position.y * (1 - orthographicCamera.zoom) - (Gdx.graphics.getHeight() / 2.0f - orthographicCamera.position.y)) / orthographicCamera.zoom;
         ctrlPressed = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT));
         shiftPressed = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT));
 
         //Camera
-        zoomFactor = 0.75f + camera.zoom * 8;
+        zoomFactor = 0.75f + orthographicCamera.zoom * 8;
         animation.camera().goToTime(time);
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            camera.position.y += 10 / camera.zoom;
+            orthographicCamera.position.y += 10 / orthographicCamera.zoom;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            camera.position.y -= 10 / camera.zoom;
+            orthographicCamera.position.y -= 10 / orthographicCamera.zoom;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            camera.position.x -= 10 / camera.zoom;
+            orthographicCamera.position.x -= 10 / orthographicCamera.zoom;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            camera.position.x += 10 / camera.zoom;
+            orthographicCamera.position.x += 10 / orthographicCamera.zoom;
         }
         if (!paused) { //don't update camera when paused to allow for movement when paused
             updateCam();
         }
-        camera.update();
+        orthographicCamera.update();
 
         if ((selected != null) && paused) { // Update the selected object to go to mouse in move mode
             if ((touchMode == TouchMode.MOVE)) {
@@ -388,7 +388,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
         }
 
-        animation.update(time, camera, selectedGroup, animationMode);
+        animation.update(time, orthographicCamera);
 
         //UI
         if (animationMode) {
@@ -517,15 +517,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         //Draw background
         game.batcher.begin();
-        Coordinate origin = projectToScreen(new Coordinate(0, 0), camera.zoom, camera.position.x, camera.position.y);
-        game.batcher.draw(fullMap, origin.getX(), origin.getY(), fullMap.getWidth() * camera.zoom, fullMap.getHeight() * camera.zoom);
+        Coordinate origin = projectToScreen(new Coordinate(0, 0), orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y);
+        game.batcher.draw(fullMap, origin.getX(), origin.getY(), fullMap.getWidth() * orthographicCamera.zoom, fullMap.getHeight() * orthographicCamera.zoom);
         game.batcher.end();
 
-        animation.getNodeHandler().draw(game.batcher, shapeRenderer, colorLayer, animationMode);
-
         // Draw Units and Lines
-        animation.getNodeHandler().draw(game.batcher, shapeRenderer, colorLayer, animationMode);
-        animation.getUnitHandler().draw(game, shapeRenderer, zoomFactor);
+        animation.draw(game, colorLayer, animationMode, zoomFactor, time, orthographicCamera);
 
         game.batcher.setColor(1, 1, 1, 1.0f);
 
@@ -542,7 +539,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             //Draw the selected object and edges
             if (selected != null) {
-                selected.drawAsSelected(shapeRenderer, animationMode, camera.zoom, camera.position.x, camera.position.y);
+                selected.drawAsSelected(shapeRenderer, animationMode, animation.camera());
             }
             for (Edge edge : selectedEdges) {
                 edge.drawAsSelected(shapeRenderer, animationMode);
@@ -577,6 +574,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             game.setScreen(game.menu);
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
+        actions.add(Action.createBuilder(() -> {
+            switchSelected(animation.newArrow(mouseX, mouseY, time));
+            return null;
+        }, "Create a new arrow", Input.Keys.A).requiresSelected(Requirement.ANY).build());
         actions.add(Action.createBuilder(() -> {
             animationMode = !animationMode;
             return null;
@@ -655,7 +656,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Select the camera", Input.Keys.C).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
-            animation.camera().getZoomInterpolator().newSetPoint(time, camera.zoom);
+            animation.camera().getZoomInterpolator().newSetPoint(time, orthographicCamera.zoom);
             return null;
         }, "Set a camera zoom set point", Input.Keys.Z).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {

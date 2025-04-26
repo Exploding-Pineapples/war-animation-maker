@@ -2,6 +2,7 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.WarAnimationMaker
 
@@ -34,9 +35,9 @@ class UnitHandler(
         return add(Unit(UnitID(animation.unitId), position, initTime, image))
     }
 
-    fun update(time: Int, zoom: Float, cx: Float, cy: Float) {
+    fun update(time: Int, camera: OrthographicCamera) {
         for (unit in animation.units) {
-            unit.goToTime(time, zoom, cx, cy)
+            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y)
         }
     }
 
