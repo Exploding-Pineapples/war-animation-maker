@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
 data class Node(
     override var position: Coordinate,
@@ -13,8 +13,8 @@ data class Node(
     override val id: NodeID
 ) : ScreenObject(), Object  {
     var color: Color = Color.GREEN
-    override var xInterpolator = InterpolatedFloat(position.x, initTime)
-    override var yInterpolator = InterpolatedFloat(position.y, initTime)
+    override var xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)
+    override var yInterpolator = PCHIPInterpolatedFloat(position.y, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     @Transient var visitedBy = mutableListOf<EdgeCollectionID>()
     var edges = mutableListOf<Edge>()

@@ -6,13 +6,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.TextInput
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import kotlin.math.sqrt
 
-class Arrow(x: Float, y: Float, time: Int): ScreenObject() {
+class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
     override var position: Coordinate = Coordinate(x, y)
-    override var xInterpolator = InterpolatedFloat(x, time)
-    override var yInterpolator = InterpolatedFloat(y, time)
+    override var xInterpolator = PCHIPInterpolatedFloat(x, time)
+    override var yInterpolator = PCHIPInterpolatedFloat(y, time)
     override val initTime = time
     override val id: ID = NodeID(-1)
     var color = AreaColor.RED
@@ -22,6 +23,7 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObject() {
         return true
     }
 
+    @Transient
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {

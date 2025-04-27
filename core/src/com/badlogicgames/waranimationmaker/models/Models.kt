@@ -1,19 +1,17 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
-import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
-import com.badlogicgames.waranimationmaker.InputElement
-import com.badlogicgames.waranimationmaker.WarAnimationMaker
+import com.badlogicgames.waranimationmaker.*
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import java.io.File
@@ -91,7 +89,7 @@ class UIVisitor(val skin: Skin) {
 
 interface ObjectWithZoom {
     var zoom: Float //zoom for camera only
-    var zoomInterpolator: InterpolatedFloat
+    var zoomInterpolator: PCHIPInterpolatedFloat
 }
 
 interface ObjectWithScreenPosition {
@@ -103,7 +101,28 @@ interface ObjectWithDeath {
 }
 
 interface ObjectWithAlpha {
+    val alpha: LinearInterpolatedFloat
+}
 
+abstract class ScreenObjectWithAlpha: ScreenObject(), ObjectWithAlpha {
+    override var alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, 0)
+
+    override fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
+        alpha.update(time)
+        return super.goToTime(time, zoom, cx, cy)
+    }
+
+    override fun buildInputs() {
+        super.buildInputs()
+
+        inputElements.add(TextInput(null, { input ->
+            if (input != null) {
+                alpha.value = input
+            }
+        }, label@{
+            return@label alpha.value.toString()
+        }, Float::class.java, "Set alpha set point"))
+    }
 }
 
 interface ObjectClickable {

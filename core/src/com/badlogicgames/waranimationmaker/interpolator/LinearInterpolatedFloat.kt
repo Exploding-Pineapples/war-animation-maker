@@ -2,10 +2,10 @@ package com.badlogicgames.waranimationmaker.interpolator
 
 import com.badlogicgames.waranimationmaker.utilities.toDoubleArray
 
-class InterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int, Float>(initValue, initTime) {
+class LinearInterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int, Float>(initValue, initTime) {
 
     @Transient
-    override var interpolator = PCHIPInterpolator(arrayOf(initTime.toDouble()), arrayOf(initValue.toDouble())).map({
+    override var interpolator = LinearInterpolator(arrayOf(initTime.toDouble()), arrayOf(initValue.toDouble())).map({
         it.toInt()
     }, {
         it.toFloat()
@@ -19,7 +19,7 @@ class InterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int
     }
 
     override fun updateInterpolator() {
-        interpolator = PCHIPInterpolator(
+        interpolator = LinearInterpolator(
             setPoints.keys.toDoubleArray(),
             setPoints.values.toDoubleArray()
         ).map({ it.toInt() }, { it.toFloat() }, { it.toDouble() })

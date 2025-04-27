@@ -1,19 +1,19 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
 interface Object : HasInputs {
     var position: Coordinate
-    var xInterpolator: InterpolatedFloat
-    var yInterpolator: InterpolatedFloat
+    var xInterpolator: PCHIPInterpolatedFloat
+    var yInterpolator: PCHIPInterpolatedFloat
     val initTime: Int
 
     val id: ID
 
     fun goToTime(time: Int): Boolean { // Can only be called after at least one key frame has been added
         if (xInterpolator == null) {
-            xInterpolator = InterpolatedFloat(position.x, initTime)
-            yInterpolator = InterpolatedFloat(position.y, initTime)
+            xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)
+            yInterpolator = PCHIPInterpolatedFloat(position.y, initTime)
         }
         position.x = xInterpolator.update(time)
         position.y = yInterpolator.update(time)

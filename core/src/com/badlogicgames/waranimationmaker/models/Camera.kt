@@ -2,7 +2,7 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
 data class Camera(
     override var position: Coordinate = Coordinate(x = 960.0f, y = 540.0f),
@@ -10,15 +10,15 @@ data class Camera(
     override val initTime: Int
 ) : ScreenObject(), ObjectWithZoom, ObjectWithScreenPosition {
     override val id: ID = NodeID(-1)
-    override var xInterpolator: InterpolatedFloat = InterpolatedFloat(position.x, initTime)
-    override var yInterpolator: InterpolatedFloat = InterpolatedFloat(position.y, initTime)
-    override var zoomInterpolator: InterpolatedFloat = InterpolatedFloat(zoom, initTime)
+    override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
+    override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
+    override var zoomInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(zoom, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun goToTime(time: Int): Boolean {
         super.goToTime(time, zoom, position.x, position.y) // Call ScreenObject's goToTime to set screen position
         if (zoomInterpolator == null) {
-            zoomInterpolator = InterpolatedFloat(zoom, initTime)
+            zoomInterpolator = PCHIPInterpolatedFloat(zoom, initTime)
         }
         zoom = zoomInterpolator.update(time)
         return true

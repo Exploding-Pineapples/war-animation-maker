@@ -575,20 +575,22 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
         actions.add(Action.createBuilder(() -> {
-            switchSelected(animation.newArrow(mouseX, mouseY, time));
+            if (selected.getClass().isAssignableFrom(ObjectWithAlpha.class)) {
+                ((ObjectWithAlpha) selected).getAlpha().newSetPoint(time, ((ObjectWithAlpha) selected).getAlpha().getValue());
+            }
             return null;
-        }, "Create a new arrow", Input.Keys.A).requiresSelected(Requirement.ANY).build());
+        }, "Set alpha set point", Input.Keys.A).requiresSelected(Requirement.REQUIRES).build());
         actions.add(Action.createBuilder(() -> {
             animationMode = !animationMode;
             return null;
-        }, "Toggle animation mode", Input.Keys.V).requiresSelected(Requirement.ANY).build());
+        }, "Toggle animation mode", Input.Keys.V).build());
         // Selection required
         actions.add(Action.createBuilder(() -> {
             selected.holdPositionUntil(time);
             clearSelected();
             return null;
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
-        // Selection prohibited
+        // Does not care about selection
         actions.add(Action.createBuilder(() -> {
             time = (time / 200) * 200 + 200;
             animation.camera().goToTime(time);
@@ -652,6 +654,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
+            switchSelected(animation.newArrow(mouseX, mouseY, time));
+            return null;
+        }, "Create a new arrow", Input.Keys.A).requiresControl(true).build());
+        actions.add(Action.createBuilder(() -> {
             selected = animation.camera();
             return null;
         }, "Select the camera", Input.Keys.C).requiresControl(true).build());
@@ -664,7 +670,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             System.out.println("saved");
             return null;
         }, "Save project", Input.Keys.S).requiresControl(true).build());
-        //Key presses which require control pressed and selected Object
+        //Key presses which require control pressed and selected
         actions.add(Action.createBuilder(() -> {
             if (selected != null) {
                 selected.getDeath().newSetPoint(time, !selected.getDeath().getValue());

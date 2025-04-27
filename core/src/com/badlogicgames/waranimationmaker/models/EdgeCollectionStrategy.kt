@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.AreaColor
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import earcut4j.Earcut
 import java.lang.reflect.Type
 
@@ -27,9 +27,9 @@ class AreaContext : EdgeCollectionContext() {
 
 class LineContext(var width: Float = 5.0f) : EdgeCollectionContext() {
     @Transient
-    var xInterpolator = InterpolatedFloat(0.0f, 0)
+    var xInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
     @Transient
-    var yInterpolator = InterpolatedFloat(0.0f, 0)
+    var yInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
     override fun getAbstractType(): Type {
         return LineContext::class.java
     }
@@ -142,8 +142,8 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
         val edges = context.edges
 
         if (xInterpolator == null) {
-            xInterpolator = InterpolatedFloat(0.0f, 0)
-            yInterpolator = InterpolatedFloat(0.0f, 0)
+            xInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
+            yInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
         }
 
         var node: Node?

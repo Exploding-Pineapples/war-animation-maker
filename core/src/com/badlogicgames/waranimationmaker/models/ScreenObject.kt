@@ -5,36 +5,23 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import kotlin.math.absoluteValue
 
 abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath, ObjectClickable {
-    override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
-    var alpha: Float = 1f
-    @Transient override var screenPosition: Coordinate = Coordinate(0f, 0f)
+    override var death = InterpolatedBoolean(false, 0)
+    @Transient
+    override var screenPosition: Coordinate = Coordinate(0f, 0f)
 
     override fun clicked(x: Float, y: Float): Boolean
     {
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
 
-    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
+    open fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
-        alpha = (1f - (xInterpolator.setPoints.keys.first() - time) / 100f).coerceIn(0f, 1f)
         death.update(time)
-
-        var deathTime: Int? = null
-        for (i in 0..<death.interpolator.x.size) { // Search for the last time the object was dead, used for fading out
-            if (death.interpolator.y[i] && (death.interpolator.x[i] >= time || i == death.interpolator.x.size - 1)) {
-                deathTime = death.interpolator.x[i]
-            }
-        }
-        if (deathTime != null) {
-            if (time > deathTime - 100) {
-                alpha = ((-time + deathTime) / 100f).coerceIn(0f, 1f)
-            }
-        }
-
         return shouldDraw(time)
     }
 
