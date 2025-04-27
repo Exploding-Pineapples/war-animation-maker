@@ -6,8 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.TextInput
-import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
+import kotlin.math.min
 import kotlin.math.sqrt
 
 class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
@@ -18,13 +18,12 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
     override val id: ID = NodeID(-1)
     var color = AreaColor.RED
     var thickness = 10f
+    @Transient
+    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun shouldDraw(time: Int): Boolean {
         return true
     }
-
-    @Transient
-    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
@@ -56,13 +55,19 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
     }
 
     fun draw(shapeRenderer: ShapeRenderer, camera: OrthographicCamera, curTime: Int) {
-        var previous = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(xInterpolator.setPoints.keys.first()), yInterpolator.interpolator.interpolateAt(xInterpolator.setPoints.keys.first())), camera.zoom, camera.position.x, camera.position.y)
-        var slope = 0f
-        shapeRenderer.color = color.color
-        for (time in xInterpolator.setPoints.keys.first().toInt() ..curTime) { // Draws entire body of arrow
+        var previous = projectToScreen(Coordinate(
+            xInterpolator.interpolator.interpolateAt(xInterpolator.setPoints.keys.first()),
+            yInterpolator.interpolator.interpolateAt(xInterpolator.setPoints.keys.first())
+        ), camera.zoom, camera.position.x, camera.position.y)
+
+        shapeRenderer.color = color.color.apply { a = alpha.value }
+
+        val endTime = min(curTime, xInterpolator.setPoints.keys.last())
+
+        for (time in xInterpolator.setPoints.keys.first().toInt() ..endTime) { // Draws entire body of arrow
             val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
             shapeRenderer.rectLine(previous.x, previous.y, position.x, position.y, thickness)
-            if (time == curTime) {
+            if (time == endTime) {
                 val triangle = generateTriangle(previous, position, thickness * 2, thickness * 3)
                 shapeRenderer.triangle(triangle[0].x, triangle[0].y, triangle[1].x, triangle[1].y, triangle[2].x, triangle[2].y)
             }

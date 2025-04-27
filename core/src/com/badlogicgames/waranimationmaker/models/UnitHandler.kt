@@ -35,10 +35,8 @@ class UnitHandler(
         return add(Unit(UnitID(animation.unitId), position, initTime, image))
     }
 
-    fun update(time: Int, camera: OrthographicCamera) {
-        for (unit in animation.units) {
-            unit.goToTime(time, camera.zoom, camera.position.x, camera.position.y)
-        }
+    fun update(time: Int, camera: OrthographicCamera, paused: Boolean) {
+        animation.units.forEach { it.goToTime(time, camera.zoom, camera.position.x, camera.position.y, paused) }
     }
 
     fun draw(game: WarAnimationMaker, shapeRenderer: ShapeRenderer, zoomFactor: Float) {

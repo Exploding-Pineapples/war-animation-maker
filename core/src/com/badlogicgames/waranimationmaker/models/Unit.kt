@@ -115,31 +115,25 @@ data class Unit(
     }
 
     fun draw(batcher: SpriteBatch, shapeRenderer: ShapeRenderer, sizefactor: Float, font: BitmapFont, fontShader: ShaderProgram, layout: GlyphLayout) {
-        // Draw only for the correct country
-        var sizePresetFactor = 1.0f
-        if (size in sizePresets) {
-            sizePresetFactor = sizePresets[size]!!
-        }
+        val sizePresetFactor = sizePresets[size]?: 1.0f
+
         width = AnimationScreen.DEFAULT_UNIT_WIDTH * sizefactor * sizePresetFactor
         height = AnimationScreen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
+        val padding = 0.75f * sizefactor * sizePresetFactor
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-
         shapeRenderer.color = Color(color.color.r, color.color.g, color.color.b, alpha.value)
         shapeRenderer.rect(screenPosition.x - width * 0.5f, screenPosition.y - height * 0.5f, width, height)
         shapeRenderer.color = Color(Color.LIGHT_GRAY.r, Color.LIGHT_GRAY.g, Color.LIGHT_GRAY.b, alpha.value)
-        val padding = 0.75f * sizefactor * sizePresetFactor
         shapeRenderer.rect(
             screenPosition.x - width * 0.5f + padding,
             screenPosition.y - height * 0.5f + padding,
             width - 2 * padding,
             height - 2 * padding
         )
-
         shapeRenderer.end()
 
         batcher.begin()
-
         batcher.setColor(1f, 1f, 1f, alpha.value)
         if (typeTexture() != null) {
             batcher.draw(typeTexture, screenPosition.x - width / 3f, screenPosition.y - height / 3f, width / 1.5f, height / 1.5f)
@@ -171,7 +165,6 @@ data class Unit(
         }
 
         batcher.setShader(null)
-
         batcher.end()
     }
 }

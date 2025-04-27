@@ -1,5 +1,7 @@
 package com.badlogicgames.waranimationmaker.models
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -74,6 +76,10 @@ class UIVisitor(val skin: Skin) {
         text = "Arrow: "
         show(verticalGroup, arrow as HasInputs)
     }
+    fun show(verticalGroup: VerticalGroup, mapLabel: MapLabel) {
+        text = "Map Label: "
+        show(verticalGroup, mapLabel as HasInputs)
+    }
 
     fun hide(verticalGroup: VerticalGroup, hasInputs: HasInputs) {
         hasInputs.updateInputs()
@@ -107,8 +113,8 @@ interface ObjectWithAlpha {
 abstract class ScreenObjectWithAlpha: ScreenObject(), ObjectWithAlpha {
     override var alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, 0)
 
-    override fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
-        alpha.update(time)
+    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float, paused: Boolean): Boolean {
+        if (!paused) { alpha.update(time) }
         return super.goToTime(time, zoom, cx, cy)
     }
 
@@ -165,6 +171,7 @@ data class Animation @JvmOverloads constructor(
     val nodes: MutableList<Node> = mutableListOf(),
     val edgeCollections: MutableList<EdgeCollection> = mutableListOf(),
     val arrows: MutableList<Arrow> = mutableListOf(),
+    var mapLabels: MutableList<MapLabel> = mutableListOf(),
     var unitId: Int = 0,
     private var edgeCollectionId: Int = 0,
     var nodeId: Int = 0,
@@ -186,6 +193,9 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun load() {
+        if (mapLabels == null) {
+            mapLabels = mutableListOf()
+        }
         unitHandler = UnitHandler(this)
         nodeHandler = NodeHandler(this)
         buildInputs()
@@ -271,6 +281,14 @@ data class Animation @JvmOverloads constructor(
             }
         }
 
+        if (type.isAssignableFrom(MapLabel::class.java)) {
+            for (mapLabel in mapLabels) {
+                if (mapLabel.clicked(x, y)) {
+                    objects.add(mapLabel as T);
+                }
+            }
+        }
+
         return objects
     }
 
@@ -309,26 +327,39 @@ data class Animation @JvmOverloads constructor(
         unitHandler.buildInputs()
         arrows.forEach { it.buildInputs() }
         edgeCollections.forEach { it.buildInputs() }
+        mapLabels.forEach { it.buildInputs() }
     }
 
-    fun update(time: Int, orthographicCamera: OrthographicCamera) {
+    fun update(time: Int, orthographicCamera: OrthographicCamera, paused: Boolean) {
         nodeHandler.update(time, orthographicCamera)
-        unitHandler.update(time, orthographicCamera)
-        arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y) }
+        unitHandler.update(time, orthographicCamera, paused)
+        arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
+        mapLabels.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
     }
 
     fun draw(game: WarAnimationMaker, colorLayer: FrameBuffer, animationMode: Boolean, zoomFactor: Float, time: Int, camera: OrthographicCamera) {
-        nodeHandler.draw(game.batcher, game.shapeRenderer, colorLayer, animationMode)
-        unitHandler.draw(game, game.shapeRenderer, zoomFactor)
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         arrows.forEach { it.draw(game.shapeRenderer, camera, time) }
         game.shapeRenderer.end()
+
+        nodeHandler.draw(game.batcher, game.shapeRenderer, colorLayer, animationMode)
+        unitHandler.draw(game, game.shapeRenderer, zoomFactor)
+        mapLabels.forEach { it.draw(game.batcher, game.shapeRenderer, zoomFactor, game.bitmapFont, game.fontShader, game.layout) }
     }
 
     fun newArrow(x: Float, y: Float, time: Int): Arrow {
         val new = Arrow(x, y, time)
         new.buildInputs()
         arrows.add(new)
+        return new
+    }
+
+    fun newMapLabel(x: Float, y: Float, time: Int): MapLabel {
+        val new = MapLabel(x, y, time)
+        new.buildInputs()
+        mapLabels.add(new)
         return new
     }
 

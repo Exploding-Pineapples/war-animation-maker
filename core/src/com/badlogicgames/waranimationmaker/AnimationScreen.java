@@ -388,7 +388,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
         }
 
-        animation.update(time, orthographicCamera);
+        animation.update(time, orthographicCamera, paused);
 
         //UI
         if (animationMode) {
@@ -522,13 +522,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.end();
 
         // Draw Units and Lines
+        Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
+        Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
         animation.draw(game, colorLayer, animationMode, zoomFactor, time, orthographicCamera);
 
         game.batcher.setColor(1, 1, 1, 1.0f);
 
         if (animationMode) {
-            Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
-            Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
             // Draw contrast backgrounds for UI
@@ -575,8 +575,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
         actions.add(Action.createBuilder(() -> {
-            if (selected.getClass().isAssignableFrom(ObjectWithAlpha.class)) {
+            if (ObjectWithAlpha.class.isAssignableFrom(selected.getClass())) {
                 ((ObjectWithAlpha) selected).getAlpha().newSetPoint(time, ((ObjectWithAlpha) selected).getAlpha().getValue());
+                System.out.println("set new alpha set point, set points: " + ((ObjectWithAlpha) selected).getAlpha().getSetPoints());
             }
             return null;
         }, "Set alpha set point", Input.Keys.A).requiresSelected(Requirement.REQUIRES).build());
@@ -593,12 +594,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         // Does not care about selection
         actions.add(Action.createBuilder(() -> {
             time = (time / 200) * 200 + 200;
+            animation.update(time, orthographicCamera, false);
             animation.camera().goToTime(time);
             updateCam();
             return null;
         }, "Step time forward 200", Input.Keys.E).build());
         actions.add(Action.createBuilder(() -> {
             time = (int) Math.ceil(time / 200.0) * 200 - 200;
+            animation.update(time, orthographicCamera, false);
             animation.camera().goToTime(time);
             updateCam();
             return null;
@@ -635,22 +638,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "New Node Mode", Input.Keys.NUM_1).requiresSelected(Requirement.ANY).build());
         actions.add(Action.createBuilder(() -> {
-            if (touchMode == TouchMode.NEW_EDGE) {
-                touchMode = TouchMode.DEFAULT;
-            } else {
-                touchMode = TouchMode.NEW_EDGE;
-                updateNewEdgeInputs();
-            }
-            return null;
-        }, "Switch to New Edge Mode", Input.Keys.E).requiresControl(true).build());
-        actions.add(Action.createBuilder(() -> {
             if (touchMode != TouchMode.NEW_UNIT) {
                 touchMode = TouchMode.NEW_UNIT;
             } else {
                 touchMode = TouchMode.DEFAULT;
             }
             return null;
-            }, "Create Unit", Input.Keys.U
+            }, "New Unit Mode", Input.Keys.U
         ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
@@ -662,14 +656,27 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Select the camera", Input.Keys.C).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
-            animation.camera().getZoomInterpolator().newSetPoint(time, orthographicCamera.zoom);
+            if (touchMode == TouchMode.NEW_EDGE) {
+                touchMode = TouchMode.DEFAULT;
+            } else {
+                touchMode = TouchMode.NEW_EDGE;
+                updateNewEdgeInputs();
+            }
             return null;
-        }, "Set a camera zoom set point", Input.Keys.Z).requiresControl(true).build());
+        }, "Switch to New Edge Mode", Input.Keys.E).requiresControl(true).build());
+        actions.add(Action.createBuilder(() -> {
+            switchSelected(animation.newMapLabel(mouseX, mouseY, time));
+            return null;
+        }, "Create a new map label", Input.Keys.L).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
             FileHandler.INSTANCE.save();
             System.out.println("saved");
             return null;
         }, "Save project", Input.Keys.S).requiresControl(true).build());
+        actions.add(Action.createBuilder(() -> {
+            animation.camera().getZoomInterpolator().newSetPoint(time, orthographicCamera.zoom);
+            return null;
+        }, "Set a camera zoom set point", Input.Keys.Z).requiresControl(true).build());
         //Key presses which require control pressed and selected
         actions.add(Action.createBuilder(() -> {
             if (selected != null) {
