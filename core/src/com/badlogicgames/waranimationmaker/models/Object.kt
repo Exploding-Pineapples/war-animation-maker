@@ -8,8 +8,6 @@ interface Object : HasInputs {
     var yInterpolator: PCHIPInterpolatedFloat
     val initTime: Int
 
-    val id: ID
-
     fun goToTime(time: Int): Boolean { // Can only be called after at least one key frame has been added
         if (xInterpolator == null) {
             xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)

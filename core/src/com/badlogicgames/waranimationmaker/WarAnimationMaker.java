@@ -43,7 +43,7 @@ public class WarAnimationMaker extends Game {
 	public Menu menu;
 
 	@Override
-	public void create () {
+	public void create() {
 		// Initialize rendering objects
 		batcher = new SpriteBatch();
 		layout = new GlyphLayout();

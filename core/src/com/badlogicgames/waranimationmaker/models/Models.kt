@@ -93,8 +93,12 @@ class UIVisitor(val skin: Skin) {
     }
 }
 
-interface ObjectWithZoom {
-    var zoom: Float //zoom for camera only
+interface ObjectWithID {
+    val id: ID
+}
+
+interface ObjectWithZoom { // Camera only
+    var zoom: Float
     var zoomInterpolator: PCHIPInterpolatedFloat
 }
 
@@ -106,21 +110,10 @@ interface ObjectWithDeath {
     var death: InterpolatedBoolean
 }
 
-interface ObjectWithAlpha {
+interface ObjectWithAlpha : HasInputs {
     val alpha: LinearInterpolatedFloat
-}
-
-abstract class ScreenObjectWithAlpha: ScreenObject(), ObjectWithAlpha {
-    override var alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, 0)
-
-    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float, paused: Boolean): Boolean {
-        if (!paused) { alpha.update(time) }
-        return super.goToTime(time, zoom, cx, cy)
-    }
 
     override fun buildInputs() {
-        super.buildInputs()
-
         inputElements.add(TextInput(null, { input ->
             if (input != null) {
                 alpha.value = input
@@ -128,6 +121,24 @@ abstract class ScreenObjectWithAlpha: ScreenObject(), ObjectWithAlpha {
         }, label@{
             return@label alpha.value.toString()
         }, Float::class.java, "Set alpha set point"))
+    }
+}
+
+interface ObjectWithColor : HasInputs {
+    var color: AreaColor
+
+    override fun buildInputs() {
+        inputElements.add(TextInput(null, { input ->
+            if (input != null) {
+                for (color in AreaColor.entries) {
+                    if (input == color.name) {
+                        this.color = color
+                    }
+                }
+            }
+        }, label@{
+            return@label color.name
+        }, String::class.java, "Set color"))
     }
 }
 

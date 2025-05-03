@@ -17,9 +17,10 @@ data class Unit(
     override var position: Coordinate,
     override val initTime: Int,
     var image: String,
-) : ScreenObjectWithAlpha() {
+) : ScreenObject(), ObjectWithAlpha {
     override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
+    override val alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, initTime)
     @Transient
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
@@ -46,7 +47,7 @@ data class Unit(
     private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
 
     override fun buildInputs() {
-        super.buildInputs()
+        super<ObjectWithAlpha>.buildInputs()
 
         inputElements.add(TextInput(null, { input ->
             if (input != null) {
@@ -75,21 +76,15 @@ data class Unit(
         }, label@{
             return@label name
         }, String::class.java, "Set name"))
-        inputElements.add(TextInput(null, { input ->
-            if (input != null) {
-                for (color in AreaColor.entries) {
-                    if (input == color.name) {
-                        this.color = color
-                    }
-                }
-            }
-        }, label@{
-            return@label color.name
-        }, String::class.java, "Set color"))
     }
 
     override fun clicked(x: Float, y: Float): Boolean {
         return ((x in (screenPosition.x - width * 0.5f)..(screenPosition.x + width * 0.5f)) && (y in (screenPosition.y - height * 0.5f)..(screenPosition.y + height * 0.5f)))
+    }
+
+    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float, paused: Boolean): Boolean {
+        if (!paused) { alpha.update(time) }
+        return super.goToTime(time, zoom, cx, cy)
     }
 
     fun updateCountryTexture() {

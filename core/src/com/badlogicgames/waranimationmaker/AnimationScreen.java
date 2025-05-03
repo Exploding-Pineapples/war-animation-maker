@@ -680,8 +680,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         //Key presses which require control pressed and selected
         actions.add(Action.createBuilder(() -> {
             if (selected != null) {
-                selected.getDeath().newSetPoint(time, !selected.getDeath().getValue());
-                System.out.println("Set death of " + selected);
+                if (selected.getClass().isAssignableFrom(Node.class)) {
+                    ((Node) selected).getDeath().newSetPoint(time, !((Node) selected).getDeath().getValue());
+                    System.out.println("Set death of " + selected);
+                }
             }
             for (Edge edge : selectedEdges) {
                 edge.getDeath().newSetPoint(time, !edge.getDeath().getValue());

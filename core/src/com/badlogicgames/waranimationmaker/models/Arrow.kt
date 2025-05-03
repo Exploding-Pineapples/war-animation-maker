@@ -6,17 +6,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.TextInput
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import kotlin.math.min
 import kotlin.math.sqrt
 
-class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
+class Arrow(x: Float, y: Float, time: Int): ScreenObject(), ObjectWithAlpha, ObjectWithColor {
     override var position: Coordinate = Coordinate(x, y)
     override var xInterpolator = PCHIPInterpolatedFloat(x, time)
     override var yInterpolator = PCHIPInterpolatedFloat(y, time)
+    override val alpha = LinearInterpolatedFloat(1f, time)
     override val initTime = time
     override val id: ID = NodeID(-1)
-    var color = AreaColor.RED
+    override var color = AreaColor.RED
     var thickness = 10f
     @Transient
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
@@ -29,8 +31,15 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
         uiVisitor.show(verticalGroup, this)
     }
 
+    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float, paused: Boolean): Boolean {
+        if (!paused) { alpha.update(time) }
+        return super.goToTime(time, zoom, cx, cy)
+    }
+
     override fun buildInputs() {
-        super.buildInputs()
+        super<ScreenObject>.buildInputs()
+        super<ObjectWithAlpha>.buildInputs()
+        super<ObjectWithColor>.buildInputs()
 
         inputElements.add(
             TextInput(null, { input ->
@@ -41,17 +50,6 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObjectWithAlpha() {
                 return@label thickness.toString()
             }, Float::class.java, "Set thickness")
         )
-        inputElements.add(TextInput(null, { input ->
-            if (input != null) {
-                for (color in AreaColor.entries) {
-                    if (input == color.name) {
-                        this.color = color
-                    }
-                }
-            }
-        }, label@{
-            return@label color.name
-        }, String::class.java, "Set color"))
     }
 
     fun draw(shapeRenderer: ShapeRenderer, camera: OrthographicCamera, curTime: Int) {

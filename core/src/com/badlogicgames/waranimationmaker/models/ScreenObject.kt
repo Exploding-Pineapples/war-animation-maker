@@ -4,12 +4,9 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
-import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import kotlin.math.absoluteValue
 
-abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath, ObjectClickable {
-    override var death = InterpolatedBoolean(false, 0)
+abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectClickable, HasInputs, ObjectWithID {
     @Transient
     override var screenPosition: Coordinate = Coordinate(0f, 0f)
 
@@ -21,7 +18,6 @@ abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectWithDeath,
     open fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float): Boolean {
         super.goToTime(time)
         updateScreenPosition(zoom, cx, cy)
-        death.update(time)
         return shouldDraw(time)
     }
 
