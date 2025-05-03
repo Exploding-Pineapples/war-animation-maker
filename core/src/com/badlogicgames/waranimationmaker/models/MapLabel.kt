@@ -38,6 +38,7 @@ class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), ObjectWithAlpha,
     }
 
     override fun buildInputs() {
+        super<ScreenObject>.buildInputs()
         super<ObjectWithColor>.buildInputs()
         super<ObjectWithAlpha>.buildInputs()
 

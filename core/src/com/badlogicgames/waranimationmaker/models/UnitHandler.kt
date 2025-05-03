@@ -53,29 +53,4 @@ class UnitHandler(
         return animation.units.remove(unit)
     }
 
-    fun getDrawUnits(time: Int): List<Unit> {
-        val out = mutableListOf<Unit>()
-        for (unit in animation.units) {
-            if (time >= unit.xInterpolator.setPoints.keys.first()) {
-                if (!unit.death.value) {
-                    out.add(unit)
-                }
-            }
-        }
-        return out
-    }
-
-    fun getNonDrawUnits(time: Int): List<Unit> {
-        val out = mutableListOf<Unit>()
-        for (unit in animation.units) {
-            if (time <= unit.xInterpolator.setPoints.keys.first()) {
-                out.add(unit)
-            } else {
-                if (unit.death.value) {
-                    out.add(unit)
-                }
-            }
-        }
-        return out
-    }
 }

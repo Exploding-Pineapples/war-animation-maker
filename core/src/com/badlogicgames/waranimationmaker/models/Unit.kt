@@ -47,6 +47,7 @@ data class Unit(
     private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
 
     override fun buildInputs() {
+        super<ScreenObject>.buildInputs()
         super<ObjectWithAlpha>.buildInputs()
 
         inputElements.add(TextInput(null, { input ->
