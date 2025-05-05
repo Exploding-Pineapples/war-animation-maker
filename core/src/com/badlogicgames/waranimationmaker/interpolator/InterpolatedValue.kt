@@ -5,7 +5,7 @@ import java.util.*
 abstract class InterpolatedValue<I : Number, O>(initValue: O, initTime: I) {
     abstract var interpolator: Interpolator<I, O>
     var setPoints: SortedMap<I, O> = TreeMap()
-    var value: O = initValue
+    @Transient var value: O = initValue
 
     abstract fun updateInterpolator()
     open fun update(time: I): O { // Updates value based on time and returns it

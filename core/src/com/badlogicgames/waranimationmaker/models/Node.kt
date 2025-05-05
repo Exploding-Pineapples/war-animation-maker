@@ -25,11 +25,6 @@ data class Node(
         uiVisitor.show(verticalGroup, this)
     }
 
-    override fun goToTime(time: Int): Boolean {
-        death.update(time)
-        return super.goToTime(time)
-    }
-
     init {
         screenPosition = Coordinate(0f, 0f)
     }
@@ -47,6 +42,7 @@ data class Node(
         } else {
             Color.YELLOW
         }
+        death.update(time)
         if (death.value) {
             color = Color.RED
         }

@@ -21,7 +21,8 @@ data class Animation @JvmOverloads constructor(
     var unitId: Int = 0,
     private var edgeCollectionId: Int = 0,
     var nodeId: Int = 0,
-    val linesPerNode: Int = 12
+    val linesPerNode: Int = 12,
+    var initTime: Int = 0
 )
 {
     private var cachedImageDimensions: Pair<Int, Int>? = null
@@ -38,12 +39,18 @@ data class Animation @JvmOverloads constructor(
         return edgeCollectionId
     }
 
-    fun load() {
+    fun init() {
         if (mapLabels == null) {
             mapLabels = mutableListOf()
         }
+        if (initTime == null) {
+            initTime = 0
+        }
         unitHandler = UnitHandler(this)
         nodeHandler = NodeHandler(this)
+        unitHandler.init()
+        mapLabels.forEach { it.alpha.update(initTime) }
+        arrows.forEach { it.alpha.update(initTime) }
         buildInputs()
     }
 

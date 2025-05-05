@@ -15,7 +15,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21")
 
     implementation 'com.drewnoakes:metadata-extractor:2.19.0'
-
+    implementation("org.joml:joml:1.10.5")
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"

@@ -7,10 +7,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.WarAnimationMaker
 
 
-class UnitHandler(
-    private val animation: Animation
-)
+class UnitHandler(val animation: Animation)
 {
+    fun init() {
+        animation.units.forEach { it.alpha.update(animation.initTime) }
+    }
+
     fun buildInputs() {
         for (unit in animation.units) {
             unit.buildInputs()

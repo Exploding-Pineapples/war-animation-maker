@@ -15,35 +15,25 @@ import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 data class Unit(
     override var position: Coordinate,
     override val initTime: Int,
-    var image: String,
+    var image: String = ""
 ) : ScreenObject(), HasAlpha {
     override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
     override val alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, initTime)
-    @Transient
-    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
-
-    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
-        uiVisitor.show(verticalGroup ,this)
-    }
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     var color: AreaColor = AreaColor.BLUE
     var name: String? = null
     var type: String = "infantry.png"
     var size: String = "XX"
-
-    companion object {
-        val sizePresets = mapOf(
-            "XX" to 1.0f,
-            "X" to 0.8f,
-            "III" to 0.65f,
-            "II" to 0.55f,
-        )
-    }
     @Transient private var typeTexture: Texture? = null
     @Transient var countryTexture: Texture? = null
-    private var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
-    private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
+    @Transient private var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
+    @Transient private var height: Float = AnimationScreen.DEFAULT_UNIT_HEIGHT.toFloat()
+
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.show(verticalGroup ,this)
+    }
 
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
@@ -116,6 +106,10 @@ data class Unit(
         height = AnimationScreen.DEFAULT_UNIT_HEIGHT * sizefactor * sizePresetFactor
         val padding = 0.75f * sizefactor * sizePresetFactor
 
+        if (color == null) {
+            color = AreaColor.BLUE
+        }
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         shapeRenderer.color = Color(color.color.r, color.color.g, color.color.b, alpha.value)
         shapeRenderer.rect(screenPosition.x - width * 0.5f, screenPosition.y - height * 0.5f, width, height)
@@ -140,10 +134,6 @@ data class Unit(
                 width / 4.0f, height / 4.0f)
         }
 
-        if (color == null) {
-            color = AreaColor.BLUE
-        }
-
         font.color = Color(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha.value)
         font.data.setScale(0.07f * sizefactor * sizePresetFactor)
         batcher.setShader(fontShader)
@@ -161,5 +151,14 @@ data class Unit(
 
         batcher.setShader(null)
         batcher.end()
+    }
+
+    companion object {
+        val sizePresets = mapOf(
+            "XX" to 1.0f,
+            "X" to 0.8f,
+            "III" to 0.65f,
+            "II" to 0.55f,
+        )
     }
 }

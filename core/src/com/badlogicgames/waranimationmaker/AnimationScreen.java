@@ -92,7 +92,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         colorLayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
 
         // Animation init
-        time = 0;
+        time = 0;//animation.getInitTime();
         paused = true;
         animationMode = true;
 
@@ -149,7 +149,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         // Final init
         animation.camera().goToTime(time);
         updateCam();
-        animation.load();
+        animation.init();
     }
 
     public static <T> T firstOrNull(ArrayList<T> list) {
