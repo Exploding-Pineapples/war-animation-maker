@@ -1,11 +1,8 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.glutils.FrameBuffer
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogicgames.waranimationmaker.WarAnimationMaker
+import com.badlogic.gdx.graphics.Texture
+import com.badlogicgames.waranimationmaker.Assets
 import java.io.File
 
 data class Animation @JvmOverloads constructor(
@@ -17,7 +14,8 @@ data class Animation @JvmOverloads constructor(
     val nodes: MutableList<Node> = mutableListOf(),
     val edgeCollections: MutableList<EdgeCollection> = mutableListOf(),
     val arrows: MutableList<Arrow> = mutableListOf(),
-    var mapLabels: MutableList<MapLabel> = mutableListOf(),
+    val mapLabels: MutableList<MapLabel> = mutableListOf(),
+    var images: MutableList<Image> = mutableListOf(),
     var unitId: Int = 0,
     private var edgeCollectionId: Int = 0,
     var nodeId: Int = 0,
@@ -25,6 +23,10 @@ data class Animation @JvmOverloads constructor(
     var initTime: Int = 0
 )
 {
+    @Transient var unitHandler = UnitHandler(this)
+    @Transient var nodeHandler = NodeHandler(this)
+    @Transient var map = Assets.loadTexture(mapPath)
+
     private var cachedImageDimensions: Pair<Int, Int>? = null
 
     fun getEdgeCollectionId(): Int {
@@ -40,12 +42,12 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun init() {
-        if (mapLabels == null) {
-            mapLabels = mutableListOf()
+        if (images == null) {
+            images = mutableListOf()
+            images.add(Image(0f, 0f, initTime, mapPath))
         }
-        if (initTime == null) {
-            initTime = 0
-        }
+
+        map = Assets.loadTexture(mapPath)
         unitHandler = UnitHandler(this)
         nodeHandler = NodeHandler(this)
         unitHandler.init()
@@ -166,20 +168,13 @@ data class Animation @JvmOverloads constructor(
     fun update(time: Int, orthographicCamera: OrthographicCamera, paused: Boolean) {
         nodeHandler.update(time, orthographicCamera)
         unitHandler.update(time, orthographicCamera, paused)
+        images.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y) }
         arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         mapLabels.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
     }
 
-    fun draw(game: WarAnimationMaker, colorLayer: FrameBuffer, animationMode: Boolean, zoomFactor: Float, time: Int, camera: OrthographicCamera) {
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        arrows.forEach { it.draw(game.shapeRenderer, camera, time) }
-        game.shapeRenderer.end()
-
-        nodeHandler.draw(game.batcher, game.shapeRenderer, colorLayer, animationMode)
-        unitHandler.draw(game, game.shapeRenderer, zoomFactor)
-        mapLabels.forEach { it.draw(game.batcher, game.shapeRenderer, zoomFactor, game.bitmapFont, game.fontShader, game.layout) }
+    fun draw(drawer: Drawer) {
+        drawer.draw(this)
     }
 
     fun newArrow(x: Float, y: Float, time: Int): Arrow {
@@ -195,7 +190,4 @@ data class Animation @JvmOverloads constructor(
         mapLabels.add(new)
         return new
     }
-
-    @Transient var unitHandler = UnitHandler(this)
-    @Transient var nodeHandler = NodeHandler(this)
 }

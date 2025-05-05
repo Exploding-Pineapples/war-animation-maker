@@ -60,27 +60,5 @@ class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), HasAlpha, Object
     }
 
     fun draw(batcher: SpriteBatch, shapeRenderer: ShapeRenderer, sizefactor: Float, font: BitmapFont, fontShader: ShaderProgram, layout: GlyphLayout) {
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color(color.color.r, color.color.g, color.color.b, alpha.value)
-        shapeRenderer.circle(screenPosition.x, screenPosition.y, size * 10)
-        shapeRenderer.end()
-
-        batcher.setColor(1f, 1f, 1f, alpha.value)
-        batcher.begin()
-
-        font.color = Color(Color.WHITE.r, Color.WHITE.g, Color.WHITE.b, alpha.value)
-        font.data.setScale(size)
-        batcher.setShader(fontShader)
-        fontShader.setUniformf("outlineDistance", 0.05f)
-        fontShader.setUniformf("outlineColor", color.color.r, color.color.g, color.color.b, alpha.value)
-
-        layout.setText(font, text)
-        font.draw(batcher, layout, screenPosition.x - layout.width / 2, screenPosition.y + layout.height * (3f / 2) + size * 5)
-
-        batcher.setShader(null)
-        batcher.end()
     }
 }

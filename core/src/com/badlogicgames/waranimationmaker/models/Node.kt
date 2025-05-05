@@ -49,7 +49,6 @@ data class Node(
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {
-        shapeRenderer.color = color
-        shapeRenderer.circle(screenPosition.x, screenPosition.y, 7.0f)
+
     }
 }

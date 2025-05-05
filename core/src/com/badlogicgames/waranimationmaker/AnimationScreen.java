@@ -21,10 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import static com.badlogicgames.waranimationmaker.Assets.loadTexture;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH;
-import static com.badlogicgames.waranimationmaker.models.ModelsKt.projectToScreen;
 import static java.lang.Math.round;
 
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
@@ -56,9 +54,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     TouchMode touchMode;
 
     GL20 gl;
-    Texture fullMap; // entire background map
     ShapeRenderer shapeRenderer; // Draws all geometric shapes
     FrameBuffer colorLayer; // Colored areas are drawn to this layer
+    Drawer drawer;
+
     //UI
     Stage stage; // Entire UI is drawn to this
     Table selectedInfoTable;
@@ -88,8 +87,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animation.camera();
         // Graphics init
         shapeRenderer = game.shapeRenderer;
-        fullMap = loadTexture(animation.getMapPath());
         colorLayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
+        drawer = new Drawer(game.bitmapFont, game.fontShader, game.shapeRenderer, game.batcher, animation.getInitTime());
 
         // Animation init
         time = 0;//animation.getInitTime();
@@ -382,6 +381,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
         orthographicCamera.update();
 
+        drawer.update(orthographicCamera, time, animationMode);
+
         if ((selected != null) && paused) { // Update the selected object to go to mouse in move mode
             if ((touchMode == TouchMode.MOVE)) {
                 selected.newSetPoint(time, mouseX, mouseY);
@@ -514,17 +515,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public void render(float delta) {
         update();
 
-        gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        //Draw background
-        game.batcher.begin();
-        Coordinate origin = projectToScreen(new Coordinate(0, 0), orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y);
-        game.batcher.draw(fullMap, origin.getX(), origin.getY(), fullMap.getWidth() * orthographicCamera.zoom, fullMap.getHeight() * orthographicCamera.zoom);
-        game.batcher.end();
-
-        // Draw Units and Lines
-        animation.draw(game, colorLayer, animationMode, zoomFactor, time, orthographicCamera);
+        animation.draw(drawer);
 
         if (animationMode) {
             Gdx.gl.glEnable(Gdx.gl.GL_BLEND);

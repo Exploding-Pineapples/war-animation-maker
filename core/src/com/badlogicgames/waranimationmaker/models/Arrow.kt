@@ -52,46 +52,6 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObject(), HasAlpha, ObjectWith
     }
 
     fun draw(shapeRenderer: ShapeRenderer, camera: OrthographicCamera, curTime: Int) {
-        var previous = projectToScreen(Coordinate(
-            xInterpolator.interpolator.interpolateAt(xInterpolator.setPoints.keys.first()),
-            yInterpolator.interpolator.interpolateAt(xInterpolator.setPoints.keys.first())
-        ), camera.zoom, camera.position.x, camera.position.y)
 
-        shapeRenderer.color = color.color.apply { a = alpha.value }
-
-        val endTime = min(curTime, xInterpolator.setPoints.keys.last())
-
-        for (time in xInterpolator.setPoints.keys.first().toInt() ..endTime) { // Draws entire body of arrow
-            val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
-            shapeRenderer.rectLine(previous.x, previous.y, position.x, position.y, thickness)
-            if (time == endTime) {
-                val triangle = generateTriangle(previous, position, thickness * 2, thickness * 3)
-                shapeRenderer.triangle(triangle[0].x, triangle[0].y, triangle[1].x, triangle[1].y, triangle[2].x, triangle[2].y)
-            }
-            previous = position
-        }
-    }
-
-    fun generateTriangle(a: Coordinate, b: Coordinate, baseWidth: Float, height: Float): Array<Coordinate> {
-        // Direction from A to B
-        val dx: Float = b.x - a.x
-        val dy: Float = b.y - a.y
-        val length = sqrt(dx * dx + dy * dy)
-        val ux = dx / length
-        val uy = dy / length
-
-        // Perpendicular direction (rotated 90°)
-        val px = -uy
-        val py = ux
-
-        // Base endpoints, perpendicular to direction, centered at B
-        val halfBase = baseWidth / 2.0f
-        val p1 = Coordinate(b.x + px * halfBase, b.y + py * halfBase)
-        val p2 = Coordinate(b.x - px * halfBase, b.y - py * halfBase)
-
-        // Tip of triangle, extending in A→B direction from B
-        val tip = Coordinate(b.x + ux * height, b.y + uy * height)
-
-        return arrayOf(p1, p2, tip)
     }
 }
