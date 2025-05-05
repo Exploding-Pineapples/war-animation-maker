@@ -16,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogicgames.waranimationmaker.models.Animation;
 import kotlin.Pair;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -34,11 +33,9 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
     public Stage stage;
     public Label imageLabel;
     public Label countriesLabel;
-    public FileButton selectImageButton;
     public MultipleFileButton addCountriesButton;
     public Label warningLabel;
     Table table;
-    ArrayList<String> countries;
     ArrayList<Actor> elements;
 
     public NewAnimationScreen(WarAnimationMaker game, Animation animation) {
@@ -80,13 +77,6 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
         table.add(nameArea);
         table.row().pad(10);
 
-        selectImageButton = new FileButton("Select Background Image", game.skin, "small");
-        if (animation.getMapPath() != null) { // safety
-            selectImageButton.setFile(new File(animation.getMapPath()));
-        }
-        table.add(selectImageButton.getTextButton()).height(40);
-        table.row();
-
         imageLabel = new Label("", game.skin);
         table.add(imageLabel).colspan(3);
         table.row();
@@ -110,14 +100,12 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
             public void clicked(InputEvent event, float x, float y) {
                 boolean animationExists = false;
                 String name = nameField.getText();
-                String backgroundPath = selectImageButton.getFile().getPath();
                 List<String> countriesPaths = Arrays.stream(addCountriesButton.files).map(File::getPath).collect(Collectors.toList());
-                Pair<Boolean, String> inputCheck = checkInput(nameField.getText(), selectImageButton.getFile().getPath(), countriesPaths);
+                Pair<Boolean, String> inputCheck = checkInput(nameField.getText(), countriesPaths);
                 if (inputCheck.getFirst()) {
                     for (Animation existingAnimation : FileHandler.INSTANCE.getAnimations()) {
                         if (existingAnimation.getName().equals(name)) {
                             System.out.println("Using existing animation: " + name);
-                            existingAnimation.setMapPath(selectImageButton.getFile().getPath());
                             existingAnimation.setName(nameField.getText());
                             existingAnimation.setCountries(countriesPaths);
                             animationExists = true;
@@ -129,7 +117,7 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
                     }
                     if (!animationExists) {
                         System.out.println("Created New Animation");
-                        Animation newAnimation = new Animation(selectImageButton.getFile().getPath(), nameField.getText(), Arrays.stream(addCountriesButton.files).map(File::getPath).collect(Collectors.toList()));
+                        Animation newAnimation = new Animation(nameField.getText(), Arrays.stream(addCountriesButton.files).map(File::getPath).collect(Collectors.toList()));
                         FileHandler.INSTANCE.createNewAnimation(newAnimation);
                         AnimationScreen screen = new AnimationScreen(game, newAnimation);
                         game.setScreen(screen);
@@ -184,52 +172,9 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
         }
     }
 
-
-    public static class FileButton {
-        private File file;
-        private final TextButton textButton;
-
-        public FileButton(String text, Skin skin, String styleName) {
-            textButton = new TextButton(text, skin, styleName);
-            textButton.addListener(new ChangeListener() {
-                @Override
-                public void changed(ChangeEvent event, Actor actor) {
-                    new Thread(() -> {
-                        JFileChooser chooser = new JFileChooser(new File("assets"));
-                        // It just seems to default to your documents folder
-                        JFrame f = new JFrame();
-                        f.setVisible(true);
-                        f.toFront();
-                        f.setVisible(false);
-                        int res = chooser.showOpenDialog(f);
-                        f.dispose();
-                        // Well this is the file button but the FileHandler still loads it from the animations directory
-                        if (res == JFileChooser.APPROVE_OPTION) {
-                            file = new File(new File("C:\\Users\\User\\Documents\\Projects\\war-animation-maker").toURI().relativize(chooser.getSelectedFile().toURI()).getPath());
-                        }
-                    }).start();
-                }
-            });
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        public void setFile(File file) {
-            this.file = file;
-        }
-
-        public TextButton getTextButton() {
-            return textButton;
-        }
-    }
-    public Pair<Boolean, String> checkInput(String name, String backgroundPath, List<String> countriesPaths) {
+    public Pair<Boolean, String> checkInput(String name, List<String> countriesPaths) {
         if (name.isEmpty()) {
             return new kotlin.Pair<>(false, "Name cannot be empty");
-        }
-        if (backgroundPath.isEmpty()) {
-            return new Pair<>(false, "Background path cannot be empty");
         }
         if (countriesPaths.size() > 8) {
             return new Pair<>(false, "There cannot be more than 8 countries");
@@ -245,13 +190,6 @@ public class NewAnimationScreen extends ScreenAdapter implements InputProcessor 
     public void render(float delta) {
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        File imagePath = selectImageButton.getFile();
-        if (imagePath != null) {
-            imageLabel.setText(imagePath.getPath());
-        } else {
-            imageLabel.setText("null");
-        }
 
         countriesLabel.setText(Arrays.toString(addCountriesButton.getFiles()));
 

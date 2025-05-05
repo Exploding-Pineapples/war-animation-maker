@@ -71,9 +71,6 @@ object FileHandler {
                         animations += this
 
                         units.forEach { unit -> unit.typeTexture() }
-
-                        // preload image dimensions
-                        getImageDimensions()
                     }
             }.onFailure { x ->
                 x.printStackTrace()

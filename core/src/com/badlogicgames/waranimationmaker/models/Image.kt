@@ -14,10 +14,14 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     override val initTime = time
 
-    var texture = Assets.loadTexture(path)
+    @Transient var texture = Assets.loadTexture(path)
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
+    }
+
+    fun loadTexture() {
+        texture = Assets.loadTexture(path)
     }
 
     fun updateTexture(newPath: String) {

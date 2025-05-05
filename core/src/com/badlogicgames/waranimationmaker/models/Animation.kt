@@ -1,12 +1,8 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Texture
-import com.badlogicgames.waranimationmaker.Assets
-import java.io.File
 
 data class Animation @JvmOverloads constructor(
-    var mapPath: String,
     var name: String = "My Animation",
     var countries: List<String> = mutableListOf(),
     val units: MutableList<Unit> = mutableListOf(),
@@ -25,7 +21,6 @@ data class Animation @JvmOverloads constructor(
 {
     @Transient var unitHandler = UnitHandler(this)
     @Transient var nodeHandler = NodeHandler(this)
-    @Transient var map = Assets.loadTexture(mapPath)
 
     private var cachedImageDimensions: Pair<Int, Int>? = null
 
@@ -42,17 +37,12 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun init() {
-        if (images == null) {
-            images = mutableListOf()
-            images.add(Image(0f, 0f, initTime, mapPath))
-        }
-
-        map = Assets.loadTexture(mapPath)
         unitHandler = UnitHandler(this)
         nodeHandler = NodeHandler(this)
         unitHandler.init()
         mapLabels.forEach { it.alpha.update(initTime) }
         arrows.forEach { it.alpha.update(initTime) }
+        images.forEach { it.loadTexture() }
         buildInputs()
     }
 
@@ -64,15 +54,6 @@ data class Animation @JvmOverloads constructor(
         }
 
         return camera!!
-    }
-
-    fun getImageDimensions(): Pair<Int, Int> {
-        if (cachedImageDimensions == null) {
-            cachedImageDimensions = File(mapPath)
-                .getImageDimensions()
-        }
-
-        return cachedImageDimensions!!
     }
 
     fun deleteObject(obj: Object): Boolean {
