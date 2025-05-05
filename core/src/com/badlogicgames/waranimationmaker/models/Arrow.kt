@@ -11,13 +11,12 @@ import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import kotlin.math.min
 import kotlin.math.sqrt
 
-class Arrow(x: Float, y: Float, time: Int): ScreenObject(), ObjectWithAlpha, ObjectWithColor {
+class Arrow(x: Float, y: Float, time: Int): ScreenObject(), HasAlpha, ObjectWithColor {
     override var position: Coordinate = Coordinate(x, y)
     override var xInterpolator = PCHIPInterpolatedFloat(x, time)
     override var yInterpolator = PCHIPInterpolatedFloat(y, time)
     override val alpha = LinearInterpolatedFloat(1f, time)
     override val initTime = time
-    override val id: ID = NodeID(-1)
     override var color = AreaColor.RED
     var thickness = 10f
     @Transient
@@ -38,7 +37,7 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObject(), ObjectWithAlpha, Obj
 
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
-        super<ObjectWithAlpha>.buildInputs()
+        super<HasAlpha>.buildInputs()
         super<ObjectWithColor>.buildInputs()
 
         inputElements.add(

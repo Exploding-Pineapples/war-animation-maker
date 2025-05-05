@@ -211,8 +211,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         // Show new selected object
         if (selected != null) {
-            System.out.println("Selected: " + selected.getClass().getSimpleName() + " " + selected.getId().getValue());
-            selectedEdgeCollections = animation.getParents(selected.getId());
+            System.out.println("Selected: " + selected.getClass().getSimpleName());
+            selectedEdgeCollections = animation.getParents(selected);
             selected.showInputs(selectedGroup, uiVisitor);
             for (EdgeCollection collection : selectedEdgeCollections) {
                 collection.showInputs(selectedGroup, uiVisitor);
@@ -295,7 +295,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     if (((Node) selected).getEdges().size() == 1) {
                         Edge existingEdge = ((Node) selected).getEdges().get(0);
                         newNode.getEdges().add(new Edge(existingEdge.getCollectionID(), new Pair<>(newNode.getId(), existingEdge.getSegment().getSecond()), new ArrayList<>(), new InterpolatedBoolean(false, time))); // Create an edge pointing from the new node to the next node
-                        existingEdge.setSegment(new Pair<>((NodeID) selected.getId(), newNode.getId())); // Change the edge of the selected node to point to the new node
+                        existingEdge.setSegment(new Pair<>(((Node) selected).getId(), newNode.getId())); // Change the edge of the selected node to point to the new node
                     }
                 }
                 switchSelected(newNode);
@@ -423,7 +423,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 selectedInfo.append("Selected: ").append(selected.getClass().getSimpleName()).append("\n");
                 selectedInfo.append("x: ").append(selected.getPosition().getX()).append("\n");
                 selectedInfo.append("y: ").append(selected.getPosition().getY()).append("\n");
-                selectedInfo.append("ID: ").append(selected.getId().getValue()).append("\n");
+                if (selected.getClass().isAssignableFrom(HasID.class)) {
+                    selectedInfo.append("ID: ").append(((HasID) selected).getId().getValue()).append("\n");
+                }
 
                 if (selected.getClass() == Node.class) {
                     ArrayList<Integer> nodes = new ArrayList<>();
@@ -522,13 +524,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.batcher.end();
 
         // Draw Units and Lines
-        Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
-        Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
         animation.draw(game, colorLayer, animationMode, zoomFactor, time, orthographicCamera);
 
-        game.batcher.setColor(1, 1, 1, 1.0f);
-
         if (animationMode) {
+            Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
+            Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
             // Draw contrast backgrounds for UI
@@ -575,9 +575,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
         actions.add(Action.createBuilder(() -> {
-            if (ObjectWithAlpha.class.isAssignableFrom(selected.getClass())) {
-                ((ObjectWithAlpha) selected).getAlpha().newSetPoint(time, ((ObjectWithAlpha) selected).getAlpha().getValue());
-                System.out.println("set new alpha set point, set points: " + ((ObjectWithAlpha) selected).getAlpha().getSetPoints());
+            if (HasAlpha.class.isAssignableFrom(selected.getClass())) {
+                ((HasAlpha) selected).getAlpha().newSetPoint(time, ((HasAlpha) selected).getAlpha().getValue());
+                System.out.println("set new alpha set point, set points: " + ((HasAlpha) selected).getAlpha().getSetPoints());
             }
             return null;
         }, "Set alpha set point", Input.Keys.A).requiresSelected(Requirement.REQUIRES).build());

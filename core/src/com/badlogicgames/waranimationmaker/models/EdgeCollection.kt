@@ -8,7 +8,7 @@ import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.SelectBoxInput
 import com.badlogicgames.waranimationmaker.TextInput
 
-open class EdgeCollection(open val id: EdgeCollectionID) : HasInputs {
+open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID {
     var alpha: Float = 255F
     @Transient
     var edges: MutableList<Edge> = mutableListOf()

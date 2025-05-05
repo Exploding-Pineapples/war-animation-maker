@@ -12,7 +12,7 @@ data class Node(
     override var position: Coordinate,
     override val initTime: Int,
     override val id: NodeID
-) : ScreenObject(), ObjectWithDeath  {
+) : ScreenObject(), HasDeath, HasID  {
     var color: Color = Color.GREEN
     override var xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator = PCHIPInterpolatedFloat(position.y, initTime)

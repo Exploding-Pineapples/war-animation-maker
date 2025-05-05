@@ -6,7 +6,7 @@ import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import kotlin.math.absoluteValue
 
-abstract class ScreenObject : Object, ObjectWithScreenPosition, ObjectClickable, HasInputs, ObjectWithID {
+abstract class ScreenObject : Object, HasScreenPosition, ObjectClickable, HasInputs {
     @Transient
     override var screenPosition: Coordinate = Coordinate(0f, 0f)
 

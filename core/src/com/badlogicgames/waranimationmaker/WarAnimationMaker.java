@@ -53,7 +53,7 @@ public class WarAnimationMaker extends Game {
 		if (!fontShader.isCompiled()) {
 			Gdx.app.error("fontShader", "compilation failed:\n" + fontShader.getLog());
 		}
-		skin = Assets.loadSkin("skins/glassy/skin/glassy-ui.json");
+		skin = Assets.loadSkin(Gdx.files.internal("assets/skins/glassy/skin/glassy-ui.json").toString());
 		multiplexer = new InputMultiplexer();
 
 		gl = Gdx.gl;

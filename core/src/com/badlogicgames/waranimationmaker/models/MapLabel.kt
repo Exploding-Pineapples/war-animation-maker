@@ -15,13 +15,12 @@ import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
-class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), ObjectWithAlpha, ObjectWithColor {
+class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), HasAlpha, ObjectWithColor {
     override var position: Coordinate = Coordinate(x, y)
     override var xInterpolator = PCHIPInterpolatedFloat(x, time)
     override var yInterpolator = PCHIPInterpolatedFloat(y, time)
     override val alpha = LinearInterpolatedFloat(1f, time)
     override val initTime = time
-    override val id: ID = NodeID(-1)
     var text = ""
     override var color = AreaColor.RED
     var size = 50f
@@ -40,7 +39,7 @@ class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), ObjectWithAlpha,
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
         super<ObjectWithColor>.buildInputs()
-        super<ObjectWithAlpha>.buildInputs()
+        super<HasAlpha>.buildInputs()
 
         inputElements.add(
             TextInput(null, { input ->

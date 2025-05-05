@@ -32,7 +32,7 @@ class UnitHandler(
     }
 
     fun newUnit(position: Coordinate, initTime: Int, image: String): Unit {
-        return add(Unit(UnitID(animation.unitId), position, initTime, image))
+        return add(Unit(position, initTime, image))
     }
 
     fun update(time: Int, camera: OrthographicCamera, paused: Boolean) {

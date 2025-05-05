@@ -13,11 +13,10 @@ import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
 data class Unit(
-    override val id: UnitID,
     override var position: Coordinate,
     override val initTime: Int,
     var image: String,
-) : ScreenObject(), ObjectWithAlpha {
+) : ScreenObject(), HasAlpha {
     override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
     override val alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, initTime)
@@ -48,7 +47,7 @@ data class Unit(
 
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
-        super<ObjectWithAlpha>.buildInputs()
+        super<HasAlpha>.buildInputs()
 
         inputElements.add(TextInput(null, { input ->
             if (input != null) {
