@@ -1,42 +1,74 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.AreaColor
+import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import earcut4j.Earcut
 import java.lang.reflect.Type
 
-interface AnyEdgeCollectionContext : AbstractTypeSerializable {
+interface AnyEdgeCollectionContext : AbstractTypeSerializable, HasInputs {
     var edges: MutableList<Edge>
     var color: AreaColor
+
+    fun init()
 }
 
 open class EdgeCollectionContext(@Transient override var edges: MutableList<Edge> = mutableListOf(), override var color: AreaColor = AreaColor.RED) : AnyEdgeCollectionContext {
+    override fun init() {}
+
     override fun getAbstractType(): Type {
         return EdgeCollectionContext::class.java
+    }
+
+    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
+
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
     }
 }
 
 class AreaContext : EdgeCollectionContext() {
+    override fun init() {}
     override fun getAbstractType(): Type {
         return AreaContext::class.java
     }
 }
 
-class LineContext(var width: Float = 5.0f) : EdgeCollectionContext() {
-    @Transient
-    var xInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
-    @Transient
-    var yInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
+class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
+    @Transient var xInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
+    @Transient var yInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
+    override var alpha = LinearInterpolatedFloat(1f, 0)
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
+
     override fun getAbstractType(): Type {
         return LineContext::class.java
+    }
+
+    init {
+        init()
+    }
+
+    override fun init() {
+        super<EdgeCollectionContext>.buildInputs()
+        super<HasAlpha>.buildInputs()
+
+        if (alpha == null) {
+            alpha = LinearInterpolatedFloat(1f, 0)
+        }
+        alpha.update(0)
+    }
+
+    override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        uiVisitor.show(verticalGroup, this)
     }
 }
 
 interface AnyEdgeCollectionStrategy : AbstractTypeSerializable {
-    fun updateAny(time: Int, animation: Animation, context: AnyEdgeCollectionContext)
+    fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext)
     fun drawAny(shapeRenderer: ShapeRenderer, context: AnyEdgeCollectionContext)
 }
 
@@ -52,7 +84,7 @@ open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollect
         context.edges.forEach { it.drawAsSelected(shapeRenderer, true) }
     }
 
-    override fun updateAny(time: Int, animation: Animation, context: AnyEdgeCollectionContext) {
+    override fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext) {
         update(time, animation, context as T)
     }
 
@@ -68,7 +100,7 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
     var drawCoords: MutableList<Coordinate> = mutableListOf()
     @Transient
     var drawPoly: MutableList<FloatArray> = mutableListOf()
-    override fun update(time: Int, animation: Animation, context: AreaContext) {
+    fun update(animation: Animation, context: AreaContext) {
         if (drawCoords == null) {
             drawCoords = mutableListOf()
         } else {
@@ -136,7 +168,9 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
 }
 
 class LineStrategy : EdgeCollectionStrategy<LineContext>() {
-    override fun update(time: Int, animation: Animation, context: LineContext) {
+    fun update(time: Int, animation: Animation, paused: Boolean, context: LineContext) {
+        if (!paused) context.alpha.update(time)
+
         var xInterpolator = context.xInterpolator
         var yInterpolator = context.yInterpolator
         val edges = context.edges
@@ -180,10 +214,14 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
         }
     }
 
+    override fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext) {
+        update(time, animation, paused, context as LineContext)
+    }
+
     override fun draw(shapeRenderer: ShapeRenderer, context: LineContext) {
         val edges = context.edges
         if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
-            shapeRenderer.color = context.color.color
+            shapeRenderer.color = colorWithAlpha(context.color.color, context.alpha.value)
             for (edge in edges) {
                 for (i in 0 until edge.screenCoords.size - 1)
                     shapeRenderer.rectLine(

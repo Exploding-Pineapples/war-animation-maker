@@ -9,13 +9,10 @@ import com.badlogicgames.waranimationmaker.SelectBoxInput
 import com.badlogicgames.waranimationmaker.TextInput
 
 open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID {
-    var alpha: Float = 255F
-    @Transient
-    var edges: MutableList<Edge> = mutableListOf()
+    @Transient var edges: MutableList<Edge> = mutableListOf()
     var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
     var edgeCollectionContext: AnyEdgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
-    @Transient
-    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun buildInputs() {
         super.buildInputs()
@@ -45,14 +42,22 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
                     (edgeCollectionContext as LineContext).edges = edges
                     edgeCollectionStrategy = LineStrategy()
                 }
+                edgeCollectionContext.init()
             }, label@{
                 return@label edgeCollectionStrategy.javaClass.simpleName.substring(0, edgeCollectionStrategy.javaClass.simpleName.length - "Strategy".length )
             }, String::class.java, "Set edge collection type", Array<String>().apply { add("Area", "Line") })
         )
+        edgeCollectionContext.init()
     }
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
+        edgeCollectionContext.showInputs(verticalGroup, uiVisitor)
+    }
+
+    override fun hideInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
+        super.hideInputs(verticalGroup, uiVisitor)
+        edgeCollectionContext.hideInputs(verticalGroup, uiVisitor)
     }
 
     fun prepare() {
@@ -61,18 +66,11 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
         }
         edges.clear()
         edgeCollectionContext.edges = mutableListOf()
-        if (edgeCollectionStrategy == null) {
-            edgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
-            //println("Edge collection strategy not set for update")
-        }
-        if (edgeCollectionContext == null) {
-            edgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
-        }
     }
 
-    fun update(time: Int, animation: Animation) {
+    fun update(time: Int, animation: Animation, paused: Boolean) {
         edgeCollectionContext.edges.addAll(edges)
-        edgeCollectionStrategy.updateAny(time, animation, edgeCollectionContext)
+        edgeCollectionStrategy.updateAny(time, animation, paused, edgeCollectionContext)
     }
 
     fun draw(shapeRenderer: ShapeRenderer) {

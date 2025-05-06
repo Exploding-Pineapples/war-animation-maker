@@ -570,6 +570,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 ((HasAlpha) selected).getAlpha().newSetPoint(time, ((HasAlpha) selected).getAlpha().getValue());
                 System.out.println("set new alpha set point, set points: " + ((HasAlpha) selected).getAlpha().getSetPoints());
             }
+            for (EdgeCollection selectedEdgeCollection : selectedEdgeCollections) {
+                if (HasAlpha.class.isAssignableFrom(selectedEdgeCollection.getEdgeCollectionContext().getClass())) {
+                    ((HasAlpha) selectedEdgeCollection.getEdgeCollectionContext()).getAlpha().newSetPoint(time, ((HasAlpha) selectedEdgeCollection.getEdgeCollectionContext()).getAlpha().getValue());
+                    System.out.println("set new alpha set point, set points: " + ((HasAlpha) selectedEdgeCollection.getEdgeCollectionContext()).getAlpha().getSetPoints());
+                }
+            }
             return null;
         }, "Set alpha set point", Input.Keys.A).requiresSelected(Requirement.REQUIRES).build());
         actions.add(Action.createBuilder(() -> {

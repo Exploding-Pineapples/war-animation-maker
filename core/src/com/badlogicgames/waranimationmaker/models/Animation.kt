@@ -147,7 +147,7 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun update(time: Int, orthographicCamera: OrthographicCamera, paused: Boolean) {
-        nodeHandler.update(time, orthographicCamera)
+        nodeHandler.update(time, orthographicCamera, paused)
         unitHandler.update(time, orthographicCamera, paused)
         images.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y) }
         arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }

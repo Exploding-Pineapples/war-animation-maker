@@ -114,7 +114,7 @@ class NodeHandler(val animation: Animation) {
         }
     }
 
-    fun update(time: Int, camera: OrthographicCamera) {
+    fun update(time: Int, camera: OrthographicCamera, paused: Boolean) {
         val edgeCollections = mutableListOf<EdgeCollection>()
         for (node in animation.nodes) { // Update all nodes and edges
             node.update(time, camera)
@@ -167,7 +167,7 @@ class NodeHandler(val animation: Animation) {
         }
         //println("Added edge collections of size: " + animation.edgeCollections.map {it.edges.size})
 
-        animation.edgeCollections.forEach { it.update(time, animation) }
+        animation.edgeCollections.forEach { it.update(time, animation, paused) }
     }
 
     fun draw(batcher: SpriteBatch, shapeRenderer: ShapeRenderer, colorLayer: FrameBuffer, animationMode: Boolean) {
