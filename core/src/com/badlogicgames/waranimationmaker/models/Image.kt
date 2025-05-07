@@ -11,7 +11,7 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
     override var position: Coordinate = Coordinate(x, y)
     override var xInterpolator = PCHIPInterpolatedFloat(x, time)
     override var yInterpolator = PCHIPInterpolatedFloat(y, time)
-    override val alpha = LinearInterpolatedFloat(1f, time)
+    override var alpha = LinearInterpolatedFloat(1f, time)
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     override val initTime = time
 
@@ -33,15 +33,20 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
         loadTexture()
     }
 
+    fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float, paused: Boolean): Boolean {
+        if (!paused) { alpha.update(time); println(alpha.value) }
+        return super.goToTime(time, zoom, cx, cy)
+    }
+
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
         super<HasAlpha>.buildInputs()
 
         inputElements.add(SelectBoxInput(null, { input ->
-            path = Assets.flagsPath(input)
+            path = Assets.mapsPath(input)
             loadTexture()
         }, label@{
             return@label path.substringAfter("assets/maps/")
-        }, String::class.java, "Set country", Assets.countryNames))
+        }, String::class.java, "Image", Assets.images()))
     }
 }

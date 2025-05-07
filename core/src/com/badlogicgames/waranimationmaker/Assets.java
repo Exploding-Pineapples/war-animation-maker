@@ -25,7 +25,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +38,9 @@ public class Assets {
 		return "assets/unitkinds/" + file;
 	}
 	public static String flagsPath(String file) { return "assets/flags/" + file; }
+	public static String mapsPath(String file) { return "assets/flags/" + file; }
 	public static Array<String> countryNames = new Array<>();
+	public static Array<String> images = new Array<>();
 	public static Array<String> unitTypes = new Array<>();
 
 	public static String png(String file) {
@@ -67,13 +68,6 @@ public class Assets {
 		return countryNames;
 	}
 
-	public static void updateCountryNames() {
-		countryNames.clear();
-		for (File country : Objects.requireNonNull(Gdx.files.internal("assets/flags").file().listFiles())) {
-			countryNames.add(country.getName());
-		}
-	}
-
 	public static Array<String> unitTypes() {
 		if (unitTypes.isEmpty()) {
 			updateUnitTypes();
@@ -81,14 +75,34 @@ public class Assets {
 		return unitTypes;
 	}
 
+	public static Array<String> images() {
+		if (images.isEmpty()) {
+			updateImages();
+		}
+		return images;
+	}
+
+	public static Array<String> listFiles(String path) {
+		Array<String> files = new Array<>();
+		for (File country : Objects.requireNonNull(Gdx.files.internal(path).file().listFiles())) {
+			files.add(country.getName());
+		}
+		return files;
+	}
+
+	public static void updateCountryNames() {
+		countryNames.clear();
+		countryNames = listFiles("assets/flags");
+	}
+
+	public static void updateImages() {
+		images.clear();
+		images = listFiles("assets/maps");
+	}
+
 	public static void updateUnitTypes() {
 		unitTypes.clear();
-
-		FilenameFilter filter = (dir, name) -> name.toLowerCase().endsWith(".png");
-
-		for (File unitType : Objects.requireNonNull(Gdx.files.internal("assets/unitkinds").file().listFiles(filter))) {
-			unitTypes.add(unitType.getName());
-		}
+		unitTypes = listFiles("assets/unitkinds");
 	}
 
 	public static Skin loadSkin (String file) {

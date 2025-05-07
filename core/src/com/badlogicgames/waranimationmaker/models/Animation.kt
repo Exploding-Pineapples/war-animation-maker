@@ -42,6 +42,7 @@ data class Animation @JvmOverloads constructor(
         unitHandler.init()
         mapLabels.forEach { it.alpha.update(initTime) }
         arrows.forEach { it.alpha.update(initTime) }
+        images.forEach { it.alpha.update(initTime) }
         images.forEach { it.loadTexture() }
         buildInputs()
     }
@@ -188,12 +189,13 @@ data class Animation @JvmOverloads constructor(
         arrows.forEach { it.buildInputs() }
         edgeCollections.forEach { it.buildInputs() }
         mapLabels.forEach { it.buildInputs() }
+        images.forEach { it.buildInputs() }
     }
 
     fun update(time: Int, orthographicCamera: OrthographicCamera, paused: Boolean) {
         nodeHandler.update(time, orthographicCamera, paused)
         unitHandler.update(time, orthographicCamera, paused)
-        images.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y) }
+        images.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         mapLabels.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
     }
