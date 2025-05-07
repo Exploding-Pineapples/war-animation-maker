@@ -1,8 +1,6 @@
 package com.badlogicgames.waranimationmaker
 
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.*
 
 abstract class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, @Transient val clazz: Class<T>, var name: String, var converter: ((String) -> T)? = null) {
@@ -24,21 +22,21 @@ abstract class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, @Tran
 
     companion object {
         // String, Integer, Double, Float
-        val converters = mutableMapOf<Class<*>, (String) -> Any>(
+        val converters = mutableMapOf<Class<*>, (String) -> Any?>(
             String::class.java to {
                 it
             },
             Integer::class.java to {
-                it.toInt()
+                try { it.toInt() } catch (_: NumberFormatException) { null }
             },
             Int::class.java to {
-                it.toInt()
+                try { it.toInt() } catch (_: NumberFormatException) { null }
             },
             Float::class.java to {
-                it.toFloat()
+                try { it.toFloat() } catch (_: NumberFormatException) { null }
             },
             Boolean::class.java to {
-                it.toBoolean()
+                it.toBooleanStrictOrNull()
             }
         )
     }

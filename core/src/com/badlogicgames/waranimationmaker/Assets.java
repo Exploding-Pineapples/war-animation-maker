@@ -38,7 +38,7 @@ public class Assets {
 		return "assets/unitkinds/" + file;
 	}
 	public static String flagsPath(String file) { return "assets/flags/" + file; }
-	public static String mapsPath(String file) { return "assets/flags/" + file; }
+	public static String mapsPath(String file) { return "assets/maps/" + file; }
 	public static Array<String> countryNames = new Array<>();
 	public static Array<String> images = new Array<>();
 	public static Array<String> unitTypes = new Array<>();

@@ -19,7 +19,6 @@ import kotlin.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.StringJoiner;
 
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
@@ -78,6 +77,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     SelectBoxInput<Integer> newEdgeCollectionIDInput;
     boolean newEdgeInputsDisplayed;
     boolean newUnitInputsDisplayed;
+    long commaLastUnpressed = 0;
+    long periodLastUnpressed = 0;
 
     public AnimationScreen(WarAnimationMaker game, Animation animation)  {
         this.animation = animation;
@@ -387,6 +388,22 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             orthographicCamera.position.x += 10 / orthographicCamera.zoom;
         }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.COMMA)) {
+            if (System.currentTimeMillis() - commaLastUnpressed >= 250) {
+                time--;
+            }
+        } else {
+            commaLastUnpressed = System.currentTimeMillis();
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.PERIOD)) {
+            if (System.currentTimeMillis() - periodLastUnpressed >= 250) {
+                time++;
+            }
+        } else {
+            periodLastUnpressed = System.currentTimeMillis();
+        }
+
         if (!paused) { //don't update camera when paused to allow for movement when paused
             updateCam();
         }

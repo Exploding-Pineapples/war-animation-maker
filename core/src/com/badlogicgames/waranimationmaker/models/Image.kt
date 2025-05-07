@@ -1,9 +1,11 @@
 package com.badlogicgames.waranimationmaker.models
 
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.Assets
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.SelectBoxInput
+import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
@@ -12,10 +14,11 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
     override var xInterpolator = PCHIPInterpolatedFloat(x, time)
     override var yInterpolator = PCHIPInterpolatedFloat(y, time)
     override var alpha = LinearInterpolatedFloat(1f, time)
-    override var inputElements: MutableList<InputElement<*>> = mutableListOf()
+    @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     override val initTime = time
+    var scale: Float = 1f
 
-    @Transient var texture = Assets.loadTexture(path)
+    @Transient var texture: Texture? = Assets.loadTexture(path)
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
@@ -26,6 +29,7 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
             println("Image path is empty")
         }
         texture = Assets.loadTexture(path)
+        println("updated image path to $texture")
     }
 
     fun updateTexture(newPath: String) {
@@ -43,10 +47,20 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
         super<HasAlpha>.buildInputs()
 
         inputElements.add(SelectBoxInput(null, { input ->
-            path = Assets.mapsPath(input)
-            loadTexture()
+            updateTexture(Assets.mapsPath(input))
         }, label@{
             return@label path.substringAfter("assets/maps/")
         }, String::class.java, "Image", Assets.images()))
+        inputElements.add(
+            TextInput(null, { input ->
+                if (input != null) {
+                    if (input >= 0) {
+                        scale = input
+                    }
+                }
+            }, label@{
+                return@label scale.toString()
+            }, Float::class.java, "Set scale")
+        )
     }
 }

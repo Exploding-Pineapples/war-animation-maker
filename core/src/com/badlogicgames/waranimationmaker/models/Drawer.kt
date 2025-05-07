@@ -37,10 +37,9 @@ class Drawer(val font: BitmapFont,
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        batcher.begin()
-        batcher.setColor(1f, 1f, 1f, 1f)
+        batcher.setColor(1f, 1f, 1f, 1f) // Set to full
+
         animation.images.forEach { draw(it) }
-        batcher.end()
 
         animation.mapLabels.forEach { draw(it) }
         animation.units.forEach { draw(it) }
@@ -142,18 +141,21 @@ class Drawer(val font: BitmapFont,
     }
 
     fun draw(image: Image) {
-        if (image.texture == null) {
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-            image.drawAsSelected(shapeRenderer, camera)
-            shapeRenderer.end()
-        } else {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        image.drawAsSelected(shapeRenderer, camera)
+        shapeRenderer.end()
+        if (image.texture != null) {
+
+            batcher.color = colorWithAlpha(Color.WHITE, image.alpha.value)
+            batcher.begin()
             batcher.draw(
                 image.texture,
                 image.screenPosition.x,
                 image.screenPosition.y,
-                image.texture.width.toFloat() * camera.zoom,
-                image.texture.height.toFloat() * camera.zoom
+                image.texture!!.width.toFloat() * camera.zoom * image.scale,
+                image.texture!!.height.toFloat() * camera.zoom * image.scale
             )
+            batcher.end()
         }
     }
 
