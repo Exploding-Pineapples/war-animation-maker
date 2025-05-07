@@ -3,6 +3,7 @@ package com.badlogicgames.waranimationmaker.models
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.Assets
 import com.badlogicgames.waranimationmaker.InputElement
+import com.badlogicgames.waranimationmaker.SelectBoxInput
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 
@@ -21,16 +22,26 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
     }
 
     fun loadTexture() {
+        if (path == "") {
+            println("Image path is empty")
+        }
         texture = Assets.loadTexture(path)
     }
 
     fun updateTexture(newPath: String) {
         path = newPath
-        texture = Assets.loadTexture(path)
+        loadTexture()
     }
 
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
         super<HasAlpha>.buildInputs()
+
+        inputElements.add(SelectBoxInput(null, { input ->
+            path = Assets.flagsPath(input)
+            loadTexture()
+        }, label@{
+            return@label path.substringAfter("assets/maps/")
+        }, String::class.java, "Set country", Assets.countryNames))
     }
 }

@@ -142,7 +142,19 @@ class Drawer(val font: BitmapFont,
     }
 
     fun draw(image: Image) {
-        batcher.draw(image.texture, image.screenPosition.x, image.screenPosition.y, image.texture.width.toFloat() * camera.zoom, image.texture.height.toFloat() * camera.zoom)
+        if (image.texture == null) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+            image.drawAsSelected(shapeRenderer, camera)
+            shapeRenderer.end()
+        } else {
+            batcher.draw(
+                image.texture,
+                image.screenPosition.x,
+                image.screenPosition.y,
+                image.texture.width.toFloat() * camera.zoom,
+                image.texture.height.toFloat() * camera.zoom
+            )
+        }
     }
 
     fun draw(mapLabel: MapLabel) {

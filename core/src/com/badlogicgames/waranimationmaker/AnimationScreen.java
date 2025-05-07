@@ -19,6 +19,7 @@ import kotlin.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT;
@@ -52,6 +53,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     boolean UIDisplayed;
 
     TouchMode touchMode;
+    String createClass;
+    SelectBoxInput<String> createSelectBoxInput;
 
     GL20 gl;
     ShapeRenderer shapeRenderer; // Draws all geometric shapes
@@ -115,6 +118,21 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             newUnitCountry = "";
         }
         newUnitInputsDisplayed = false;
+
+        Array<String> createChoices = new Array<>();
+        createChoices.addAll("Unit", "Node", "Map Label", "Arrow", "Image");
+
+        createSelectBoxInput = new SelectBoxInput<>(
+                game.skin,
+                (String input) -> {
+                    createClass = input;
+                    return null;
+                    },
+                () -> null,
+                String.class,
+                "Create Mode Input",
+                createChoices, null);
+        createClass = "Unit";
 
         newEdgeCollectionID = 0;
         Array<Integer> idChoices = new Array<>();
@@ -288,19 +306,23 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 switchSelected(selectScreenObject(x, y, ScreenObject.class));
             }
 
-            if (touchMode == TouchMode.NEW_NODE) { // Will create a new Node. If a node is selected and has exactly 1 edge pointing away from it, the new node will be inserted between the selected node and the next node
-                Node newNode = animation.createNodeAtPosition(time, mouseX, mouseY);
-                if ((selected != null) && (selected.getClass() == Node.class)) {
-                    if (((Node) selected).getEdges().size() == 1) {
-                        Edge existingEdge = ((Node) selected).getEdges().get(0);
-                        newNode.getEdges().add(new Edge(existingEdge.getCollectionID(), new Pair<>(newNode.getId(), existingEdge.getSegment().getSecond()), new ArrayList<>(), new InterpolatedBoolean(false, time))); // Create an edge pointing from the new node to the next node
-                        existingEdge.setSegment(new Pair<>(((Node) selected).getId(), newNode.getId())); // Change the edge of the selected node to point to the new node
+            if (touchMode == TouchMode.CREATE) {
+                if (createClass.equals("Unit")) {
+                    if (!newUnitInputsDisplayed) {
+                        newUnitCountryInput.show(leftGroup, game.skin);
+                        newUnitInputsDisplayed = true;
+                    }
+                } else {
+                    if (newUnitInputsDisplayed) {
+                        newUnitCountryInput.hide(leftGroup);
+                        newUnitInputsDisplayed = false;
                     }
                 }
-                switchSelected(newNode);
+
+                switchSelected(animation.createObjectAtPosition(time, mouseX, mouseY, createClass, Assets.flagsPath(newUnitCountry)));
+
                 return true;
             }
-
             if (touchMode == TouchMode.NEW_EDGE) {
                 if (selected == null || selected.getClass() != Node.class) {
                     switchSelected((Node) firstOrNull(animation.selectObjectWithType(x, y, Node.class)));
@@ -313,17 +335,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     switchSelected(newSelection);
                 }
-            }
-
-            if (touchMode == TouchMode.NEW_UNIT) {
-                switchSelected(animation.getUnitHandler().newUnit(
-                        new Coordinate(mouseX, mouseY),
-                        time,
-                        Assets.flagsPath(newUnitCountry)
-                ));
-
-                System.out.println(selected);
-                selected.showInputs(selectedGroup, uiVisitor);
             }
         }
         return false;
@@ -479,15 +490,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 }
             }
 
-            if (touchMode == TouchMode.NEW_UNIT) {
-                if (!newUnitInputsDisplayed) {
-                    newUnitCountryInput.show(leftGroup, game.skin);
-                    newUnitInputsDisplayed = true;
+            if (touchMode == TouchMode.CREATE) {
+                if (!createSelectBoxInput.getDisplayed()) {
+                    createSelectBoxInput.show(leftGroup, game.skin);
+                    createSelectBoxInput.setDisplayed(true);
                 }
             } else {
-                if (newUnitInputsDisplayed) {
-                    newUnitCountryInput.hide(leftGroup);
-                    newUnitInputsDisplayed = false;
+                if (createSelectBoxInput.getDisplayed()) {
+                    createSelectBoxInput.hide(leftGroup);
+                    createSelectBoxInput.setDisplayed(false);
                 }
             }
 
@@ -518,8 +529,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animation.draw(drawer);
 
         if (animationMode) {
-            Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
-            Gdx.gl.glBlendFunc(Gdx.gl.GL_SRC_ALPHA, Gdx.gl.GL_ONE_MINUS_SRC_ALPHA);
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
             // Draw contrast backgrounds for UI
@@ -530,14 +541,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             //Draw the selected object and edges
             if (selected != null) {
-                selected.drawAsSelected(shapeRenderer, animationMode, animation.camera());
+                selected.drawAsSelected(shapeRenderer, orthographicCamera);
             }
             for (Edge edge : selectedEdges) {
                 edge.drawAsSelected(shapeRenderer, animationMode);
             }
 
             shapeRenderer.end();
-            Gdx.gl.glDisable(Gdx.gl.GL_BLEND);
+            Gdx.gl.glDisable(GL20.GL_BLEND);
         }
 
         stage.draw();
@@ -552,6 +563,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         FileHandler.INSTANCE.save();
     }
 
+    @SuppressWarnings({"DataFlowIssue"}) // Null return required for Kotlin Unit lambda
     public void buildActions() {
         // Actions available when game is not inputting
         // Actions that do not care about selection
@@ -624,24 +636,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Toggle move mode", Input.Keys.M).requiresSelected(Requirement.ANY).build());
         actions.add(Action.createBuilder(() -> {
-            if (touchMode != TouchMode.NEW_NODE) {
-                touchMode = TouchMode.NEW_NODE;
-                System.out.println("New Node Mode");
-            } else {
-                touchMode = TouchMode.DEFAULT;
-                clearSelected();
-                System.out.println("Default Mode");
-            }
-            return null;
-        }, "New Node Mode", Input.Keys.NUM_1).requiresSelected(Requirement.ANY).build());
-        actions.add(Action.createBuilder(() -> {
-            if (touchMode != TouchMode.NEW_UNIT) {
-                touchMode = TouchMode.NEW_UNIT;
+            if (touchMode != TouchMode.CREATE) {
+                touchMode = TouchMode.CREATE;
             } else {
                 touchMode = TouchMode.DEFAULT;
             }
             return null;
-            }, "New Unit Mode", Input.Keys.U
+            }, "Create Object Mode", Input.Keys.C
         ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {

@@ -46,14 +46,17 @@ public class WarAnimationMaker extends Game {
 	public void create() {
 		// Initialize rendering objects
 		batcher = new SpriteBatch();
-		layout = new GlyphLayout();
 		shapeRenderer = new ShapeRenderer();
 		bitmapFont = Assets.loadFont();
 		fontShader = new ShaderProgram(Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.vert"), Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.frag"));
 		if (!fontShader.isCompiled()) {
 			Gdx.app.error("fontShader", "compilation failed:\n" + fontShader.getLog());
 		}
-		skin = Assets.loadSkin(Gdx.files.internal("assets/skins/glassy/skin/glassy-ui.json").toString());
+		try {
+			skin = Assets.loadSkin(Gdx.files.internal("assets/skins/glassy/skin/glassy-ui.json").toString());
+		} catch (Exception e) {
+			System.out.println("Cannot load skin");
+		}
 		multiplexer = new InputMultiplexer();
 
 		gl = Gdx.gl;

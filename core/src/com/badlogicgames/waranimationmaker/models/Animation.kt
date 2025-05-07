@@ -72,12 +72,48 @@ data class Animation @JvmOverloads constructor(
 
     fun getNodeByID(id: NodeID): Node? = nodes.firstOrNull { it.id.value == id.value }
 
-    fun createNodeAtPosition(time: Int, x: Float, y: Float): Node {
+    fun newNode(x: Float, y: Float, time: Int): Node {
         val node = Node(Coordinate(x, y), time, NodeID(nodeId))
         node.buildInputs()
         nodes.add(node)
         nodeId++
         return node
+    }
+
+    fun newArrow(x: Float, y: Float, time: Int): Arrow {
+        val new = Arrow(x, y, time)
+        new.buildInputs()
+        arrows.add(new)
+        return new
+    }
+
+    fun newMapLabel(x: Float, y: Float, time: Int): MapLabel {
+        val new = MapLabel(x, y, time)
+        new.buildInputs()
+        mapLabels.add(new)
+        return new
+    }
+
+    fun newImage(x: Float, y: Float, time: Int): Image {
+        val new = Image(x, y, time, "")
+        new.buildInputs()
+        images.add(new)
+        return new
+    }
+
+    fun createObjectAtPosition(time: Int, x: Float, y: Float, type: String, country: String = ""): ScreenObject? {
+        if (type == "Country" && country != "") {
+            return unitHandler.newUnit(Coordinate(x, y), time, country)
+        }
+
+        val objectDictionary = mapOf(
+            "Node" to ::newNode,
+            "Unit" to unitHandler::newUnit,
+            "Arrow" to ::newArrow,
+            "Map Label" to ::newMapLabel,
+            "Image" to ::newImage
+        )
+        return objectDictionary[type]?.invoke(x, y, time)
     }
 
     fun selectObject(x: Float, y: Float): ArrayList<ScreenObject> {
@@ -125,6 +161,14 @@ data class Animation @JvmOverloads constructor(
             }
         }
 
+        if (type.isAssignableFrom(Image::class.java)) {
+            for (image in images) {
+                if (image.clicked(x, y)) {
+                    objects.add(image as T)
+                }
+            }
+        }
+
         return objects
     }
 
@@ -156,19 +200,5 @@ data class Animation @JvmOverloads constructor(
 
     fun draw(drawer: Drawer) {
         drawer.draw(this)
-    }
-
-    fun newArrow(x: Float, y: Float, time: Int): Arrow {
-        val new = Arrow(x, y, time)
-        new.buildInputs()
-        arrows.add(new)
-        return new
-    }
-
-    fun newMapLabel(x: Float, y: Float, time: Int): MapLabel {
-        val new = MapLabel(x, y, time)
-        new.buildInputs()
-        mapLabels.add(new)
-        return new
     }
 }

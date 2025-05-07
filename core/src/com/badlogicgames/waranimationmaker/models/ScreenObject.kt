@@ -1,6 +1,7 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
@@ -31,21 +32,19 @@ abstract class ScreenObject : Object, HasScreenPosition, ObjectClickable, HasInp
     }
 
     // Draw only if selected
-    fun drawAsSelected(shapeRenderer: ShapeRenderer, animationMode: Boolean, camera: Camera) {
-        if (animationMode) {
-            shapeRenderer.color = Color.SKY
-            for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
-                shapeRenderer.circle(position.x, position.y, 2f)
-            }
-            shapeRenderer.color = Color.PURPLE
-            for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
-                shapeRenderer.circle(position.x, position.y, 4f)
-            }
-            shapeRenderer.color = Color.ORANGE
-            shapeRenderer.rect(screenPosition.x - 6.0f, screenPosition.y - 6.0f, 12f, 12f) // Draws an orange square to symbolize being selected
+    fun drawAsSelected(shapeRenderer: ShapeRenderer, camera: OrthographicCamera) {
+        shapeRenderer.color = Color.SKY
+        for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
+            val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
+            shapeRenderer.circle(position.x, position.y, 2f)
         }
+        shapeRenderer.color = Color.PURPLE
+        for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
+            val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
+            shapeRenderer.circle(position.x, position.y, 4f)
+        }
+        shapeRenderer.color = Color.ORANGE
+        shapeRenderer.rect(screenPosition.x - 6.0f, screenPosition.y - 6.0f, 12f, 12f) // Draws an orange square to symbolize being selected
     }
 
     override fun shouldDraw(time: Int): Boolean {

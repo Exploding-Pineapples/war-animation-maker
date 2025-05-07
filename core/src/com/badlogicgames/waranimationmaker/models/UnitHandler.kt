@@ -33,6 +33,10 @@ class UnitHandler(val animation: Animation)
         return unit
     }
 
+    fun newUnit(x: Float, y: Float, time: Int) : Unit {
+         return add(Unit(Coordinate(x, y), time))
+    }
+
     fun newUnit(position: Coordinate, initTime: Int, image: String): Unit {
         return add(Unit(position, initTime, image))
     }

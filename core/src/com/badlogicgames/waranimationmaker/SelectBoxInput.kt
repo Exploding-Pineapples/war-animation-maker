@@ -9,7 +9,7 @@ class SelectBoxInput<T: Any> (skin: Skin?, output: (T?) -> Unit, val input: () -
     @Transient override var inputElement: Actor? = null
 
     override fun show(verticalGroup: VerticalGroup, inSkin: Skin) {
-        val skin: Skin? = inSkin?: this.skin
+        val skin: Skin? = inSkin
         if (!displayed) {
             table = Table()
             val nameLabel = Label(name, skin)

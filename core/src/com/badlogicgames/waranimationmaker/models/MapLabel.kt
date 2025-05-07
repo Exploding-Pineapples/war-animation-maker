@@ -23,7 +23,7 @@ class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), HasAlpha, Object
     override val initTime = time
     var text = ""
     override var color = AreaColor.RED
-    var size = 50f
+    var size = 1f
     @Transient
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
