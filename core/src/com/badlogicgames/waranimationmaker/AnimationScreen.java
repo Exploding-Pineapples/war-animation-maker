@@ -391,14 +391,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (Gdx.input.isKeyPressed(Input.Keys.COMMA)) {
             if (System.currentTimeMillis() - commaLastUnpressed >= 250) {
-                time--;
+                updateTime(time - 1);
             }
         } else {
             commaLastUnpressed = System.currentTimeMillis();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.PERIOD)) {
             if (System.currentTimeMillis() - periodLastUnpressed >= 250) {
-                time++;
+                updateTime(time + 1);
             }
         } else {
             periodLastUnpressed = System.currentTimeMillis();
@@ -580,6 +580,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         FileHandler.INSTANCE.save();
     }
 
+    private void updateTime(int newTime) {
+        time = newTime;
+        animation.update(time, orthographicCamera, false);
+        animation.camera().goToTime(time);
+        updateCam();
+    }
+
     @SuppressWarnings({"DataFlowIssue"}) // Null return required for Kotlin Unit lambda
     public void buildActions() {
         // Actions available when game is not inputting
@@ -619,29 +626,19 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
         // Does not care about selection
         actions.add(Action.createBuilder(() -> {
-            time = (time / 200) * 200 + 200;
-            animation.update(time, orthographicCamera, false);
-            animation.camera().goToTime(time);
-            updateCam();
+            updateTime((time / 200) * 200 + 200);
             return null;
         }, "Step time forward 200", Input.Keys.E).build());
         actions.add(Action.createBuilder(() -> {
-            time = (int) Math.ceil(time / 200.0) * 200 - 200;
-            animation.update(time, orthographicCamera, false);
-            animation.camera().goToTime(time);
-            updateCam();
+            updateTime((int) Math.ceil(time / 200.0) * 200 - 200);
             return null;
         }, "Step time back 200", Input.Keys.Q).build());
         actions.add(Action.createBuilder(() -> {
-            time++;
-            animation.camera().goToTime(time);
-            updateCam();
+            updateTime(time + 1);
             return null;
         }, "Step time forward 1", Input.Keys.PERIOD).build());
         actions.add(Action.createBuilder(() -> {
-            time--;
-            animation.camera().goToTime(time);
-            updateCam();
+            updateTime(time - 1);
             return null;
         }, "Step time back 1", Input.Keys.COMMA).build());
         actions.add(Action.createBuilder(() -> {
@@ -663,10 +660,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
-            switchSelected(animation.newArrow(mouseX, mouseY, time));
-            return null;
-        }, "Create a new arrow", Input.Keys.A).requiresControl(true).build());
-        actions.add(Action.createBuilder(() -> {
             selected = animation.camera();
             return null;
         }, "Select the camera", Input.Keys.C).requiresControl(true).build());
@@ -679,10 +672,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             return null;
         }, "Switch to New Edge Mode", Input.Keys.E).requiresControl(true).build());
-        actions.add(Action.createBuilder(() -> {
-            switchSelected(animation.newMapLabel(mouseX, mouseY, time));
-            return null;
-        }, "Create a new map label", Input.Keys.L).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
             FileHandler.INSTANCE.save();
             System.out.println("saved");
