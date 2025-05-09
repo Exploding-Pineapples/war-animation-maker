@@ -61,8 +61,17 @@ data class Animation @JvmOverloads constructor(
         if (obj.javaClass == Node::class.java) {
             return nodeHandler.remove(obj as Node)
         }
-        if (unitHandler.remove(obj)) {
-            return true
+        if (obj.javaClass == Image::class.java) {
+            return images.remove(obj as Image)
+        }
+        if (obj.javaClass == MapLabel::class.java) {
+            return mapLabels.remove(obj as MapLabel)
+        }
+        if (obj.javaClass == Arrow::class.java) {
+            return arrows.remove(obj as Arrow)
+        }
+        if (obj.javaClass == Unit::class.java) {
+            return unitHandler.remove(obj)
         }
         return false
     }
@@ -103,7 +112,7 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun createObjectAtPosition(time: Int, x: Float, y: Float, type: String, country: String = ""): ScreenObject? {
-        if (type == "Country" && country != "") {
+        if (type == "Unit" && country != "") {
             return unitHandler.newUnit(Coordinate(x, y), time, country)
         }
 

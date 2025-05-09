@@ -38,7 +38,7 @@ class Image(x: Float, y: Float, time: Int, var path: String) : ScreenObject(), H
     }
 
     fun goToTime(time: Int, zoom: Float, cx: Float, cy: Float, paused: Boolean): Boolean {
-        if (!paused) { alpha.update(time); println(alpha.value) }
+        if (!paused) { alpha.update(time) }
         return super.goToTime(time, zoom, cx, cy)
     }
 

@@ -141,11 +141,12 @@ class Drawer(val font: BitmapFont,
     }
 
     fun draw(image: Image) {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        image.drawAsSelected(shapeRenderer, camera)
-        shapeRenderer.end()
+        if (animationMode) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+            image.drawAsSelected(shapeRenderer, camera)
+            shapeRenderer.end()
+        }
         if (image.texture != null) {
-
             batcher.color = colorWithAlpha(Color.WHITE, image.alpha.value)
             batcher.begin()
             batcher.draw(

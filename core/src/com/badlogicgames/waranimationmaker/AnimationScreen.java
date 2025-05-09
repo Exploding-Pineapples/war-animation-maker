@@ -287,7 +287,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 } else {
                     switchSelected(animation.selectObjectWithType(x, y, Edge.class));
                 }
+
+                return true;
             }
+
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
                 if (selected != null) {
                     if (selected.getClass() == Node.class) {
@@ -308,22 +311,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.CREATE) {
-                if (createClass.equals("Unit")) {
-                    if (!newUnitInputsDisplayed) {
-                        newUnitCountryInput.show(leftGroup, game.skin);
-                        newUnitInputsDisplayed = true;
-                    }
-                } else {
-                    if (newUnitInputsDisplayed) {
-                        newUnitCountryInput.hide(leftGroup);
-                        newUnitInputsDisplayed = false;
-                    }
-                }
-
                 switchSelected(animation.createObjectAtPosition(time, mouseX, mouseY, createClass, Assets.flagsPath(newUnitCountry)));
 
                 return true;
             }
+
             if (touchMode == TouchMode.NEW_EDGE) {
                 if (selected == null || selected.getClass() != Node.class) {
                     switchSelected((Node) firstOrNull(animation.selectObjectWithType(x, y, Node.class)));
@@ -512,10 +504,25 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     createSelectBoxInput.show(leftGroup, game.skin);
                     createSelectBoxInput.setDisplayed(true);
                 }
+                if (createClass.equals("Unit")) {
+                    if (!newUnitInputsDisplayed) {
+                        newUnitCountryInput.show(leftGroup, game.skin);
+                        newUnitInputsDisplayed = true;
+                    }
+                } else {
+                    if (newUnitInputsDisplayed) {
+                        newUnitCountryInput.hide(leftGroup);
+                        newUnitInputsDisplayed = false;
+                    }
+                }
             } else {
                 if (createSelectBoxInput.getDisplayed()) {
                     createSelectBoxInput.hide(leftGroup);
                     createSelectBoxInput.setDisplayed(false);
+                }
+                if (newUnitInputsDisplayed) {
+                    newUnitCountryInput.hide(leftGroup);
+                    newUnitInputsDisplayed = false;
                 }
             }
 
@@ -579,6 +586,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public void pause() {
         FileHandler.INSTANCE.save();
     }
+
 
     @SuppressWarnings({"DataFlowIssue"}) // Null return required for Kotlin Unit lambda
     public void buildActions() {

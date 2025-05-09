@@ -11,6 +11,7 @@ public class DesktopLauncher {
 		config.width = 1920;
 		config.height = 1080;
 		config.forceExit = false;
+		System.out.println(3.352144140668993);
 		new LwjglApplication(new WarAnimationMaker(), config);
 	}
 }
