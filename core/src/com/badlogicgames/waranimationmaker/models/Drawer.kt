@@ -107,7 +107,7 @@ class Drawer(val font: BitmapFont,
             font.draw(batcher, unit.name, unit.screenPosition.x - nameSize.width / 2, unit.screenPosition.y - unit.height / 2 + nameSize.height + padding)
         }
 
-        batcher.setShader(null)
+        batcher.shader = null
         batcher.end()
     }
 
@@ -187,7 +187,7 @@ class Drawer(val font: BitmapFont,
     fun prepareFont(color: Color, outlineColor: Color, alpha: Float, size: Float) {
         font.color = colorWithAlpha(color, alpha)
         font.data.setScale(size)
-        batcher.setShader(fontShader)
+        batcher.shader = fontShader
         fontShader.setUniformf("outlineDistance", 0.05f)
         fontShader.setUniformf("outlineColor", colorWithAlpha(outlineColor, alpha))
     }
