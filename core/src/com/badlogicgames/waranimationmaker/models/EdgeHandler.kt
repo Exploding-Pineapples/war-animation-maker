@@ -10,7 +10,7 @@ import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 
 
-class NodeHandler(val animation: Animation) {
+class EdgeHandler(val animation: Animation) {
 
     fun buildInputs() {
         for (node in animation.nodes) {
@@ -41,26 +41,6 @@ class NodeHandler(val animation: Animation) {
             }
         }
         return removed
-    }
-
-    fun getDrawNodes(time: Int): MutableList<Node> {
-        val out = mutableListOf<Node>()
-        for (node in animation.nodes) {
-            if (node.shouldDraw(time)) {
-                out.add(node)
-            }
-        }
-        return out
-    }
-
-    fun getNonDrawNodes(time: Int): MutableList<Node> {
-        val out = mutableListOf<Node>()
-        for (node in animation.nodes) {
-            if (!node.shouldDraw(time)) {
-                out.add(node)
-            }
-        }
-        return out
     }
 
     private fun traverse(node: Node, edgeCollections: MutableList<EdgeCollection>, currentBranch: EdgeCollection, time: Int) {
@@ -202,10 +182,6 @@ class NodeHandler(val animation: Animation) {
             }
         }
 
-        //Draw the debug circles
-        if (animationMode) {
-            animation.nodes.forEach { it.draw(shapeRenderer) }
-        }
         shapeRenderer.end()
     }
 }

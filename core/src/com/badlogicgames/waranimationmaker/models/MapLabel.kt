@@ -58,7 +58,4 @@ class MapLabel(x: Float, y: Float, time: Int) : ScreenObject(), HasAlpha, Object
             return@label text
         }, String::class.java, "Set text"))
     }
-
-    fun draw(batcher: SpriteBatch, shapeRenderer: ShapeRenderer, sizefactor: Float, font: BitmapFont, fontShader: ShaderProgram, layout: GlyphLayout) {
-    }
 }

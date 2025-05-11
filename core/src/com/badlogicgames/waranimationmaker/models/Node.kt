@@ -47,8 +47,4 @@ data class Node(
             color = Color.RED
         }
     }
-
-    fun draw(shapeRenderer: ShapeRenderer) {
-
-    }
 }

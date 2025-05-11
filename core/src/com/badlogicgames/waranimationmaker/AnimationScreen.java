@@ -26,8 +26,8 @@ import static com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDT
 import static java.lang.Math.round;
 
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
-    public static final int DEFAULT_UNIT_WIDTH = 10;
-    public static final int DEFAULT_UNIT_HEIGHT = 10;
+    public static final int DEFAULT_UNIT_WIDTH = 75;
+    public static final int DEFAULT_UNIT_HEIGHT = 75;
     public static final int MIN_LINE_SIZE = 1; // Minimum number of edges needed to draw a line
     public static final int LINES_PER_NODE = 12; // Number of straight lines per node on a spline
 
@@ -36,7 +36,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     float mouseX; // Mouse real X position
     float mouseY; // Mouse real Y position
-    float zoomFactor; // Scales everything other than the map less than actual zoom
     Animation animation; // Contains all information about animation loaded from file
     Integer time;
 
@@ -309,17 +308,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.CREATE) {
-                if (createClass.equals("Unit")) {
-                    if (!newUnitInputsDisplayed) {
-                        newUnitCountryInput.show(leftGroup, game.skin);
-                        newUnitInputsDisplayed = true;
-                    }
-                } else {
-                    if (newUnitInputsDisplayed) {
-                        newUnitCountryInput.hide(leftGroup);
-                        newUnitInputsDisplayed = false;
-                    }
-                }
 
                 switchSelected(animation.createObjectAtPosition(time, mouseX, mouseY, createClass, Assets.flagsPath(newUnitCountry)));
 
@@ -376,7 +364,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         shiftPressed = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT));
 
         //Camera
-        zoomFactor = 0.75f + orthographicCamera.zoom * 8;
         animation.camera().goToTime(time);
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             orthographicCamera.position.y += 10 / orthographicCamera.zoom;
@@ -510,6 +497,17 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.CREATE) {
+                if (createClass.equals("Unit")) {
+                    if (!newUnitInputsDisplayed) {
+                        newUnitCountryInput.show(leftGroup, game.skin);
+                        newUnitInputsDisplayed = true;
+                    }
+                } else {
+                    if (newUnitInputsDisplayed) {
+                        newUnitCountryInput.hide(leftGroup);
+                        newUnitInputsDisplayed = false;
+                    }
+                }
                 if (!createSelectBoxInput.getDisplayed()) {
                     createSelectBoxInput.show(leftGroup, game.skin);
                     createSelectBoxInput.setDisplayed(true);
@@ -518,6 +516,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 if (createSelectBoxInput.getDisplayed()) {
                     createSelectBoxInput.hide(leftGroup);
                     createSelectBoxInput.setDisplayed(false);
+                }
+                if (newUnitInputsDisplayed) {
+                    newUnitCountryInput.hide(leftGroup);
+                    newUnitInputsDisplayed = false;
                 }
             }
 
@@ -708,7 +710,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 animation.deleteObject(selected);
             }
             for (Edge edge : selectedEdges) {
-                animation.getNodeHandler().removeEdge(edge);
+                animation.getEdgeHandler().removeEdge(edge);
             }
             System.out.println("Deleted object");
             clearSelected();

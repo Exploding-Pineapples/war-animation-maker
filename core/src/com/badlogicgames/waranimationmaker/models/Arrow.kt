@@ -50,8 +50,4 @@ class Arrow(x: Float, y: Float, time: Int): ScreenObject(), HasAlpha, ObjectWith
             }, Float::class.java, "Set thickness")
         )
     }
-
-    fun draw(shapeRenderer: ShapeRenderer, camera: OrthographicCamera, curTime: Int) {
-
-    }
 }

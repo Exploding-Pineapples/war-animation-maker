@@ -30,7 +30,7 @@ class Drawer(val font: BitmapFont,
         this.camera = camera
         this.time = time
         this.animationMode = animationMode
-        zoomFactor = 0.75f + camera.zoom * 8
+        zoomFactor = 1f
     }
 
     fun draw(animation: Animation) {
@@ -40,7 +40,6 @@ class Drawer(val font: BitmapFont,
         batcher.setColor(1f, 1f, 1f, 1f) // Set to full
 
         animation.images.forEach { draw(it) }
-
         animation.mapLabels.forEach { draw(it) }
         animation.units.forEach { draw(it) }
 
@@ -60,7 +59,7 @@ class Drawer(val font: BitmapFont,
 
         unit.width = AnimationScreen.DEFAULT_UNIT_WIDTH * zoomFactor * sizePresetFactor
         unit.height = AnimationScreen.DEFAULT_UNIT_HEIGHT * zoomFactor * sizePresetFactor
-        val padding = 0.75f * zoomFactor * sizePresetFactor
+        val padding = unit.width / 16
 
         if (unit.color == null) {
             unit.color = AreaColor.BLUE
@@ -97,10 +96,10 @@ class Drawer(val font: BitmapFont,
                 unit.width / 4.0f, unit.height / 4.0f)
         }
 
-        prepareFont(Color.WHITE, unit.color.color, unit.alpha.value, 0.07f * zoomFactor * sizePresetFactor)
+        prepareFont(Color.WHITE, unit.color.color, unit.alpha.value,  0.5f * zoomFactor * sizePresetFactor)
 
         val sizeSize = measureText(font, unit.size)
-        font.draw(batcher, unit.size, unit.screenPosition.x + unit.width / 2 - sizeSize.width - padding - sizeSize.height * 0.1f, unit.screenPosition.y + unit.height / 2 - sizeSize.height * 0.6f)
+        font.draw(batcher, unit.size, unit.screenPosition.x + unit.width / 2 - sizeSize.width - padding - sizeSize.height * 0.1f, unit.screenPosition.y + unit.height / 2 - padding)
 
         if (unit.name != null) {
             val nameSize = measureText(font, unit.name!!)
@@ -146,7 +145,7 @@ class Drawer(val font: BitmapFont,
             image.drawAsSelected(shapeRenderer, camera)
             shapeRenderer.end()
         }
-        if (image.texture != null) {
+        if (image.texture != null && image.alpha.value != 0f) {
             batcher.color = colorWithAlpha(Color.WHITE, image.alpha.value)
             batcher.begin()
             batcher.draw(
@@ -184,7 +183,7 @@ class Drawer(val font: BitmapFont,
         batcher.draw(texture, rect.x, rect.y, rect.width, rect.height)
     }
 
-    fun prepareFont(color: Color, outlineColor: Color, alpha: Float, size: Float) {
+    private fun prepareFont(color: Color, outlineColor: Color, alpha: Float, size: Float) {
         font.color = colorWithAlpha(color, alpha)
         font.data.setScale(size)
         batcher.shader = fontShader

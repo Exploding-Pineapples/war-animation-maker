@@ -16,13 +16,13 @@ data class Unit(
     override var position: Coordinate,
     override val initTime: Int,
     var image: String = ""
-) : ScreenObject(), HasAlpha {
+) : ScreenObject(), HasAlpha, ObjectWithColor {
     override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
     override val alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
-    var color: AreaColor = AreaColor.BLUE
+    override var color: AreaColor = AreaColor.BLUE
     var name: String? = null
     var type: String = "infantry.png"
     var size: String = "XX"
@@ -38,6 +38,7 @@ data class Unit(
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
         super<HasAlpha>.buildInputs()
+        super<ObjectWithColor>.buildInputs()
 
         inputElements.add(TextInput(null, { input ->
             if (input != null) {
@@ -99,16 +100,13 @@ data class Unit(
         return typeTexture
     }
 
-    fun draw(batcher: SpriteBatch, shapeRenderer: ShapeRenderer, sizefactor: Float, font: BitmapFont, fontShader: ShaderProgram, layout: GlyphLayout) {
-
-    }
-
     companion object {
         val sizePresets = mapOf(
             "XX" to 1.0f,
             "X" to 0.8f,
             "III" to 0.65f,
             "II" to 0.55f,
+            "I" to 0.5f
         )
     }
 }

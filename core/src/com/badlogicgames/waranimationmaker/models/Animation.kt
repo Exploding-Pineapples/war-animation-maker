@@ -12,17 +12,13 @@ data class Animation @JvmOverloads constructor(
     val arrows: MutableList<Arrow> = mutableListOf(),
     val mapLabels: MutableList<MapLabel> = mutableListOf(),
     var images: MutableList<Image> = mutableListOf(),
-    var unitId: Int = 0,
     private var edgeCollectionId: Int = 0,
     var nodeId: Int = 0,
     val linesPerNode: Int = 12,
     var initTime: Int = 0
 )
 {
-    @Transient var unitHandler = UnitHandler(this)
-    @Transient var nodeHandler = NodeHandler(this)
-
-    private var cachedImageDimensions: Pair<Int, Int>? = null
+    @Transient var edgeHandler = EdgeHandler(this)
 
     fun getEdgeCollectionId(): Int {
         edgeCollectionId++
@@ -37,13 +33,11 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun init() {
-        unitHandler = UnitHandler(this)
-        nodeHandler = NodeHandler(this)
-        unitHandler.init()
+        edgeHandler = EdgeHandler(this)
+        units.forEach { it.alpha.update(initTime) }
         mapLabels.forEach { it.alpha.update(initTime) }
         arrows.forEach { it.alpha.update(initTime) }
-        images.forEach { it.alpha.update(initTime) }
-        images.forEach { it.loadTexture() }
+        images.forEach { it.alpha.update(initTime); it.loadTexture() }
         buildInputs()
     }
 
@@ -59,7 +53,7 @@ data class Animation @JvmOverloads constructor(
 
     fun deleteObject(obj: Object): Boolean {
         if (obj.javaClass == Node::class.java) {
-            return nodeHandler.remove(obj as Node)
+            return edgeHandler.remove(obj as Node)
         }
         if (obj.javaClass == Image::class.java) {
             return images.remove(obj as Image)
@@ -71,7 +65,7 @@ data class Animation @JvmOverloads constructor(
             return arrows.remove(obj as Arrow)
         }
         if (obj.javaClass == Unit::class.java) {
-            return unitHandler.remove(obj)
+            return units.remove(obj as Unit)
         }
         return false
     }
@@ -111,14 +105,21 @@ data class Animation @JvmOverloads constructor(
         return new
     }
 
+    fun newUnit(x: Float, y: Float, time: Int, image: String = ""): Unit {
+        val new = Unit(Coordinate(x, y), time, image)
+        new.typeTexture()
+        new.buildInputs()
+        units.add(new)
+        return new
+    }
+
     fun createObjectAtPosition(time: Int, x: Float, y: Float, type: String, country: String = ""): ScreenObject? {
-        if (type == "Unit" && country != "") {
-            return unitHandler.newUnit(Coordinate(x, y), time, country)
+        if (type == "Unit") {
+            return newUnit(x, y, time, country)
         }
 
         val objectDictionary = mapOf(
             "Node" to ::newNode,
-            "Unit" to unitHandler::newUnit,
             "Arrow" to ::newArrow,
             "Map Label" to ::newMapLabel,
             "Image" to ::newImage
@@ -126,19 +127,12 @@ data class Animation @JvmOverloads constructor(
         return objectDictionary[type]?.invoke(x, y, time)
     }
 
-    fun selectObject(x: Float, y: Float): ArrayList<ScreenObject> {
-        return selectObjectWithType(x, y, ScreenObject::class.java)
-    }
-
     @Suppress("UNCHECKED_CAST")
     fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, type: Class<out ObjectClickable>): ArrayList<T> {
         val objects = ArrayList<T>()
 
         if (type.isAssignableFrom(Unit::class.java)) {
-            val selectedUnit = unitHandler.clicked(x, y)
-            if (selectedUnit != null) {
-                objects.add(selectedUnit as T)
-            }
+            objects.addAll( units.filter { it.clicked(x, y) }.map { it as T} )
         }
 
         if (type.isAssignableFrom(Node::class.java)) {
@@ -147,36 +141,20 @@ data class Animation @JvmOverloads constructor(
 
         if (type.isAssignableFrom(Edge::class.java)) {
             for (node in nodes) {
-                for (edge in node.edges) {
-                    if (edge.clicked(x, y)) {
-                        objects.add(edge as T)
-                    }
-                }
+                objects.addAll( node.edges.filter { it.clicked(x, y) }.map { it as T} )
             }
         }
 
         if (type.isAssignableFrom(Arrow::class.java)) {
-            for (arrow in arrows) {
-                if (arrow.clicked(x, y)) {
-                    objects.add(arrow as T);
-                }
-            }
+            objects.addAll( arrows.filter { it.clicked(x, y) }.map {it as T} )
         }
 
         if (type.isAssignableFrom(MapLabel::class.java)) {
-            for (mapLabel in mapLabels) {
-                if (mapLabel.clicked(x, y)) {
-                    objects.add(mapLabel as T);
-                }
-            }
+            objects.addAll( mapLabels.filter { it.clicked(x, y) }.map {it as T} )
         }
 
         if (type.isAssignableFrom(Image::class.java)) {
-            for (image in images) {
-                if (image.clicked(x, y)) {
-                    objects.add(image as T)
-                }
-            }
+            objects.addAll( images.filter { it.clicked(x, y) }.map {it as T} )
         }
 
         return objects
@@ -193,8 +171,8 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun buildInputs() {
-        nodeHandler.buildInputs()
-        unitHandler.buildInputs()
+        edgeHandler.buildInputs()
+        units.forEach { it.buildInputs() }
         arrows.forEach { it.buildInputs() }
         edgeCollections.forEach { it.buildInputs() }
         mapLabels.forEach { it.buildInputs() }
@@ -202,8 +180,8 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun update(time: Int, orthographicCamera: OrthographicCamera, paused: Boolean) {
-        nodeHandler.update(time, orthographicCamera, paused)
-        unitHandler.update(time, orthographicCamera, paused)
+        edgeHandler.update(time, orthographicCamera, paused)
+        units.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         images.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         mapLabels.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
