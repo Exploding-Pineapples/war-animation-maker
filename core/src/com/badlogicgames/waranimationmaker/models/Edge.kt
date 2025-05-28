@@ -1,6 +1,5 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID
 import org.joml.Vector2f
@@ -44,13 +43,6 @@ class Edge(val collectionID: InterpolatedID,
         }
         death.update(time)
         collectionID.update(time)
-    }
-    fun drawAsSelected(shapeRenderer: ShapeRenderer, animationMode: Boolean) {
-        if (animationMode) {
-            for (i in 0..<screenCoords.size - 1) {
-                shapeRenderer.rectLine(screenCoords[i].x, screenCoords[i].y, screenCoords[i + 1].x, screenCoords[i + 1].y, 5f)
-            }
-        }
     }
     fun shouldDraw(time: Int): Boolean {
         val firstTime = death.setPoints.keys.firstOrNull() ?: return false

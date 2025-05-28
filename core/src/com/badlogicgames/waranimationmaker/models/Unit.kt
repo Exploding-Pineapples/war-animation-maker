@@ -1,6 +1,7 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -26,6 +27,7 @@ data class Unit(
     var name: String? = null
     var type: String = "infantry.png"
     var size: String = "XX"
+    var drawSize: Float? = 1.0f
     @Transient private var typeTexture: Texture? = null
     @Transient var countryTexture: Texture? = null
     @Transient var width: Float = AnimationScreen.DEFAULT_UNIT_WIDTH.toFloat()
@@ -41,12 +43,19 @@ data class Unit(
         super<ObjectWithColor>.buildInputs()
 
         inputElements.add(TextInput(null, { input ->
-            if (input != null) {
-                size = input
-            }
+            size = input?: ""
         }, label@{
             return@label size
         }, String::class.java, "Set size"))
+        inputElements.add(TextInput(null, { input ->
+            drawSize = if (input != null && input != 0f) {
+                input
+            } else {
+                null
+            }
+        }, label@{
+            return@label drawSize.toString()
+        }, Float::class.java, "Set draw size"))
         inputElements.add(SelectBoxInput(null, { input ->
             if (input != null) {
                 type = input

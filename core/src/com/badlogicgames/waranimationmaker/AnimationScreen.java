@@ -4,18 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.utils.Array;
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean;
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID;
 import com.badlogicgames.waranimationmaker.models.*;
-import kotlin.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +54,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     GL20 gl;
     ShapeRenderer shapeRenderer; // Draws all geometric shapes
-    FrameBuffer colorLayer; // Colored areas are drawn to this layer
     Drawer drawer;
 
     //UI
@@ -90,7 +87,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animation.camera();
         // Graphics init
         shapeRenderer = game.shapeRenderer;
-        colorLayer = new FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false);
         drawer = new Drawer(game.bitmapFont, game.fontShader, game.shapeRenderer, game.batcher, animation.getInitTime());
 
         // Animation init
@@ -286,7 +282,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 } else {
                     switchSelected(animation.selectObjectWithType(x, y, Edge.class));
                 }
-                return true;
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
                 if (selected != null) {
@@ -302,16 +297,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     selected.newSetPoint(time, mouseX, mouseY);
                     clearSelected();
-                    return true;
                 }
                 switchSelected(selectScreenObject(x, y, ScreenObject.class));
             }
 
             if (touchMode == TouchMode.CREATE) {
-
                 switchSelected(animation.createObjectAtPosition(time, mouseX, mouseY, createClass, Assets.flagsPath(newUnitCountry)));
-
-                return true;
             }
 
             if (touchMode == TouchMode.NEW_EDGE) {
@@ -321,14 +312,14 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 } else {
                     Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
                     if (newSelection != null) {
-                        ((Node) selected).getEdges().add(new Edge(new InterpolatedID(time, newEdgeCollectionID), new Pair<>(((Node) selected).getId(), newSelection.getId()), new ArrayList<>(), new InterpolatedBoolean(false, time)));
+                        animation.getEdgeHandler().addEdge((Node) selected, newSelection, time, newEdgeCollectionID);
                         System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
                     }
                     switchSelected(newSelection);
                 }
             }
         }
-        return false;
+        return true;
     }
 
     public boolean touchUp(int x, int y, int pointer, int button) {
@@ -562,10 +553,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             //Draw the selected object and edges
             if (selected != null) {
-                selected.drawAsSelected(shapeRenderer, orthographicCamera);
+                drawer.drawAsSelected(selected);
             }
             for (Edge edge : selectedEdges) {
-                edge.drawAsSelected(shapeRenderer, animationMode);
+                drawer.drawAsSelected(edge);
             }
 
             shapeRenderer.end();

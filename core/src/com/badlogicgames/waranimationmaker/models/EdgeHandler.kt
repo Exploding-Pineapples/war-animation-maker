@@ -1,14 +1,8 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.FrameBuffer
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
-import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
-
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
+import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID
 
 class EdgeHandler(val animation: Animation) {
 
@@ -22,6 +16,10 @@ class EdgeHandler(val animation: Animation) {
     {
         animation.nodes[animation.nodeId] = node
         animation.nodeId++
+    }
+
+    fun addEdge(fromNode: Node, toNode: Node, time: Int, id: Int) {
+        fromNode.edges.add(Edge(InterpolatedID(time, id), Pair(fromNode.id, toNode.id), death = InterpolatedBoolean(false, time)))
     }
 
     fun remove(removeNode: Node): Boolean
@@ -131,14 +129,13 @@ class EdgeHandler(val animation: Animation) {
 
         for (edgeCollection in edgeCollections) {
             val existingNodeCollection = animation.getEdgeCollectionByID(edgeCollection.id)
-            if (existingNodeCollection == null) {
-                val newId = animation.getEdgeCollectionId()
-                edgeCollection.edges.forEach { // Do not reuse a previous ID, as they will point to the same Edge Collection object
+            if (existingNodeCollection == null) { // Create new edge collection if it does not exist
+                edgeCollection.edges.forEach {
                     it.collectionID.setPoints.clear()
-                    it.collectionID.newSetPoint(time, newId, true)
+                    it.collectionID.newSetPoint(time, edgeCollection.id.value, true)
                     it.collectionID.update(time)
                 }
-                println("Warning: Created edge collection $newId")
+                println("Warning: Created edge collection ${edgeCollection.id.value}")
                 animation.edgeCollections.add(edgeCollection)
                 edgeCollection.buildInputs()
             } else {
@@ -148,40 +145,5 @@ class EdgeHandler(val animation: Animation) {
         //println("Added edge collections of size: " + animation.edgeCollections.map {it.edges.size})
 
         animation.edgeCollections.forEach { it.update(time, animation, paused) }
-    }
-
-    fun draw(batcher: SpriteBatch, shapeRenderer: ShapeRenderer, colorLayer: FrameBuffer, animationMode: Boolean) {
-        // Draw area polygons
-        colorLayer.begin()
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color.CLEAR
-        shapeRenderer.rect(0F, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat()) // Clear the color layer
-
-        for (edgeCollection in animation.edgeCollections) {
-            if (edgeCollection.edgeCollectionStrategy.javaClass == AreaStrategy::class.java) {
-                edgeCollection.draw(shapeRenderer)
-            }
-        }
-
-        shapeRenderer.end()
-        colorLayer.end()
-
-        // Draw the color layer to the screen
-        batcher.begin()
-        val textureRegion = TextureRegion(colorLayer.colorBufferTexture)
-        textureRegion.flip(false, true)
-        batcher.setColor(1f, 1f, 1f, 0.2f) // Draw the color layers with transparency
-        batcher.draw(textureRegion, 0f, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat())
-        batcher.end()
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-
-        for (edgeCollection in animation.edgeCollections) {
-            if (edgeCollection.edgeCollectionStrategy.javaClass == LineStrategy::class.java) {
-                edgeCollection.draw(shapeRenderer)
-            }
-        }
-
-        shapeRenderer.end()
     }
 }

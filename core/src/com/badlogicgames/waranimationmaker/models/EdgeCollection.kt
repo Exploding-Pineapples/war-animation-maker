@@ -73,7 +73,7 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
         edgeCollectionStrategy.updateAny(time, animation, paused, edgeCollectionContext)
     }
 
-    fun draw(shapeRenderer: ShapeRenderer) {
+    fun draw(drawer: Drawer) {
         if (edgeCollectionStrategy == null) {
             edgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
             //println("Edge collection strategy not set for update")
@@ -81,6 +81,6 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
         if (edgeCollectionContext == null) {
             edgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
         }
-        edgeCollectionStrategy.drawAny(shapeRenderer, edgeCollectionContext)
+        edgeCollectionStrategy.drawAny(drawer, edgeCollectionContext)
     }
 }

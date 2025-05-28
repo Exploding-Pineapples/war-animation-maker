@@ -69,7 +69,7 @@ class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
 
 interface AnyEdgeCollectionStrategy : AbstractTypeSerializable {
     fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext)
-    fun drawAny(shapeRenderer: ShapeRenderer, context: AnyEdgeCollectionContext)
+    fun drawAny(drawer: Drawer, context: AnyEdgeCollectionContext)
 }
 
 open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollectionStrategy {
@@ -80,16 +80,17 @@ open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollect
             edge.screenCoords.add(animation.getNodeByID(edge.segment.second)!!.screenPosition)
         }
     }
-    open fun draw(shapeRenderer: ShapeRenderer, context: T) {
-        context.edges.forEach { it.drawAsSelected(shapeRenderer, true) }
+
+    open fun draw(drawer: Drawer, context: T) {
+        context.edges.forEach { drawer.drawAsSelected(it) }
     }
 
     override fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext) {
         update(time, animation, context as T)
     }
 
-    override fun drawAny(shapeRenderer: ShapeRenderer, context: AnyEdgeCollectionContext) {
-        draw(shapeRenderer, context as T)
+    override fun drawAny(drawer: Drawer, context: AnyEdgeCollectionContext) {
+        draw(drawer, context as T)
     }
 
     override fun getAbstractType():Class<*> = EdgeCollectionStrategy::class.java
@@ -100,6 +101,7 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
     var drawCoords: MutableList<Coordinate> = mutableListOf()
     @Transient
     var drawPoly: MutableList<FloatArray> = mutableListOf()
+
     fun update(animation: Animation, context: AreaContext) {
         if (drawCoords == null) {
             drawCoords = mutableListOf()
@@ -157,11 +159,8 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
         }
     }
 
-    override fun draw(shapeRenderer: ShapeRenderer, context: AreaContext) {
-        shapeRenderer.color = context.color.color
-        for (triangle in drawPoly) {
-            shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5])
-        }
+    override fun draw(drawer: Drawer, context: AreaContext) {
+        drawer.drawArea(this, context)
     }
 
     override fun getAbstractType() = AreaStrategy::class.java
@@ -218,21 +217,8 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
         update(time, animation, paused, context as LineContext)
     }
 
-    override fun draw(shapeRenderer: ShapeRenderer, context: LineContext) {
-        val edges = context.edges
-        if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
-            shapeRenderer.color = colorWithAlpha(context.color.color, context.alpha.value)
-            for (edge in edges) {
-                for (i in 0 until edge.screenCoords.size - 1)
-                    shapeRenderer.rectLine(
-                        edge.screenCoords[i].x,
-                        edge.screenCoords[i].y,
-                        edge.screenCoords[i + 1].x,
-                        edge.screenCoords[i + 1].y,
-                        context.width
-                    )
-            }
-        }
+    override fun draw(drawer: Drawer, context: LineContext) {
+        drawer.drawLine(context)
     }
 
     override fun getAbstractType() = LineStrategy::class.java
