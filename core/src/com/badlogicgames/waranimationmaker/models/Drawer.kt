@@ -82,7 +82,6 @@ class Drawer(val font: BitmapFont,
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         if (animationMode) animation.nodes.forEach { draw(it) }
-        shapeRenderer.end()
         animation.arrows.forEach { draw(it) }
 
         shapeRenderer.end()
@@ -271,7 +270,7 @@ class Drawer(val font: BitmapFont,
         val textSize = measureText(font, mapLabel.text)
         font.draw(batcher, mapLabel.text, mapLabel.screenPosition.x - textSize.width / 2, mapLabel.screenPosition.y + textSize.height * (3f / 2) + mapLabel.size * 5)
 
-        batcher.setShader(null)
+        batcher.shader = null
         batcher.end()
     }
 

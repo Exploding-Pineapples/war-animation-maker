@@ -124,7 +124,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     createClass = input;
                     return null;
                     },
-                () -> null,
+                () -> createClass,
                 String.class,
                 "Create Mode Input",
                 createChoices, null);

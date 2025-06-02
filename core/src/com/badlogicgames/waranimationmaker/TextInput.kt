@@ -9,8 +9,8 @@ class TextInput<T> (skin: Skin?, output: (T?) -> Unit, val input: () -> String?,
     @Transient override var inputElement: Actor? = null
 
     override fun show(verticalGroup: VerticalGroup, inSkin: Skin) {
-        val skin: Skin = inSkin
         if (!displayed) {
+            val skin: Skin = inSkin
             table = Table()
             val nameLabel = Label(name, skin)
             val textField = TextField(input.invoke(), skin)
