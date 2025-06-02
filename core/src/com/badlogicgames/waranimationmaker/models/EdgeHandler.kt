@@ -44,27 +44,17 @@ class EdgeHandler(val animation: Animation) {
     private fun traverse(node: Node, edgeCollections: MutableList<EdgeCollection>, currentBranch: EdgeCollection, time: Int) {
         val visited = (node.visitedBy.find { (it.value == currentBranch.id.value && it.javaClass == currentBranch.id::class.java) } != null)
         if (visited) {
-            //println("visited: $visited, this id: ${currentBranch.javaClass.simpleName} ${currentBranch.id.value}, those ids: ${node.visitedBy.map { it.value }}")
             val matchingNodeCollections = edgeCollections.filter { it.id.value == currentBranch.id.value }
-            //println("Matching collections: " + matchingNodeCollections.map { it.javaClass.simpleName + " ${it.id.value}" })
             for (nodeCollection in matchingNodeCollections) {
-                //println("Matching id collection found for ${currentBranch.javaClass.simpleName} ${currentBranch.id.value}")
-                //println("This node id value: ${node.id.value} First id value: ${nodeCollection.edges.first().segment.first.value}")
                 if (node.id.value == nodeCollection.edges.first().segment.first.value) { // If the current node is the first node of an existing Node Collection with the same CollectionID, this branch is part of that Node Collection, so add this branch at the beginning of it
-                    //println("${currentBranch.javaClass.simpleName} ${currentBranch.id.value} added to beginning of another node collection")
                     nodeCollection.edges.addAll(0, currentBranch.edges)
                     return
                 }
             }
             if (currentBranch.edges.isNotEmpty()) {
                 if (node.id.value == currentBranch.edges.first().segment.first.value) { // If the current node is the first node of the current branch, it is forming a loop, so add it to the list
-                    //println("${currentBranch.javaClass.simpleName} ${currentBranch.id.value} ended by loop forming")
                     edgeCollections.add(currentBranch)
-                } else {
-                    //println("Not added: ${currentBranch.edges}")
                 }
-            } else {
-                //println("Warning: ${currentBranch.javaClass.simpleName} ${currentBranch.id.value} is empty")
             }
             return
         }
@@ -76,7 +66,7 @@ class EdgeHandler(val animation: Animation) {
         if (node.shouldDraw(time)) {
             for (edge in node.edges) { // Traverses every available edge from the node
                 val nextNode = animation.getNodeByID(edge.segment.second)!!
-                if (nextNode.shouldDraw(time) && edge.shouldDraw(time)) {
+                if (nextNode.shouldDraw(time)) {
                     if (edge.collectionID.value == currentBranch.id.value) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
                         reachedEnd = false
                         traverse(nextNode, edgeCollections, currentBranch.apply { edges.add(edge) }, time)
@@ -87,8 +77,6 @@ class EdgeHandler(val animation: Animation) {
 
         if (reachedEnd && currentBranch.edges.isNotEmpty()) { // If no edges continue the Node Collection that is being constructed, that means the end has been reached, so add the current branch and stop
             edgeCollections.add(currentBranch)
-            //print("${currentBranch.javaClass.simpleName} ${currentBranch.id.value} ended by reaching end. ")
-            return
         }
     }
 
@@ -98,7 +86,7 @@ class EdgeHandler(val animation: Animation) {
             node.update(time, camera)
             node.edges.forEach { it.update(time) }
         }
-        for (node in animation.nodes) {
+        for (node in animation.nodes) { // Build all edge collections from edges
             if (node.shouldDraw(time)) {
                 for (edge in node.edges) {
                     traverse(

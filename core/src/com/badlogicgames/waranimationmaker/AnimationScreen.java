@@ -240,14 +240,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (!newSelections.isEmpty()) {
             for (Edge newSelection : newSelections) {
-                if (newSelection.shouldDraw(time)) {
-                    System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
-                    EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
-                    if (edgeCollection != null) {
-                        System.out.println("selected edge collection " + edgeCollection.getId().getValue());
-                        selectedEdgeCollections.add(edgeCollection);
-                        edgeCollection.showInputs(selectedGroup, uiVisitor);
-                    }
+                System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
+                EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
+                if (edgeCollection != null) {
+                    System.out.println("selected edge collection " + edgeCollection.getId().getValue());
+                    selectedEdgeCollections.add(edgeCollection);
+                    edgeCollection.showInputs(selectedGroup, uiVisitor);
                 }
             }
         }
@@ -297,6 +295,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     selected.newSetPoint(time, mouseX, mouseY);
                     clearSelected();
+                    return true;
                 }
                 switchSelected(selectScreenObject(x, y, ScreenObject.class));
             }
@@ -312,6 +311,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 } else {
                     Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
                     if (newSelection != null) {
+                        if (newEdgeCollectionID == animation.getEdgeCollectionId(true) + 1) {
+                            animation.getEdgeCollectionId();
+                        }
                         animation.getEdgeHandler().addEdge((Node) selected, newSelection, time, newEdgeCollectionID);
                         System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
                     }
@@ -597,9 +599,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
         actions.add(Action.createBuilder(() -> {
-            if (HasAlpha.class.isAssignableFrom(selected.getClass())) {
-                ((HasAlpha) selected).getAlpha().newSetPoint(time, ((HasAlpha) selected).getAlpha().getValue());
-                System.out.println("set new alpha set point, set points: " + ((HasAlpha) selected).getAlpha().getSetPoints());
+            if (selected != null) {
+                if (HasAlpha.class.isAssignableFrom(selected.getClass())) {
+                    ((HasAlpha) selected).getAlpha().newSetPoint(time, ((HasAlpha) selected).getAlpha().getValue());
+                    System.out.println("set new alpha set point, set points: " + ((HasAlpha) selected).getAlpha().getSetPoints());
+                }
             }
             for (EdgeCollection selectedEdgeCollection : selectedEdgeCollections) {
                 if (HasAlpha.class.isAssignableFrom(selectedEdgeCollection.getEdgeCollectionContext().getClass())) {
@@ -608,7 +612,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 }
             }
             return null;
-        }, "Set alpha set point", Input.Keys.A).requiresSelected(Requirement.REQUIRES).build());
+        }, "Set alpha set point", Input.Keys.A).build());
         actions.add(Action.createBuilder(() -> {
             animationMode = !animationMode;
             return null;

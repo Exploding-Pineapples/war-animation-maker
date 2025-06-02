@@ -64,12 +64,12 @@ class Drawer(val font: BitmapFont,
 
         // Draw the color layer to the screen
         batcher.begin()
-        val textureRegion = TextureRegion(colorLayer.colorBufferTexture)
-        textureRegion.flip(false, true)
         batcher.setColor(1f, 1f, 1f, 0.2f) // Draw the color layers with transparency
-        batcher.draw(textureRegion, 0f, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat())
+        batcher.draw(TextureRegion(colorLayer.colorBufferTexture).apply { flip(false, true) }, 0f, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat())
         batcher.end()
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         for (edgeCollection in animation.edgeCollections) {

@@ -38,18 +38,9 @@ class Edge(val collectionID: InterpolatedID,
         return  (nodeID.value == segment.first.value || nodeID.value == segment.second.value)
     }
     fun update(time: Int) {
-        if (screenCoords == null) {
-            screenCoords = mutableListOf()
-        }
+        screenCoords = mutableListOf()
         death.update(time)
         collectionID.update(time)
-    }
-    fun shouldDraw(time: Int): Boolean {
-        val firstTime = death.setPoints.keys.firstOrNull() ?: return false
-        if (time < firstTime) {
-            return false
-        }
-        return !death.value
     }
 
     companion object {
