@@ -685,11 +685,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             if (selected != null) {
                 if (selected.getClass().isAssignableFrom(Node.class)) {
                     ((Node) selected).getDeath().newSetPoint(time, !((Node) selected).getDeath().getValue());
-                    System.out.println("Set death of " + selected);
+                    System.out.println("Set death of " + selected + " to " + ((Node) selected).getDeath().getValue());
                 }
             }
             for (Edge edge : selectedEdges) {
                 edge.getDeath().newSetPoint(time, !edge.getDeath().getValue());
+                System.out.println("Set death of " + edge + " to " + edge.getDeath().getValue());
             }
             clearSelected();
             return null;
