@@ -121,7 +121,8 @@ class Drawer(val font: BitmapFont,
         if (unit.alpha.value == 0f) {
             if (animationMode) {
                 shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-                drawAsSelected(unit)
+                shapeRenderer.color = colorWithAlpha(Color.BLACK, 0.5f)
+                shapeRenderer.rect(unit.screenPosition.x - unit.width / 2, unit.screenPosition.y - unit.width / 2, unit.width, unit.height)
                 shapeRenderer.end()
             }
         } else {

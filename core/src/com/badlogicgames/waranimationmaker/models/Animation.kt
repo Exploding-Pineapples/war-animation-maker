@@ -131,10 +131,6 @@ data class Animation @JvmOverloads constructor(
     fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, type: Class<out ObjectClickable>): ArrayList<T> {
         val objects = ArrayList<T>()
 
-        if (type.isAssignableFrom(Unit::class.java)) {
-            objects.addAll( units.filter { it.clicked(x, y) }.map { it as T} )
-        }
-
         if (type.isAssignableFrom(Node::class.java)) {
             objects.addAll(nodes.filter { it.clicked(x, y) }.map {it as T})
         }
@@ -155,6 +151,10 @@ data class Animation @JvmOverloads constructor(
 
         if (type.isAssignableFrom(Image::class.java)) {
             objects.addAll( images.filter { it.clicked(x, y) }.map {it as T} )
+        }
+
+        if (type.isAssignableFrom(Unit::class.java)) {
+            objects.addAll( units.filter { it.clicked(x, y) }.map { it as T} )
         }
 
         return objects
