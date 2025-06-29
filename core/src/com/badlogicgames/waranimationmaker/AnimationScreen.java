@@ -26,7 +26,6 @@ import static java.lang.Math.round;
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 75;
     public static final int DEFAULT_UNIT_HEIGHT = 75;
-    public static final int MIN_LINE_SIZE = 1; // Minimum number of edges needed to draw a line
     public static final int LINES_PER_NODE = 12; // Number of straight lines per node on a spline
 
     WarAnimationMaker game; // Contains some variables common to all screens

@@ -1,13 +1,12 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.AbstractTypeSerializable
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
-import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolator
 import earcut4j.Earcut
 import java.lang.reflect.Type
 
@@ -39,8 +38,6 @@ class AreaContext : EdgeCollectionContext() {
 }
 
 class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
-    @Transient var xInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
-    @Transient var yInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
     override var alpha = LinearInterpolatedFloat(1f, 0)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
@@ -170,42 +167,45 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
     fun update(time: Int, animation: Animation, paused: Boolean, context: LineContext) {
         if (!paused) context.alpha.update(time)
 
-        var xInterpolator = context.xInterpolator
-        var yInterpolator = context.yInterpolator
+        val parameterVals = mutableListOf<Double>()
+        val xVals = mutableListOf<Double>()
+        val yVals = mutableListOf<Double>()
+
         val edges = context.edges
 
-        if (xInterpolator == null) {
-            xInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
-            yInterpolator = PCHIPInterpolatedFloat(0.0f, 0)
-        }
+        if (edges.isNotEmpty() && context.alpha.value > 0) {
+            var node: Node?
+            var parameter = 0.0
+            var index = 0
 
-        var node: Node?
-        for (index in edges.indices) {
-            node = animation.getNodeByID(edges[index].segment.first)
-            if (node != null) {
-                xInterpolator.setPoints[index * AnimationScreen.LINES_PER_NODE] = node.screenPosition.x
-                yInterpolator.setPoints[index * AnimationScreen.LINES_PER_NODE] = node.screenPosition.y
-            }
-            if (index == edges.size - 1) {
-                node = animation.getNodeByID(edges[index].segment.second)
+            while (parameter < 1.0) {
+                parameterVals.add(parameter)
+                node = animation.getNodeByID(edges[index].segment.first)
                 if (node != null) {
-                    xInterpolator.setPoints[(index + 1) * AnimationScreen.LINES_PER_NODE] = node.screenPosition.x
-                    yInterpolator.setPoints[(index + 1) * AnimationScreen.LINES_PER_NODE] = node.screenPosition.y
+                    xVals.add(node.screenPosition.x.toDouble())
+                    yVals.add(node.screenPosition.y.toDouble())
                 }
+                index++
+                parameter = index.toDouble() / edges.size
             }
-        }
 
-        xInterpolator.updateInterpolator()
-        yInterpolator.updateInterpolator()
+            parameterVals.add(1.0)
+            val lastNode = animation.getNodeByID(edges.last().segment.second)
+            if (lastNode != null) {
+                xVals.add(lastNode.screenPosition.x.toDouble())
+                yVals.add(lastNode.screenPosition.y.toDouble())
+            }
 
-        if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
+            val xInterpolator = PCHIPInterpolator(parameterVals.toTypedArray(), xVals.toTypedArray())
+            val yInterpolator = PCHIPInterpolator(parameterVals.toTypedArray(), yVals.toTypedArray())
+
             for (i in edges.indices) {
                 val edge = edges[i]
                 edge.screenCoords.clear()
                 for (j in 0 until AnimationScreen.LINES_PER_NODE) {
                     edges[i].screenCoords.add(Coordinate(
-                        xInterpolator.interpolator.interpolateAt(i * AnimationScreen.LINES_PER_NODE + j),
-                        yInterpolator.interpolator.interpolateAt(i * AnimationScreen.LINES_PER_NODE + j)
+                        xInterpolator.interpolateAt((i + j.toDouble() / AnimationScreen.LINES_PER_NODE) / edges.size).toFloat(),
+                        yInterpolator.interpolateAt((i + j.toDouble() / AnimationScreen.LINES_PER_NODE) / edges.size).toFloat()
                     ))
                 }
                 edge.screenCoords.add(animation.getNodeByID(edge.segment.second)!!.screenPosition)

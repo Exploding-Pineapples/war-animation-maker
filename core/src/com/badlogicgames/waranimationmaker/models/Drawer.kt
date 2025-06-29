@@ -89,7 +89,7 @@ class Drawer(val font: BitmapFont,
 
     fun drawLine(context: LineContext) {
         val edges = context.edges
-        if (edges.size >= AnimationScreen.MIN_LINE_SIZE) {
+        if (edges.isNotEmpty()) {
             shapeRenderer.color = colorWithAlpha(context.color.color, context.alpha.value)
             for (edge in edges) {
                 for (i in 0 until edge.screenCoords.size - 1)
