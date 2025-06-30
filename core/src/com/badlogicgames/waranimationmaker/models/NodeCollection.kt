@@ -1,6 +1,5 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogic.gdx.utils.Array
 import com.badlogicgames.waranimationmaker.AreaColor
@@ -8,10 +7,10 @@ import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.SelectBoxInput
 import com.badlogicgames.waranimationmaker.TextInput
 
-open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID {
-    @Transient var edges: MutableList<Edge> = mutableListOf()
+open class NodeCollection(override val id: EdgeCollectionID) : HasInputs, HasID {
+    @Transient var nodes: MutableList<Node> = mutableListOf()
     var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
-    var edgeCollectionContext: AnyEdgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
+    var edgeCollectionContext: AnyEdgeCollectionContext = EdgeCollectionContext(nodes, AreaColor.RED)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun buildInputs() {
@@ -34,12 +33,12 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
             SelectBoxInput(null, { input ->
                 if (input == "Area") {
                     edgeCollectionContext = AreaContext()
-                    (edgeCollectionContext as AreaContext).edges = edges
+                    (edgeCollectionContext as AreaContext).nodes = nodes
                     edgeCollectionStrategy = AreaStrategy()
                 }
                 if (input == "Line") {
                     edgeCollectionContext = LineContext()
-                    (edgeCollectionContext as LineContext).edges = edges
+                    (edgeCollectionContext as LineContext).nodes = nodes
                     edgeCollectionStrategy = LineStrategy()
                 }
                 edgeCollectionContext.init()
@@ -61,16 +60,16 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
     }
 
     fun prepare() {
-        if (edges == null) {
-            edges = mutableListOf()
+        if (nodes == null) {
+            nodes = mutableListOf()
         }
-        edges.clear()
-        edgeCollectionContext.edges = mutableListOf()
+        nodes.clear()
+        edgeCollectionContext.nodes = mutableListOf()
     }
 
-    fun update(time: Int, animation: Animation, paused: Boolean) {
-        edgeCollectionContext.edges.addAll(edges)
-        edgeCollectionStrategy.updateAny(time, animation, paused, edgeCollectionContext)
+    fun update(time: Int, paused: Boolean) {
+        edgeCollectionContext.nodes.addAll(nodes)
+        edgeCollectionStrategy.updateAny(time, paused, edgeCollectionContext)
     }
 
     fun draw(drawer: Drawer) {
@@ -79,7 +78,7 @@ open class EdgeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
             //println("Edge collection strategy not set for update")
         }
         if (edgeCollectionContext == null) {
-            edgeCollectionContext = EdgeCollectionContext(edges, AreaColor.RED)
+            edgeCollectionContext = EdgeCollectionContext(nodes, AreaColor.RED)
         }
         edgeCollectionStrategy.drawAny(drawer, edgeCollectionContext)
     }

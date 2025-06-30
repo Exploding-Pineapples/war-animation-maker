@@ -8,7 +8,7 @@ data class Animation @JvmOverloads constructor(
     val units: MutableList<Unit> = mutableListOf(),
     private var camera: Camera? = null,
     val nodes: MutableList<Node> = mutableListOf(),
-    val edgeCollections: MutableList<EdgeCollection> = mutableListOf(),
+    val nodeCollections: MutableList<NodeCollection> = mutableListOf(),
     val arrows: MutableList<Arrow> = mutableListOf(),
     val mapLabels: MutableList<MapLabel> = mutableListOf(),
     var images: MutableList<Image> = mutableListOf(),
@@ -70,8 +70,8 @@ data class Animation @JvmOverloads constructor(
         return false
     }
 
-    fun getEdgeCollectionByID(id: EdgeCollectionID): EdgeCollection? {
-        return edgeCollections.find { it.id.value == id.value }
+    fun getEdgeCollectionByID(id: EdgeCollectionID): NodeCollection? {
+        return nodeCollections.find { it.id.value == id.value }
     }
 
     fun getNodeByID(id: NodeID): Node? = nodes.firstOrNull { it.id.value == id.value }
@@ -160,10 +160,10 @@ data class Animation @JvmOverloads constructor(
         return objects
     }
 
-    fun getParents(node: Object) : List<EdgeCollection> {
+    fun getParents(node: Object) : List<NodeCollection> {
         return if (node.javaClass == Node::class.java) {
-            edgeCollections.filter {
-                    edgeCollection -> (edgeCollection.edges.find { it.contains((node as Node).id) } != null)
+            nodeCollections.filter {
+                    nodeCollection -> (nodeCollection.nodes.find { it.id.value == (node as Node).id.value } != null)
             }
         } else {
             mutableListOf()
@@ -174,7 +174,7 @@ data class Animation @JvmOverloads constructor(
         edgeHandler.buildInputs()
         units.forEach { it.buildInputs() }
         arrows.forEach { it.buildInputs() }
-        edgeCollections.forEach { it.buildInputs() }
+        nodeCollections.forEach { it.buildInputs() }
         mapLabels.forEach { it.buildInputs() }
         images.forEach { it.buildInputs() }
     }

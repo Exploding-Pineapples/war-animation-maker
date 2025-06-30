@@ -11,13 +11,13 @@ import earcut4j.Earcut
 import java.lang.reflect.Type
 
 interface AnyEdgeCollectionContext : AbstractTypeSerializable, HasInputs {
-    var edges: MutableList<Edge>
+    var nodes: MutableList<Node>
     var color: AreaColor
 
     fun init()
 }
 
-open class EdgeCollectionContext(@Transient override var edges: MutableList<Edge> = mutableListOf(), override var color: AreaColor = AreaColor.RED) : AnyEdgeCollectionContext {
+open class EdgeCollectionContext(@Transient override var nodes: MutableList<Node> = mutableListOf(), override var color: AreaColor = AreaColor.RED) : AnyEdgeCollectionContext {
     override fun init() {}
 
     override fun getAbstractType(): Type {
@@ -65,25 +65,21 @@ class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
 }
 
 interface AnyEdgeCollectionStrategy : AbstractTypeSerializable {
-    fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext)
+    fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext)
     fun drawAny(drawer: Drawer, context: AnyEdgeCollectionContext)
 }
 
 open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollectionStrategy {
-    open fun update(time: Int, animation: Animation, context: T) {
-        for (edge in context.edges) {
-            edge.screenCoords.clear()
-            edge.screenCoords.add(animation.getNodeByID(edge.segment.first)!!.screenPosition)
-            edge.screenCoords.add(animation.getNodeByID(edge.segment.second)!!.screenPosition)
-        }
+    open fun update(time: Int, context: T) {
+
     }
 
     open fun draw(drawer: Drawer, context: T) {
-        context.edges.forEach { drawer.drawAsSelected(it) }
+        context.nodes.forEach { drawer.drawAsSelected(it) }
     }
 
-    override fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext) {
-        update(time, animation, context as T)
+    override fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext) {
+        update(time, context as T)
     }
 
     override fun drawAny(drawer: Drawer, context: AnyEdgeCollectionContext) {
@@ -99,36 +95,20 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
     @Transient
     var drawPoly: MutableList<FloatArray> = mutableListOf()
 
-    fun update(animation: Animation, context: AreaContext) {
+    fun update(context: AreaContext) {
         if (drawCoords == null) {
             drawCoords = mutableListOf()
         } else {
             drawCoords.clear()
         }
 
-        val edges = context.edges
+        val nodes = context.nodes
 
-        for (edge in edges) {
-            if (!edge.death.value) {
-                drawCoords.add(animation.getNodeByID(edge.segment.first)!!.screenPosition)
-                if (edge.screenCoords.size <= 2) { // If there are no interpolated coordinates on the edge, see if there is a duplicate interpolated line edge to use
-                    val firstNode = animation.getNodeByID(edge.segment.first)
-                    val otherInterpolatedEdge = firstNode!!.edges.find { (it != edge && it.segment.second.value == edge.segment.second.value) && it.screenCoords.size > 2 }
-                    if (otherInterpolatedEdge != null) {
-                        edge.screenCoords = otherInterpolatedEdge.screenCoords
-                    } else {
-                        edge.screenCoords = mutableListOf(
-                            animation.getNodeByID(edge.segment.first)!!.screenPosition,
-                            animation.getNodeByID(edge.segment.second)!!.screenPosition
-                        )
-                    }
-                }
-                drawCoords.addAll(edge.screenCoords.subList(0, edge.screenCoords.size - 1)) // Exclude second node of each edge since it is the first node of the next edge
-            }
+        for (index in 0..<nodes.lastIndex) {
+            val edge = nodes[index].edges.find { it.segment.second.value == nodes[index + 1].id.value }!!
+            drawCoords.addAll(edge.screenCoords.subList(0, edge.screenCoords.size - 1))
         }
-        if (edges.isNotEmpty() && !edges.last().death.value) {
-            drawCoords.add(animation.getNodeByID(edges.last().segment.second)!!.screenPosition) // Add the second node of the last edge since there is no next edge
-        }
+        drawCoords.add(nodes.last().screenPosition)
 
         val poly = drawCoords.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }.toDoubleArray()
 
@@ -156,6 +136,10 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
         }
     }
 
+    override fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext) {
+        update(context as AreaContext)
+    }
+
     override fun draw(drawer: Drawer, context: AreaContext) {
         drawer.drawArea(this, context)
     }
@@ -164,57 +148,54 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
 }
 
 class LineStrategy : EdgeCollectionStrategy<LineContext>() {
-    fun update(time: Int, animation: Animation, paused: Boolean, context: LineContext) {
+    fun update(time: Int, paused: Boolean, context: LineContext) {
         if (!paused) context.alpha.update(time)
 
         val parameterVals = mutableListOf<Double>()
         val xVals = mutableListOf<Double>()
         val yVals = mutableListOf<Double>()
 
-        val edges = context.edges
+        val nodes = context.nodes
 
-        if (edges.isNotEmpty() && context.alpha.value > 0) {
-            var node: Node?
+        if (nodes.isNotEmpty() && context.alpha.value > 0) {
             var parameter = 0.0
             var index = 0
 
-            while (parameter < 1.0) {
+            while (parameter <= 1.0) {
                 parameterVals.add(parameter)
-                node = animation.getNodeByID(edges[index].segment.first)
-                if (node != null) {
-                    xVals.add(node.screenPosition.x.toDouble())
-                    yVals.add(node.screenPosition.y.toDouble())
-                }
-                index++
-                parameter = index.toDouble() / edges.size
-            }
+                xVals.add(nodes[index].screenPosition.x.toDouble())
+                yVals.add(nodes[index].screenPosition.y.toDouble())
 
-            parameterVals.add(1.0)
-            val lastNode = animation.getNodeByID(edges.last().segment.second)
-            if (lastNode != null) {
-                xVals.add(lastNode.screenPosition.x.toDouble())
-                yVals.add(lastNode.screenPosition.y.toDouble())
+                index++
+                parameter = index.toDouble() / (nodes.size - 1)
             }
 
             val xInterpolator = PCHIPInterpolator(parameterVals.toTypedArray(), xVals.toTypedArray())
             val yInterpolator = PCHIPInterpolator(parameterVals.toTypedArray(), yVals.toTypedArray())
 
-            for (i in edges.indices) {
-                val edge = edges[i]
-                edge.screenCoords.clear()
-                for (j in 0 until AnimationScreen.LINES_PER_NODE) {
-                    edges[i].screenCoords.add(Coordinate(
-                        xInterpolator.interpolateAt((i + j.toDouble() / AnimationScreen.LINES_PER_NODE) / edges.size).toFloat(),
-                        yInterpolator.interpolateAt((i + j.toDouble() / AnimationScreen.LINES_PER_NODE) / edges.size).toFloat()
-                    ))
+            for (i in 0..<nodes.lastIndex) {
+                for (edge in nodes[i].edges) {
+                    if (!edge.death.value && edge.segment.second.value == nodes[i + 1].id.value) { // Update any edge that points towards the next node in the node collection to have the same interpolated points
+                        edge.screenCoords.clear()
+                        for (j in 0 until AnimationScreen.LINES_PER_NODE) {
+                            edge.screenCoords.add(
+                                Coordinate(
+                                    xInterpolator.interpolateAt((i * ((nodes.size + 1.0) / nodes.size) + j.toDouble() / AnimationScreen.LINES_PER_NODE) / nodes.size)
+                                        .toFloat(),
+                                    yInterpolator.interpolateAt((i * ((nodes.size + 1.0) / nodes.size) + j.toDouble() / AnimationScreen.LINES_PER_NODE) / nodes.size)
+                                        .toFloat()
+                                )
+                            )
+                        }
+                        edge.screenCoords.add(nodes[i + 1].screenPosition)
+                    }
                 }
-                edge.screenCoords.add(animation.getNodeByID(edge.segment.second)!!.screenPosition)
             }
         }
     }
 
-    override fun updateAny(time: Int, animation: Animation, paused: Boolean, context: AnyEdgeCollectionContext) {
-        update(time, animation, paused, context as LineContext)
+    override fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext) {
+        update(time, paused, context as LineContext)
     }
 
     override fun draw(drawer: Drawer, context: LineContext) {

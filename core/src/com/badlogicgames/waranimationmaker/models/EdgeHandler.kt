@@ -49,22 +49,22 @@ class EdgeHandler(val animation: Animation) {
         return removed
     }
 
-    private fun traverse(node: Node, edgeCollections: MutableList<EdgeCollection>, currentBranch: EdgeCollection, time: Int) {
+    private fun traverse(node: Node, nodeCollections: MutableList<NodeCollection>, currentBranch: NodeCollection, time: Int) {
         val visited = (node.visitedBy.find { (it.value == currentBranch.id.value) } != null)
         if (visited) {
-            val matchingNodeCollections = edgeCollections.filter { it.id.value == currentBranch.id.value }
+            val matchingNodeCollections = nodeCollections.filter { it.id.value == currentBranch.id.value }
             for (nodeCollection in matchingNodeCollections) {
-                if (node.id.value == nodeCollection.edges.first().segment.first.value) { // If the current node is the first node of an existing Node Collection with the same CollectionID, this branch is part of that Node Collection, so add this branch at the beginning of it
-                    nodeCollection.edges.addAll(0, currentBranch.edges)
+                if (node.id.value == nodeCollection.nodes.first().id.value) { // If the current node is the first node of an existing Node Collection with the same CollectionID, this branch is part of that Node Collection, so add this branch at the beginning of it
+                    nodeCollection.nodes.addAll(0, currentBranch.nodes)
                     return
                 }
             }
-            if (currentBranch.edges.isNotEmpty()) {
-                if (node.id.value == currentBranch.edges.first().segment.first.value) { // If the current node is the first node of the current branch, it is forming a loop, so add it to the list
-                    edgeCollections.add(currentBranch)
+            if (currentBranch.nodes.isNotEmpty()) {
+                if (node.id.value == currentBranch.nodes.first().id.value) { // If the current node is the first node of the current branch, it is forming a loop, so add it to the list
+                    nodeCollections.add(currentBranch)
                     return
                 }
-                edgeCollections.add(currentBranch)
+                nodeCollections.add(currentBranch)
                 println("Warning: Ambiguous topology")
             }
             return
@@ -80,68 +80,85 @@ class EdgeHandler(val animation: Animation) {
                 if (nextNode.shouldDraw(time) && !edge.death.value) {
                     if (edge.collectionID.value == currentBranch.id.value) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
                         reachedEnd = false
-                        traverse(nextNode, edgeCollections, currentBranch.apply { edges.add(edge) }, time)
+                        traverse(nextNode, nodeCollections, currentBranch.apply { nodes.add(node) }, time)
                     }
                 }
             }
         }
 
-        if (reachedEnd && currentBranch.edges.isNotEmpty()) { // If no edges continue the Node Collection that is being constructed, that means the end has been reached, so add the current branch and stop
-            edgeCollections.add(currentBranch)
+        if (reachedEnd && currentBranch.nodes.isNotEmpty()) { // If no edges continue the Node Collection that is being constructed, that means the end has been reached, so add the current branch and stop
+            nodeCollections.add(currentBranch)
         }
     }
 
     fun update(time: Int, camera: OrthographicCamera, paused: Boolean) {
-        val edgeCollections = mutableListOf<EdgeCollection>()
+        val nodeCollections = mutableListOf<NodeCollection>()
         for (node in animation.nodes) { // Update all nodes and edges
             node.update(time, camera)
-            node.edges.forEach { it.update(time) }
+            node.edges.forEach {
+                it.update(time)
+                it.screenCoords.clear()
+                it.screenCoords.add(animation.getNodeByID(it.segment.first)!!.screenPosition)
+                it.screenCoords.add(animation.getNodeByID(it.segment.second)!!.screenPosition)
+            }
         }
         for (node in animation.nodes) { // Build all edge collections from edges
             if (node.shouldDraw(time)) {
                 for (edge in node.edges) {
                     traverse(
                         node,
-                        edgeCollections,
-                        EdgeCollection(EdgeCollectionID(edge.collectionID.value)),
+                        nodeCollections,
+                        NodeCollection(EdgeCollectionID(edge.collectionID.value)),
                         time)
                 }
             }
         }
 
-        edgeCollections.removeIf { it.edges.isEmpty() }
-        animation.edgeCollections.forEach { it.prepare() }
+        nodeCollections.removeIf { it.nodes.isEmpty() }
+        animation.nodeCollections.forEach { it.prepare() }
 
         val usedIDs = mutableListOf<Int>()
-        for (i in 0..<edgeCollections.size) {
-            val edgeCollection = edgeCollections[i]
-            if (edgeCollection.id.value in usedIDs) {
+        for (i in 0..<nodeCollections.size) {
+            val nodeCollection = nodeCollections[i]
+            if (nodeCollection.id.value in usedIDs) {
                 val newId = animation.getEdgeCollectionId()
-                edgeCollection.edges.forEach { it.collectionID.newSetPoint(time, newId); it.collectionID.update(time) }
-                edgeCollections[i] = EdgeCollection(EdgeCollectionID(newId)).apply { edges.addAll(edgeCollection.edges) }
-                println("Resolved duplicate ID ${edgeCollection.id.value}, New ID: ${edgeCollections[i].id.value}, new edge collection size: ${edgeCollections[i].edges.size}")
+                nodeCollection.nodes.forEach { node ->
+                    node.edges.filter { it.collectionID.value == nodeCollection.id.value }.forEach {
+                        it.collectionID.newSetPoint(time, newId); it.collectionID.update(time)
+                        it.update(time)
+                    }
+                }
+                nodeCollections[i] = NodeCollection(EdgeCollectionID(newId)).apply { nodes.addAll(nodeCollection.nodes) }
+                println("Resolved duplicate ID ${nodeCollection.id.value}, New ID: ${nodeCollections[i].id.value}, new edge collection size: ${nodeCollections[i].nodes.size}")
                 usedIDs.add(newId)
             } else {
-                usedIDs.add(edgeCollection.id.value)
+                usedIDs.add(nodeCollection.id.value)
             }
         }
 
-        for (edgeCollection in edgeCollections) {
-            val existingNodeCollection = animation.getEdgeCollectionByID(edgeCollection.id)
+        for (nodeCollection in nodeCollections) {
+            val existingNodeCollection = animation.getEdgeCollectionByID(nodeCollection.id)
             if (existingNodeCollection == null) { // Create new edge collection if it does not exist
-                edgeCollection.edges.forEach {
-                    it.collectionID.newSetPoint(time, edgeCollection.id.value, true)
-                    it.collectionID.update(time)
+                nodeCollection.nodes.forEach { node ->
+                    node.edges.filter { it.collectionID.value == nodeCollection.id.value }.forEach {
+                        it.collectionID.newSetPoint(time, nodeCollection.id.value); it.collectionID.update(time)
+                        it.update(time)
+                    }
                 }
-                println("Warning: Created edge collection ${edgeCollection.id.value}")
-                animation.edgeCollections.add(edgeCollection)
-                edgeCollection.buildInputs()
+                println("Warning: Created edge collection ${nodeCollection.id.value}")
+                animation.nodeCollections.add(nodeCollection)
+                nodeCollection.buildInputs()
             } else {
-                existingNodeCollection.edges.addAll(edgeCollection.edges)
+                existingNodeCollection.nodes.addAll(nodeCollection.nodes)
             }
         }
         //println("Added edge collections of size: " + animation.edgeCollections.map {it.edges.size})
 
-        animation.edgeCollections.forEach { it.update(time, animation, paused) }
+        animation.nodeCollections.filter { it.edgeCollectionStrategy.javaClass == LineStrategy::class.java }.forEach {
+            it.update(time, paused)
+        } // Lines must be updated first so that areas can use their interpolated edges
+        animation.nodeCollections.filter { it.edgeCollectionStrategy.javaClass == AreaStrategy::class.java }.forEach {
+            it.update(time, paused)
+        }
     }
 }

@@ -63,9 +63,9 @@ class UIVisitor(val skin: Skin) {
         text = "Node: "
         show(verticalGroup, node as HasInputs)
     }
-    fun show(verticalGroup: VerticalGroup, edgeCollection: EdgeCollection) {
-        text = "Edge Collection ${edgeCollection.id.value}: "
-        show(verticalGroup, edgeCollection as HasInputs)
+    fun show(verticalGroup: VerticalGroup, nodeCollection: NodeCollection) {
+        text = "Edge Collection ${nodeCollection.id.value}: "
+        show(verticalGroup, nodeCollection as HasInputs)
     }
     fun show(verticalGroup: VerticalGroup, arrow: Arrow) {
         text = "Arrow: "

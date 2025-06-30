@@ -36,10 +36,10 @@ class Drawer(val font: BitmapFont,
     }
 
     fun draw(animation: Animation) {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
+        Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        batcher.setColor(1f, 1f, 1f, 1f) // Set to full
+        batcher.setColor(1f, 1f, 1f, 1f) // Reset to full transparency
 
         animation.images.forEach { draw(it) }
         animation.mapLabels.forEach { draw(it) }
@@ -49,11 +49,11 @@ class Drawer(val font: BitmapFont,
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
         colorLayer.begin()
+        Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color.CLEAR
-        shapeRenderer.rect(0F, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat()) // Clear the color layer
 
-        for (edgeCollection in animation.edgeCollections) {
+        for (edgeCollection in animation.nodeCollections) {
             if (edgeCollection.edgeCollectionStrategy.javaClass == AreaStrategy::class.java) {
                 edgeCollection.draw(this)
             }
@@ -72,7 +72,7 @@ class Drawer(val font: BitmapFont,
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        for (edgeCollection in animation.edgeCollections) {
+        for (edgeCollection in animation.nodeCollections) {
             if (edgeCollection.edgeCollectionStrategy.javaClass == LineStrategy::class.java) {
                 edgeCollection.draw(this)
             }
@@ -88,16 +88,18 @@ class Drawer(val font: BitmapFont,
     }
 
     fun drawLine(context: LineContext) {
-        val edges = context.edges
-        if (edges.isNotEmpty()) {
+        val nodes = context.nodes
+        if (nodes.isNotEmpty()) {
             shapeRenderer.color = colorWithAlpha(context.color.color, context.alpha.value)
-            for (edge in edges) {
-                for (i in 0 until edge.screenCoords.size - 1)
+            for (i in 0..<nodes.lastIndex) {
+                val node = nodes[i]
+                val edge = node.edges.find { it.segment.second.value == nodes[i + 1].id.value }!!
+                for (j in 0 until edge.screenCoords.lastIndex)
                     shapeRenderer.rectLine(
-                        edge.screenCoords[i].x,
-                        edge.screenCoords[i].y,
-                        edge.screenCoords[i + 1].x,
-                        edge.screenCoords[i + 1].y,
+                        edge.screenCoords[j].x,
+                        edge.screenCoords[j].y,
+                        edge.screenCoords[j + 1].x,
+                        edge.screenCoords[j + 1].y,
                         context.width
                     )
             }

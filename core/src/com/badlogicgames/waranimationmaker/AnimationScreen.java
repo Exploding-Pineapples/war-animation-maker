@@ -37,7 +37,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Integer time;
 
     ScreenObject selected;
-    List<EdgeCollection> selectedEdgeCollections; // if a Node is selected, this will be the Area or Line that the Node is on
+    List<NodeCollection> selectedNodeCollections; // if a Node is selected, this will be the Area or Line that the Node is on
     List<Edge> selectedEdges;
 
     boolean shiftPressed;
@@ -94,7 +94,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animationMode = true;
 
         //UI
-        selectedEdgeCollections = new ArrayList<>();
+        selectedNodeCollections = new ArrayList<>();
         selectedEdges = new ArrayList<>();
         touchMode = TouchMode.DEFAULT;
         actions = new ArrayList<>();
@@ -132,8 +132,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         newEdgeCollectionID = 0;
         Array<Integer> idChoices = new Array<>();
         idChoices.add(animation.getEdgeCollectionId(true));
-        for (EdgeCollection edgeCollection : animation.getEdgeCollections()) {
-            idChoices.add(edgeCollection.getId().getValue());
+        for (NodeCollection nodeCollection : animation.getNodeCollections()) {
+            idChoices.add(nodeCollection.getId().getValue());
         }
         newEdgeCollectionIDInput = new SelectBoxInput<>(game.skin,
                 (Integer input) -> { newEdgeCollectionID = input; return null; },
@@ -196,9 +196,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public void updateNewEdgeInputs() {
-        if (!selectedEdgeCollections.isEmpty()) { // Update the inputs to match the new edge type
+        if (!selectedNodeCollections.isEmpty()) { // Update the inputs to match the new edge type
             System.out.println("Updating new edge inputs");
-            newEdgeCollectionID = selectedEdgeCollections.get(0).getId().getValue();
+            newEdgeCollectionID = selectedNodeCollections.get(0).getId().getValue();
             newEdgeCollectionIDInput.hide(leftGroup);
             newEdgeInputsDisplayed = false;
         }
@@ -208,12 +208,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (selected != null) {
             selected.hideInputs(selectedGroup, uiVisitor);
         }
-        for (EdgeCollection collection : selectedEdgeCollections) {
+        for (NodeCollection collection : selectedNodeCollections) {
             collection.hideInputs(selectedGroup, uiVisitor);
         }
         selected = null;
         selectedEdges.clear();
-        selectedEdgeCollections.clear();
+        selectedNodeCollections.clear();
     }
 
     public <T extends ScreenObject> void switchSelected(T newSelection) {
@@ -224,9 +224,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         // Show new selected object
         if (selected != null) {
             System.out.println("Selected: " + selected.getClass().getSimpleName());
-            selectedEdgeCollections = animation.getParents(selected);
+            selectedNodeCollections = animation.getParents(selected);
             selected.showInputs(selectedGroup, uiVisitor);
-            for (EdgeCollection collection : selectedEdgeCollections) {
+            for (NodeCollection collection : selectedNodeCollections) {
                 collection.showInputs(selectedGroup, uiVisitor);
             }
         }
@@ -240,11 +240,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (!newSelections.isEmpty()) {
             for (Edge newSelection : newSelections) {
                 System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
-                EdgeCollection edgeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
-                if (edgeCollection != null) {
-                    System.out.println("selected edge collection " + edgeCollection.getId().getValue());
-                    selectedEdgeCollections.add(edgeCollection);
-                    edgeCollection.showInputs(selectedGroup, uiVisitor);
+                NodeCollection nodeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
+                if (nodeCollection != null) {
+                    System.out.println("selected edge collection " + nodeCollection.getId().getValue());
+                    selectedNodeCollections.add(nodeCollection);
+                    nodeCollection.showInputs(selectedGroup, uiVisitor);
                 }
             }
         }
@@ -444,10 +444,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     selectedInfo.append("Edges: ").append(nodes).append("\n");
                 }
-                for (EdgeCollection edgeCollection : selectedEdgeCollections) {
-                    selectedInfo.append("Selected ").append(edgeCollection.getClass().getSimpleName()).append(": \n");
-                    selectedInfo.append("# Edges: ").append(edgeCollection.getEdges().size()).append("\n");
-                    selectedInfo.append("EdgeCollectionID: ").append(edgeCollection.getId().getValue()).append("\n");
+                for (NodeCollection nodeCollection : selectedNodeCollections) {
+                    selectedInfo.append("Selected ").append(nodeCollection.getClass().getSimpleName()).append(": \n");
+                    selectedInfo.append("# Edges: ").append(nodeCollection.getNodes().size()).append("\n");
+                    selectedInfo.append("EdgeCollectionID: ").append(nodeCollection.getId().getValue()).append("\n");
                 }
             }
             selectedLabel.setText(selectedInfo);
@@ -472,8 +472,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             if (touchMode == TouchMode.NEW_EDGE) {
                 Array<Integer> idChoices = new Array<>();
                 idChoices.add(animation.getEdgeCollectionId(true) + 1);
-                for (EdgeCollection edgeCollection : animation.getEdgeCollections()) {
-                    idChoices.add(edgeCollection.getId().getValue());
+                for (NodeCollection nodeCollection : animation.getNodeCollections()) {
+                    idChoices.add(nodeCollection.getId().getValue());
                 }
                 newEdgeCollectionIDInput.getChoices().clear();
                 newEdgeCollectionIDInput.getChoices().addAll(idChoices);
@@ -604,10 +604,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     System.out.println("set new alpha set point, set points: " + ((HasAlpha) selected).getAlpha().getSetPoints());
                 }
             }
-            for (EdgeCollection selectedEdgeCollection : selectedEdgeCollections) {
-                if (HasAlpha.class.isAssignableFrom(selectedEdgeCollection.getEdgeCollectionContext().getClass())) {
-                    ((HasAlpha) selectedEdgeCollection.getEdgeCollectionContext()).getAlpha().newSetPoint(time, ((HasAlpha) selectedEdgeCollection.getEdgeCollectionContext()).getAlpha().getValue());
-                    System.out.println("set new alpha set point, set points: " + ((HasAlpha) selectedEdgeCollection.getEdgeCollectionContext()).getAlpha().getSetPoints());
+            for (NodeCollection selectedNodeCollection : selectedNodeCollections) {
+                if (HasAlpha.class.isAssignableFrom(selectedNodeCollection.getEdgeCollectionContext().getClass())) {
+                    ((HasAlpha) selectedNodeCollection.getEdgeCollectionContext()).getAlpha().newSetPoint(time, ((HasAlpha) selectedNodeCollection.getEdgeCollectionContext()).getAlpha().getValue());
+                    System.out.println("set new alpha set point, set points: " + ((HasAlpha) selectedNodeCollection.getEdgeCollectionContext()).getAlpha().getSetPoints());
                 }
             }
             return null;
