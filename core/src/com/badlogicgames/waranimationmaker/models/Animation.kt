@@ -18,7 +18,7 @@ data class Animation @JvmOverloads constructor(
     var initTime: Int = 0
 )
 {
-    @Transient var edgeHandler = EdgeHandler(this)
+    @Transient var nodeEdgeHandler = NodeEdgeHandler(this)
 
     fun getEdgeCollectionId(): Int {
         edgeCollectionId++
@@ -33,7 +33,7 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun init() {
-        edgeHandler = EdgeHandler(this)
+        nodeEdgeHandler = NodeEdgeHandler(this)
         units.forEach { it.alpha.update(initTime) }
         mapLabels.forEach { it.alpha.update(initTime) }
         arrows.forEach { it.alpha.update(initTime) }
@@ -53,7 +53,7 @@ data class Animation @JvmOverloads constructor(
 
     fun deleteObject(obj: Object): Boolean {
         if (obj.javaClass == Node::class.java) {
-            return edgeHandler.remove(obj as Node)
+            return nodeEdgeHandler.remove(obj as Node)
         }
         if (obj.javaClass == Image::class.java) {
             return images.remove(obj as Image)
@@ -128,11 +128,11 @@ data class Animation @JvmOverloads constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, type: Class<out ObjectClickable>): ArrayList<T> {
+    fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, time: Int, type: Class<out ObjectClickable>): ArrayList<T> {
         val objects = ArrayList<T>()
 
         if (type.isAssignableFrom(Node::class.java)) {
-            objects.addAll(nodes.filter { it.clicked(x, y) }.map {it as T})
+            objects.addAll(nodes.filter { time == it.initTime && it.clicked(x, y) }.map {it as T})
         }
 
         if (type.isAssignableFrom(Edge::class.java)) {
@@ -171,7 +171,7 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun buildInputs() {
-        edgeHandler.buildInputs()
+        nodeEdgeHandler.buildInputs()
         units.forEach { it.buildInputs() }
         arrows.forEach { it.buildInputs() }
         nodeCollections.forEach { it.buildInputs() }
@@ -180,7 +180,7 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun update(time: Int, orthographicCamera: OrthographicCamera, paused: Boolean) {
-        edgeHandler.update(time, orthographicCamera, paused)
+        nodeEdgeHandler.update(time, orthographicCamera, paused)
         units.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         images.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
         arrows.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }

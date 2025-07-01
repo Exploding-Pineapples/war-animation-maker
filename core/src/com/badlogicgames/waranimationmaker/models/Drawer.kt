@@ -198,8 +198,10 @@ class Drawer(val font: BitmapFont,
     }
 
     fun draw(node: Node) {
-        shapeRenderer.color = node.color
-        shapeRenderer.circle(node.screenPosition.x, node.screenPosition.y, 7.0f)
+        if (time == node.initTime) {
+            shapeRenderer.color = node.color
+            shapeRenderer.circle(node.screenPosition.x, node.screenPosition.y, 7.0f)
+        }
     }
 
     fun draw(arrow: Arrow) {
@@ -289,18 +291,20 @@ class Drawer(val font: BitmapFont,
     }
 
     fun drawAsSelected(screenObject: ScreenObject) {
-        val xInterpolator = screenObject.xInterpolator
-        val yInterpolator = screenObject.yInterpolator
+        if (!screenObject.javaClass.isAssignableFrom(Node::class.java)) {
+            val xInterpolator = screenObject.xInterpolator
+            val yInterpolator = screenObject.yInterpolator
 
-        shapeRenderer.color = Color.SKY
-        for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
-            val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
-            shapeRenderer.circle(position.x, position.y, 2f)
-        }
-        shapeRenderer.color = Color.PURPLE
-        for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
-            val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
-            shapeRenderer.circle(position.x, position.y, 4f)
+            shapeRenderer.color = Color.SKY
+            for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
+                shapeRenderer.circle(position.x, position.y, 2f)
+            }
+            shapeRenderer.color = Color.PURPLE
+            for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
+                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
+                shapeRenderer.circle(position.x, position.y, 4f)
+            }
         }
 
         if (screenObject.javaClass.isAssignableFrom(Unit::class.java)) {

@@ -12,7 +12,7 @@ object FileHandler {
         .serializeNulls()
         .registerTypeAdapter(ID::class.java, AbstractTypeSerializer<ID>())
         .registerTypeAdapter(AnyEdgeCollectionStrategy::class.java, AbstractTypeSerializer<AnyEdgeCollectionStrategy>())
-        .registerTypeAdapter(AnyEdgeCollectionContext::class.java, AbstractTypeSerializer<AnyEdgeCollectionContext>())
+        .registerTypeAdapter(AnyNodeCollectionContext::class.java, AbstractTypeSerializer<AnyNodeCollectionContext>())
         .create()
 
     val animations = mutableListOf<Animation>()

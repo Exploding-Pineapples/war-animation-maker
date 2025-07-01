@@ -10,7 +10,7 @@ class Edge(val collectionID: InterpolatedID,
            override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
 ) : HasDeath, ObjectClickable {
     override fun clicked(x: Float, y: Float): Boolean {
-        if (screenCoords.size > 1) {
+        if (screenCoords.isNotEmpty()) {
             var lowestDist = distanceFromPointToSegment(
                 Vector2f(x, y),
                 Vector2f(screenCoords[0].x, screenCoords[0].y),
@@ -37,26 +37,23 @@ class Edge(val collectionID: InterpolatedID,
     fun contains(nodeID: NodeID): Boolean {
         return  (nodeID.value == segment.first.value || nodeID.value == segment.second.value)
     }
-    fun update(time: Int) {
+    fun prepare(time: Int) {
         screenCoords = mutableListOf()
         death.update(time)
         collectionID.update(time)
     }
 
     companion object {
-        fun distanceFromPointToSegment(point: Vector2f, a: Vector2f, b: Vector2f): Float {
+        fun distanceFromPointToSegment(point: Vector2f, a: Vector2f, b: Vector2f): Float { // ChatGPT wrote this
             val ab = Vector2f(b).sub(a)
             val ap = Vector2f(point).sub(a)
             val t = ap.dot(ab) / ab.lengthSquared()
 
             return if (t < 0f) {
-                // Closest to point A
                 point.distance(a)
             } else if (t > 1f) {
-                // Closest to point B
                 point.distance(b)
             } else {
-                // Closest to point on segment
                 val projection = Vector2f(ab).mul(t).add(a)
                 point.distance(projection)
             }

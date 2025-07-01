@@ -10,18 +10,18 @@ import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolator
 import earcut4j.Earcut
 import java.lang.reflect.Type
 
-interface AnyEdgeCollectionContext : AbstractTypeSerializable, HasInputs {
+interface AnyNodeCollectionContext : AbstractTypeSerializable, HasInputs {
     var nodes: MutableList<Node>
     var color: AreaColor
 
     fun init()
 }
 
-open class EdgeCollectionContext(@Transient override var nodes: MutableList<Node> = mutableListOf(), override var color: AreaColor = AreaColor.RED) : AnyEdgeCollectionContext {
+open class NodeCollectionContext(@Transient override var nodes: MutableList<Node> = mutableListOf(), override var color: AreaColor = AreaColor.RED) : AnyNodeCollectionContext {
     override fun init() {}
 
     override fun getAbstractType(): Type {
-        return EdgeCollectionContext::class.java
+        return NodeCollectionContext::class.java
     }
 
     override var inputElements: MutableList<InputElement<*>> = mutableListOf()
@@ -30,14 +30,14 @@ open class EdgeCollectionContext(@Transient override var nodes: MutableList<Node
     }
 }
 
-class AreaContext : EdgeCollectionContext() {
+class AreaContext : NodeCollectionContext() {
     override fun init() {}
     override fun getAbstractType(): Type {
         return AreaContext::class.java
     }
 }
 
-class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
+class LineContext(var width: Float = 5.0f) : NodeCollectionContext(), HasAlpha {
     override var alpha = LinearInterpolatedFloat(1f, 0)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
@@ -50,7 +50,7 @@ class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
     }
 
     override fun init() {
-        super<EdgeCollectionContext>.buildInputs()
+        super<NodeCollectionContext>.buildInputs()
         super<HasAlpha>.buildInputs()
 
         if (alpha == null) {
@@ -65,11 +65,11 @@ class LineContext(var width: Float = 5.0f) : EdgeCollectionContext(), HasAlpha {
 }
 
 interface AnyEdgeCollectionStrategy : AbstractTypeSerializable {
-    fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext)
-    fun drawAny(drawer: Drawer, context: AnyEdgeCollectionContext)
+    fun updateAny(time: Int, paused: Boolean, context: AnyNodeCollectionContext)
+    fun drawAny(drawer: Drawer, context: AnyNodeCollectionContext)
 }
 
-open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollectionStrategy {
+open class EdgeCollectionStrategy<T : AnyNodeCollectionContext> : AnyEdgeCollectionStrategy {
     open fun update(time: Int, context: T) {
 
     }
@@ -78,11 +78,11 @@ open class EdgeCollectionStrategy<T : AnyEdgeCollectionContext> : AnyEdgeCollect
         context.nodes.forEach { drawer.drawAsSelected(it) }
     }
 
-    override fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext) {
+    override fun updateAny(time: Int, paused: Boolean, context: AnyNodeCollectionContext) {
         update(time, context as T)
     }
 
-    override fun drawAny(drawer: Drawer, context: AnyEdgeCollectionContext) {
+    override fun drawAny(drawer: Drawer, context: AnyNodeCollectionContext) {
         draw(drawer, context as T)
     }
 
@@ -136,7 +136,7 @@ class AreaStrategy : EdgeCollectionStrategy<AreaContext>() {
         }
     }
 
-    override fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext) {
+    override fun updateAny(time: Int, paused: Boolean, context: AnyNodeCollectionContext) {
         update(context as AreaContext)
     }
 
@@ -167,7 +167,7 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
                 yVals.add(nodes[index].screenPosition.y.toDouble())
 
                 index++
-                parameter = index.toDouble() / (nodes.size - 1)
+                parameter = index.toDouble() / (nodes.size - 1.0)
             }
 
             val xInterpolator = PCHIPInterpolator(parameterVals.toTypedArray(), xVals.toTypedArray())
@@ -175,15 +175,14 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
 
             for (i in 0..<nodes.lastIndex) {
                 for (edge in nodes[i].edges) {
-                    if (!edge.death.value && edge.segment.second.value == nodes[i + 1].id.value) { // Update any edge that points towards the next node in the node collection to have the same interpolated points
+                    if (!edge.death.value && edge.segment.second.value == nodes[i + 1].id.value) { // Update all edges that point towards the next node in the node collection to have the same interpolated points
                         edge.screenCoords.clear()
                         for (j in 0 until AnimationScreen.LINES_PER_NODE) {
+                            val eval = (i / (nodes.size - 1.0) + j.toDouble() / (AnimationScreen.LINES_PER_NODE * (nodes.size - 1.0)))
                             edge.screenCoords.add(
                                 Coordinate(
-                                    xInterpolator.interpolateAt((i * ((nodes.size + 1.0) / nodes.size) + j.toDouble() / AnimationScreen.LINES_PER_NODE) / nodes.size)
-                                        .toFloat(),
-                                    yInterpolator.interpolateAt((i * ((nodes.size + 1.0) / nodes.size) + j.toDouble() / AnimationScreen.LINES_PER_NODE) / nodes.size)
-                                        .toFloat()
+                                    xInterpolator.interpolateAt(eval).toFloat(),
+                                    yInterpolator.interpolateAt(eval).toFloat()
                                 )
                             )
                         }
@@ -194,7 +193,7 @@ class LineStrategy : EdgeCollectionStrategy<LineContext>() {
         }
     }
 
-    override fun updateAny(time: Int, paused: Boolean, context: AnyEdgeCollectionContext) {
+    override fun updateAny(time: Int, paused: Boolean, context: AnyNodeCollectionContext) {
         update(time, paused, context as LineContext)
     }
 

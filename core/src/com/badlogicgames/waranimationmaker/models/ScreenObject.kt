@@ -22,7 +22,7 @@ abstract class ScreenObject : Object, HasScreenPosition, ObjectClickable, HasInp
         return shouldDraw(time)
     }
 
-    private fun updateScreenPosition(zoom: Float, cx: Float, cy: Float) {
+    protected fun updateScreenPosition(zoom: Float, cx: Float, cy: Float) {
         if (screenPosition == null) { // Is null when animation is first opened because screenPosition is @Transient
             screenPosition = Coordinate(0f, 0f)
         }

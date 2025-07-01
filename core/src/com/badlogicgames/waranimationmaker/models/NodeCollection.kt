@@ -9,8 +9,8 @@ import com.badlogicgames.waranimationmaker.TextInput
 
 open class NodeCollection(override val id: EdgeCollectionID) : HasInputs, HasID {
     @Transient var nodes: MutableList<Node> = mutableListOf()
-    var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
-    var edgeCollectionContext: AnyEdgeCollectionContext = EdgeCollectionContext(nodes, AreaColor.RED)
+    var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<NodeCollectionContext>()
+    var edgeCollectionContext: AnyNodeCollectionContext = NodeCollectionContext(nodes, AreaColor.RED)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun buildInputs() {
@@ -74,11 +74,11 @@ open class NodeCollection(override val id: EdgeCollectionID) : HasInputs, HasID 
 
     fun draw(drawer: Drawer) {
         if (edgeCollectionStrategy == null) {
-            edgeCollectionStrategy = EdgeCollectionStrategy<EdgeCollectionContext>()
+            edgeCollectionStrategy = EdgeCollectionStrategy<NodeCollectionContext>()
             //println("Edge collection strategy not set for update")
         }
         if (edgeCollectionContext == null) {
-            edgeCollectionContext = EdgeCollectionContext(nodes, AreaColor.RED)
+            edgeCollectionContext = NodeCollectionContext(nodes, AreaColor.RED)
         }
         edgeCollectionStrategy.drawAny(drawer, edgeCollectionContext)
     }

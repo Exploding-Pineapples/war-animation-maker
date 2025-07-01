@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID
 
-class EdgeHandler(val animation: Animation) {
+class NodeEdgeHandler(val animation: Animation) {
 
     fun buildInputs() {
         for (node in animation.nodes) {
@@ -61,7 +61,7 @@ class EdgeHandler(val animation: Animation) {
             }
             if (currentBranch.nodes.isNotEmpty()) {
                 if (node.id.value == currentBranch.nodes.first().id.value) { // If the current node is the first node of the current branch, it is forming a loop, so add it to the list
-                    nodeCollections.add(currentBranch)
+                    nodeCollections.add(currentBranch.apply { nodes.add(node) })
                     return
                 }
                 nodeCollections.add(currentBranch)
@@ -77,7 +77,7 @@ class EdgeHandler(val animation: Animation) {
         if (node.shouldDraw(time)) {
             for (edge in node.edges) { // Traverses every available edge from the node
                 val nextNode = animation.getNodeByID(edge.segment.second)!!
-                if (nextNode.shouldDraw(time) && !edge.death.value) {
+                if (time == nextNode.initTime && !edge.death.value) {
                     if (edge.collectionID.value == currentBranch.id.value) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
                         reachedEnd = false
                         traverse(nextNode, nodeCollections, currentBranch.apply { nodes.add(node) }, time)
@@ -87,7 +87,7 @@ class EdgeHandler(val animation: Animation) {
         }
 
         if (reachedEnd && currentBranch.nodes.isNotEmpty()) { // If no edges continue the Node Collection that is being constructed, that means the end has been reached, so add the current branch and stop
-            nodeCollections.add(currentBranch)
+            nodeCollections.add(currentBranch.apply { nodes.add(node) })
         }
     }
 
@@ -95,15 +95,15 @@ class EdgeHandler(val animation: Animation) {
         val nodeCollections = mutableListOf<NodeCollection>()
         for (node in animation.nodes) { // Update all nodes and edges
             node.update(time, camera)
-            node.edges.forEach {
-                it.update(time)
-                it.screenCoords.clear()
-                it.screenCoords.add(animation.getNodeByID(it.segment.first)!!.screenPosition)
-                it.screenCoords.add(animation.getNodeByID(it.segment.second)!!.screenPosition)
+            if (time == node.initTime) {
+                node.edges.forEach {
+                    it.screenCoords.add(animation.getNodeByID(it.segment.first)!!.screenPosition)
+                    it.screenCoords.add(animation.getNodeByID(it.segment.second)!!.screenPosition)
+                }
             }
         }
         for (node in animation.nodes) { // Build all edge collections from edges
-            if (node.shouldDraw(time)) {
+            if (time == node.initTime) {
                 for (edge in node.edges) {
                     traverse(
                         node,
@@ -125,7 +125,7 @@ class EdgeHandler(val animation: Animation) {
                 nodeCollection.nodes.forEach { node ->
                     node.edges.filter { it.collectionID.value == nodeCollection.id.value }.forEach {
                         it.collectionID.newSetPoint(time, newId); it.collectionID.update(time)
-                        it.update(time)
+                        it.prepare(time)
                     }
                 }
                 nodeCollections[i] = NodeCollection(EdgeCollectionID(newId)).apply { nodes.addAll(nodeCollection.nodes) }
@@ -142,7 +142,7 @@ class EdgeHandler(val animation: Animation) {
                 nodeCollection.nodes.forEach { node ->
                     node.edges.filter { it.collectionID.value == nodeCollection.id.value }.forEach {
                         it.collectionID.newSetPoint(time, nodeCollection.id.value); it.collectionID.update(time)
-                        it.update(time)
+                        it.prepare(time)
                     }
                 }
                 println("Warning: Created edge collection ${nodeCollection.id.value}")

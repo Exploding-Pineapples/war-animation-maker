@@ -2529,11 +2529,6 @@
           "500": 4393.0176
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -2584,11 +2579,6 @@
           "500": 4394.742
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -2637,11 +2627,6 @@
         "setPoints": {
           "400": 4384.238,
           "500": 4394.5396
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -2696,11 +2681,6 @@
           "600": 4392.6987
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -2751,11 +2731,6 @@
           "400": 4384.238,
           "500": 4391.394,
           "600": 4396.0293
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -2810,11 +2785,6 @@
           "600": 4393.2246
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -2865,11 +2835,6 @@
           "400": 4384.238,
           "500": 4386.1353,
           "600": 4385.4243
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -2924,11 +2889,6 @@
           "600": 4377.536
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -2979,11 +2939,6 @@
           "400": 4384.238,
           "500": 4374.9575,
           "600": 4373.44
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3038,11 +2993,6 @@
           "600": 4377.1567
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3095,11 +3045,6 @@
           "600": 4382.1504
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3148,11 +3093,6 @@
         "setPoints": {
           "400": 4384.238,
           "500": 4386.0166
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3205,11 +3145,6 @@
           "500": 4388.553
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3258,11 +3193,6 @@
         "setPoints": {
           "400": 4384.238,
           "500": 4390.7856
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3315,11 +3245,6 @@
           "700": 4470.114
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3368,11 +3293,6 @@
         "setPoints": {
           "600": 4444.967,
           "700": 4464.4746
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3425,11 +3345,6 @@
           "700": 4457.6484
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3478,11 +3393,6 @@
         "setPoints": {
           "600": 4444.967,
           "700": 4457.3516
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3535,11 +3445,6 @@
           "700": 4446.9634
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3588,11 +3493,6 @@
         "setPoints": {
           "600": 4444.967,
           "700": 4439.5435
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3645,11 +3545,6 @@
           "700": 4429.156
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3698,11 +3593,6 @@
         "setPoints": {
           "600": 4444.967,
           "700": 4421.142
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3755,11 +3645,6 @@
           "700": 4424.376
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3808,11 +3693,6 @@
         "setPoints": {
           "600": 4444.967,
           "700": 4430.046
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3865,11 +3745,6 @@
           "700": 4433.9043
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -3918,11 +3793,6 @@
         "setPoints": {
           "600": 4444.967,
           "700": 4446.37
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -3995,11 +3865,6 @@
           "5000": 4517.9253,
           "5700": 4517.9253,
           "5800": 4525.5063
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -4096,11 +3961,6 @@
           "5800": 4525.5063
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4185,11 +4045,6 @@
           "5800": 4525.5063
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4262,11 +4117,6 @@
           "800": 4406.046
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4317,11 +4167,6 @@
           "600": 4398.1157,
           "700": 4407.1924,
           "800": 4402.5225
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -4376,11 +4221,6 @@
           "800": 4400.0557
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4433,11 +4273,6 @@
           "800": 4397.824
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4486,11 +4321,6 @@
         "setPoints": {
           "600": 4398.1157,
           "700": 4397.847
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -4543,11 +4373,6 @@
           "700": 4395.627
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4596,11 +4421,6 @@
         "setPoints": {
           "600": 4398.1157,
           "700": 4394.1475
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -4653,11 +4473,6 @@
           "700": 4392.544
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4708,11 +4523,6 @@
           "700": 4390.8174
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4761,11 +4571,6 @@
         "setPoints": {
           "600": 4398.1157,
           "700": 4388.1045
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -4820,11 +4625,6 @@
           "800": 4388.663
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4873,11 +4673,6 @@
         "setPoints": {
           "600": 4398.1157,
           "700": 4392.544
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -4932,11 +4727,6 @@
           "800": 4391.247
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -4987,11 +4777,6 @@
           "600": 4398.1157,
           "700": 4400.1904,
           "800": 4406.7505
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5046,11 +4831,6 @@
           "800": 4394.653
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5101,11 +4881,6 @@
           "600": 4398.1157,
           "700": 4402.533,
           "800": 4410.2744
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5160,11 +4935,6 @@
           "800": 4414.3853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5215,11 +4985,6 @@
           "600": 4398.1157,
           "700": 4406.11,
           "800": 4415.912
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5274,11 +5039,6 @@
           "800": 4416.969
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5329,11 +5089,6 @@
           "600": 4398.1157,
           "700": 4408.9463,
           "800": 4417.7915
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5388,11 +5143,6 @@
           "800": 4412.6235
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5441,11 +5191,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4370.8022
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5498,11 +5243,6 @@
           "900": 4364.9785
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5551,11 +5291,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4360.729
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5608,11 +5343,6 @@
           "900": 4356.322
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5661,11 +5391,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4350.8125
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5718,11 +5443,6 @@
           "900": 4343.1
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5771,11 +5491,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4335.545
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5828,11 +5543,6 @@
           "900": 4339.165
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5881,11 +5591,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4344.0444
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -5938,11 +5643,6 @@
           "900": 4351.5996
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -5991,11 +5691,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4358.9976
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6048,11 +5743,6 @@
           "900": 4366.0806
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6101,11 +5791,6 @@
         "setPoints": {
           "800": 4357.627,
           "900": 4374.58
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6166,11 +5851,6 @@
           "5000": 4522.307,
           "5500": 4522.307,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6235,11 +5915,6 @@
           "5900": 4367.0615
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6297,11 +5972,6 @@
           "4900": 4370.561,
           "5800": 4370.561,
           "5900": 4367.0615
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6367,11 +6037,6 @@
           "5900": 4367.0615
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6433,11 +6098,6 @@
           "5600": 4353.8286,
           "5800": 4353.8286,
           "5900": 4367.0615
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6503,11 +6163,6 @@
           "5900": 4367.0615
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6569,11 +6224,6 @@
           "5900": 4367.0615
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6632,11 +6282,6 @@
           "5800": 4525.5063
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6687,11 +6332,6 @@
           "1100": 4504.9614,
           "4900": 4504.9614,
           "5000": 4525.5063
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6750,11 +6390,6 @@
           "5800": 4525.5063
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6807,11 +6442,6 @@
           "4900": 4548.412,
           "5700": 4548.412,
           "5800": 4525.5063
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -6878,11 +6508,6 @@
           "5800": 4525.5063
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -6941,11 +6566,6 @@
           "2400": 4561.086,
           "4900": 4561.086,
           "5000": 4525.5063
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7010,11 +6630,6 @@
           "5000": 4527.0864,
           "5700": 4527.0864,
           "5800": 4525.5063
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7083,11 +6698,6 @@
           "5800": 4525.5063
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7153,11 +6763,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7214,11 +6819,6 @@
           "5300": 4551.8735,
           "5500": 4545.9707,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7279,11 +6879,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7340,11 +6935,6 @@
           "5300": 4588.442,
           "5500": 4552.045,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7405,11 +6995,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7466,11 +7051,6 @@
           "5300": 4580.459,
           "5500": 4550.5986,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7531,11 +7111,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7592,11 +7167,6 @@
           "5300": 4569.0728,
           "5500": 4550.5986,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7657,11 +7227,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7718,11 +7283,6 @@
           "5300": 4562.434,
           "5500": 4550.5986,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7783,11 +7343,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -7846,11 +7401,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": []
     },
     {
@@ -7886,11 +7436,6 @@
           "5300": 4562.434,
           "5500": 4550.5986,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -7952,11 +7497,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8014,11 +7554,6 @@
           "5300": 4547.348,
           "5500": 4545.681,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8080,11 +7615,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8140,11 +7670,6 @@
           "5000": 4537.694,
           "5500": 4537.694,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8204,11 +7729,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8264,11 +7784,6 @@
           "5000": 4513.8594,
           "5500": 4513.8594,
           "5600": 4533.755
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8330,11 +7845,6 @@
           "5600": 4533.755
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8386,11 +7896,6 @@
           "1100": 4641.54,
           "2800": 4641.54,
           "3000": 4612.287
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8445,11 +7950,6 @@
           "3000": 4615.2046
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8500,11 +8000,6 @@
           "1100": 4648.992,
           "2800": 4648.992,
           "3000": 4616.796
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8559,11 +8054,6 @@
           "3000": 4616.796
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8614,11 +8104,6 @@
           "1100": 4635.744,
           "2800": 4635.744,
           "3000": 4613.8784
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8673,11 +8158,6 @@
           "3000": 4607.513
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8728,11 +8208,6 @@
           "1100": 4612.5605,
           "2800": 4612.5605,
           "3000": 4599.2915
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8787,11 +8262,6 @@
           "3000": 4592.9263
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8842,11 +8312,6 @@
           "1100": 4604.695,
           "2800": 4604.695,
           "3000": 4593.9873
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -8901,11 +8366,6 @@
           "3000": 4597.17
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -8956,11 +8416,6 @@
           "1100": 4609.249,
           "2800": 4609.249,
           "3000": 4599.0264
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9015,11 +8470,6 @@
           "3000": 4603.535
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9070,11 +8520,6 @@
           "1100": 4624.1523,
           "2800": 4624.1523,
           "3000": 4603.535
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9129,11 +8574,6 @@
           "3000": 4608.309
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9184,11 +8624,6 @@
           "1100": 4791.724,
           "5600": 4791.724,
           "5700": 4772.8853
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9243,11 +8678,6 @@
           "5700": 4772.8853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9298,11 +8728,6 @@
           "1100": 4797.654,
           "5600": 4797.654,
           "5700": 4772.8853
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9357,11 +8782,6 @@
           "5700": 4772.8853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9412,11 +8832,6 @@
           "1100": 4785.795,
           "5600": 4785.795,
           "5700": 4772.8853
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9471,11 +8886,6 @@
           "5700": 4772.8853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9526,11 +8936,6 @@
           "1100": 4759.92,
           "5600": 4759.92,
           "5700": 4772.8853
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9585,11 +8990,6 @@
           "5700": 4772.8853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9640,11 +9040,6 @@
           "1100": 4759.92,
           "5600": 4759.92,
           "5700": 4772.8853
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9699,11 +9094,6 @@
           "5700": 4772.8853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9756,11 +9146,6 @@
           "5700": 4772.8853
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9807,11 +9192,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4241.3843
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9862,11 +9242,6 @@
           "1100": 4234.4893
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -9913,11 +9288,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4227.2944
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -9968,11 +9338,6 @@
           "1100": 4217.701
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10019,11 +9384,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4214.7036
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10074,11 +9434,6 @@
           "1100": 4218.301
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10125,11 +9480,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4221.5986
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10180,11 +9530,6 @@
           "1100": 4226.9946
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10231,11 +9576,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4235.3887
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10286,11 +9626,6 @@
           "1100": 4242.2837
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10337,11 +9672,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4249.7783
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10392,11 +9722,6 @@
           "1100": 4249.1787
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10443,11 +9768,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4247.9795
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10498,11 +9818,6 @@
           "1100": 4245.5815
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10549,11 +9864,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4307.046
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10604,11 +9914,6 @@
           "1100": 4292.781
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10655,11 +9960,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4281.308
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10710,11 +10010,6 @@
           "1100": 4268.07
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10761,11 +10056,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4260.127
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10816,11 +10106,6 @@
           "1100": 4247.7715
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10867,11 +10152,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4229.2383
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -10922,11 +10202,6 @@
           "1100": 4212.029
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -10975,11 +10250,6 @@
           "1100": 4204.29
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": []
     },
     {
@@ -11011,11 +10281,6 @@
           "4200": 4352.982,
           "6000": 4352.982,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11070,11 +10335,6 @@
           "4200": 4336.6924,
           "6000": 4336.6924,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11133,11 +10393,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11194,11 +10449,6 @@
           "6000": 4307.2764,
           "6100": 4321.702,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11261,11 +10511,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11324,11 +10569,6 @@
           "6000": 4294.8423,
           "6100": 4321.702,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11391,11 +10631,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11454,11 +10689,6 @@
           "6000": 4291.668,
           "6100": 4324.118,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11521,11 +10751,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11586,11 +10811,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11647,11 +10867,6 @@
           "6000": 4304.366,
           "6100": 4330.4,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11712,11 +10927,6 @@
           "6000": 4324.2407,
           "6100": 4338.1313,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11785,11 +10995,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11854,11 +11059,6 @@
           "6000": 4349.4365,
           "6100": 4352.6274,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -11927,11 +11127,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -11994,11 +11189,6 @@
           "6000": 4369.106,
           "6100": 4360.359,
           "6200": 4344.679
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12065,11 +11255,6 @@
           "6200": 4344.679
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12116,11 +11301,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4150.4395
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12171,11 +11351,6 @@
           "1100": 4140.5024
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12222,11 +11397,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4134.706
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12277,11 +11447,6 @@
           "1100": 4126.701
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12328,11 +11493,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4127.2534
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12383,11 +11543,6 @@
           "1100": 4127.805
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12434,11 +11589,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4128.6333
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12489,11 +11639,6 @@
           "1100": 4137.742
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12540,11 +11685,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4148.5073
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12595,11 +11735,6 @@
           "1100": 4156.788
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12648,11 +11783,6 @@
           "1100": 4158.4443
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12699,11 +11829,6 @@
       "yInterpolator": {
         "setPoints": {
           "1100": 4156.788
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12764,11 +11889,6 @@
           "5000": 4496.64
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12823,11 +11943,6 @@
           "5000": 4495.627
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12878,11 +11993,6 @@
           "1100": 4545.015,
           "4900": 4545.015,
           "5000": 4494.6143
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -12937,11 +12047,6 @@
           "5000": 4491.633
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -12992,11 +12097,6 @@
           "1100": 4545.015,
           "4900": 4545.015,
           "5000": 4487.1855
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13051,11 +12151,6 @@
           "5000": 4482.796
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13108,11 +12203,6 @@
           "5000": 4477.731
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13163,11 +12253,6 @@
           "1100": 4508.1143,
           "4900": 4508.1143,
           "5000": 4477.731
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13226,11 +12311,6 @@
           "5000": 4468.952
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13285,11 +12365,6 @@
           "1500": 4469.6816,
           "4900": 4469.6816,
           "5000": 4463.887
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13348,11 +12423,6 @@
           "4900": 4457.704,
           "5000": 4470.978,
           "5800": 4470.978
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13417,11 +12487,6 @@
           "5800": 4473.342
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13484,11 +12549,6 @@
           "5800": 4477.731
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13545,11 +12605,6 @@
           "4800": 4459.775,
           "4900": 4459.775,
           "5000": 4483.134
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13610,11 +12665,6 @@
           "4800": 4461.54,
           "4900": 4461.54,
           "5000": 4490.9
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13679,11 +12729,6 @@
           "5000": 4495.965
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13740,11 +12785,6 @@
           "2600": 4512.9536,
           "4900": 4512.9536,
           "5000": 4501.9756
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13805,11 +12845,6 @@
           "5000": 4497.3154
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13856,11 +12891,6 @@
       "yInterpolator": {
         "setPoints": {
           "1800": 1672.8647
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -13911,11 +12941,6 @@
           "1700": 1558.1978
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -13964,11 +12989,6 @@
         "setPoints": {
           "1700": 1527.4335,
           "1800": 1628.1165
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14023,12 +13043,6 @@
           "3600": 1702.1891
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false,
-          "3000": true
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14078,11 +13092,6 @@
         "setPoints": {
           "1700": 1555.401,
           "1800": 1941.3523
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14135,11 +13144,6 @@
           "1800": 2039.2385
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14190,11 +13194,6 @@
           "1800": 2044.832
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14243,11 +13242,6 @@
         "setPoints": {
           "1700": 1454.718,
           "1800": 1793.1246
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14302,11 +13296,6 @@
           "1900": 1681.2546
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14357,11 +13346,6 @@
           "1700": 1384.7993,
           "1800": 1432.3441,
           "1900": 1656.084
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14416,11 +13400,6 @@
           "1900": 1605.7424
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14471,11 +13450,6 @@
           "1700": 1141.4822,
           "1800": 1222.5879,
           "1900": 1530.2302
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14530,11 +13504,6 @@
           "1900": 1474.2953
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14585,11 +13554,6 @@
           "1700": 526.1976,
           "1800": 864.6041,
           "1900": 1407.1733
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14644,11 +13608,6 @@
           "1900": 1267.3359
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14699,11 +13658,6 @@
           "1700": 417.12436,
           "1800": 621.287,
           "1900": 1300.8969
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14758,11 +13712,6 @@
           "1900": 1465.905
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14813,11 +13762,6 @@
           "1700": 249.31944,
           "1800": 224.14871,
           "1900": 1354.0352
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14872,11 +13816,6 @@
           "1900": 1116.3115
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -14927,11 +13866,6 @@
           "1700": 47.953552,
           "1800": 36.766556,
           "1900": 982.06757
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -14986,11 +13920,6 @@
           "1900": 794.6854
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15041,11 +13970,6 @@
           "1700": -103.07087,
           "1800": -117.05461,
           "1900": 559.75854
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -15100,11 +14024,6 @@
           "1900": 391.9536
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15157,11 +14076,6 @@
           "1900": 31.17306
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": []
     },
     {
@@ -15189,11 +14103,6 @@
         "setPoints": {
           "3200": 1698.8387,
           "3400": 1756.7668
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": []
@@ -15233,11 +14142,6 @@
           "4800": 4176.6304
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": []
     },
     {
@@ -15273,11 +14177,6 @@
           "4200": 4150.4546,
           "4400": 4013.1423,
           "4800": 4176.6304
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -15338,11 +14237,6 @@
           "4800": 4176.6304
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15401,11 +14295,6 @@
           "4800": 4176.6304
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15462,11 +14351,6 @@
           "4200": 4150.4546,
           "4400": 4013.1423,
           "4800": 4176.6304
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -15529,11 +14413,6 @@
           "4800": 4176.6304
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15592,11 +14471,6 @@
           "4200": 4091.2773,
           "4400": 4013.1423,
           "4800": 4176.6304
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -15659,11 +14533,6 @@
           "4800": 4176.6304
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15722,11 +14591,6 @@
           "4200": 3953.1975,
           "4400": 4013.1423,
           "4800": 4176.6304
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -15793,11 +14657,6 @@
           "5300": 4166.5156
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -15862,11 +14721,6 @@
           "4400": 3982.1597,
           "4800": 4136.171,
           "5300": 4136.171
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -15941,11 +14795,6 @@
           "5300": 4158.424
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16016,11 +14865,6 @@
           "4400": 4075.1074,
           "4600": 4163.4834,
           "5300": 4163.4834
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16095,11 +14939,6 @@
           "5300": 4129.093
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16170,11 +15009,6 @@
           "5300": 4100.771
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16241,11 +15075,6 @@
           "4400": 3988.6145,
           "4600": 4051.2085,
           "5300": 4051.2085
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16316,11 +15145,6 @@
           "5300": 4024.91
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16385,11 +15209,6 @@
           "5300": 3993.554
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16440,11 +15259,6 @@
           "5100": 5096.2075,
           "5200": 4690.7036,
           "5300": 5097.3325
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16499,11 +15313,6 @@
           "5300": 5080.4575
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16554,11 +15363,6 @@
           "5100": 5069.2075,
           "5200": 4655.1694,
           "5300": 5066.9575
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16613,11 +15417,6 @@
           "5300": 5053.4575
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16668,11 +15467,6 @@
           "5100": 5060.2075,
           "5200": 4658.0703,
           "5300": 5054.5825
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16727,11 +15521,6 @@
           "5300": 5056.8325
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": []
     },
     {
@@ -16765,11 +15554,6 @@
           "5700": 4652.1816,
           "5750": 4652.1816,
           "5800": 4676.4863
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16830,11 +15614,6 @@
           "5800": 4676.4863
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -16891,11 +15670,6 @@
           "5700": 4646.727,
           "5750": 4646.727,
           "5800": 4676.4863
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -16956,11 +15730,6 @@
           "5800": 4676.4863
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17017,11 +15786,6 @@
           "5700": 4651.636,
           "5750": 4651.636,
           "5800": 4676.4863
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -17082,11 +15846,6 @@
           "5800": 4676.4863
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17145,11 +15904,6 @@
           "5800": 4676.4863
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17206,11 +15960,6 @@
           "5800": 4676.4863
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17261,11 +16010,6 @@
           "4900": 4627.0146,
           "5000": 4676.4863,
           "5700": 4676.4863
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -17322,11 +16066,6 @@
           "5700": 4661.779,
           "5750": 4661.779,
           "5800": 4676.4863
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -17389,11 +16128,6 @@
           "4400": 3751.0837
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17452,11 +16186,6 @@
           "4200": 3616.5447,
           "4300": 3448.3096,
           "4400": 3743.3381
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -17519,11 +16248,6 @@
           "4400": 3721.392
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17582,11 +16306,6 @@
           "4200": 3528.8208,
           "4300": 3465.4343,
           "4400": 3649.0996
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -17649,11 +16368,6 @@
           "4400": 3505.8054
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17714,11 +16428,6 @@
           "4400": 3419.3125
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17775,11 +16484,6 @@
           "4000": 2970.6216,
           "4200": 3273.205,
           "4300": 3324.1565
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -17840,11 +16544,6 @@
           "4300": 3205.7112
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17903,11 +16602,6 @@
           "4300": 3181.4512
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -17962,11 +16656,6 @@
           "3800": 3003.475,
           "4000": 3003.475,
           "4200": 3088.6682
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18025,11 +16714,6 @@
           "4200": 3026.787
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18086,11 +16770,6 @@
           "4200": 2965.4946
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18141,11 +16820,6 @@
           "3400": 2076.6917,
           "3600": 2123.1277,
           "3800": 2920.8328
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18200,11 +16874,6 @@
           "3800": 2858.2922
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18255,11 +16924,6 @@
           "3400": 2077.0693,
           "3600": 2077.0693,
           "3800": 2771.1826
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18314,11 +16978,6 @@
           "3800": 2719.8103
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18369,11 +17028,6 @@
           "3400": 2069.7803,
           "3600": 2069.7803,
           "3800": 2659.5034
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18428,11 +17082,6 @@
           "3800": 2605.8975
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18483,11 +17132,6 @@
           "3400": 2069.7803,
           "3600": 2069.7803,
           "3800": 2570.1602
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18542,11 +17186,6 @@
           "3800": 2478.5833
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18597,11 +17236,6 @@
           "3400": 2069.7803,
           "3600": 2069.7803,
           "3800": 2413.8093
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18656,11 +17290,6 @@
           "3800": 2413.8093
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18711,11 +17340,6 @@
           "3400": 2064.9211,
           "3600": 2064.9211,
           "3800": 2413.8093
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18770,11 +17394,6 @@
           "3800": 2355.7363
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18825,11 +17444,6 @@
           "3400": 2120.7285,
           "3600": 2120.7285,
           "3800": 2355.7363
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18884,11 +17498,6 @@
           "3800": 2255.225
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -18935,11 +17544,6 @@
       "yInterpolator": {
         "setPoints": {
           "3400": 2149.4607
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -18990,11 +17594,6 @@
           "3400": 2081.411
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -19041,11 +17640,6 @@
       "yInterpolator": {
         "setPoints": {
           "3400": 2026.9711
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -19096,11 +17690,6 @@
           "3400": 1958.9213
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -19149,11 +17738,6 @@
           "3400": 1791.065
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": []
     },
     {
@@ -19179,11 +17763,6 @@
       "yInterpolator": {
         "setPoints": {
           "0": 3679.5686
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -19234,11 +17813,6 @@
           "0": 3607.8315
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -19285,11 +17859,6 @@
       "yInterpolator": {
         "setPoints": {
           "0": 3477.1677
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -19340,11 +17909,6 @@
           "0": 3223.5264
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -19391,11 +17955,6 @@
       "yInterpolator": {
         "setPoints": {
           "0": 3126.169
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [
@@ -19446,11 +18005,6 @@
           "0": 3067.2422
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -19499,11 +18053,6 @@
           "0": 3205.592
         }
       },
-      "death": {
-        "setPoints": {
-          "0": false
-        }
-      },
       "edges": [
         {
           "collectionID": {
@@ -19550,11 +18099,6 @@
       "yInterpolator": {
         "setPoints": {
           "0": 3459.2336
-        }
-      },
-      "death": {
-        "setPoints": {
-          "0": false
         }
       },
       "edges": [

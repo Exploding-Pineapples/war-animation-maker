@@ -257,13 +257,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public <T extends ObjectClickable> ArrayList<T> selectNewScreenObject(float x, float y, ArrayList<T> selected, Class<T> type) {
-        ArrayList<T> selectedThings = animation.selectObjectWithType(x, y, type);
+        ArrayList<T> selectedThings = animation.selectObjectWithType(x, y, time, type);
         selectedThings.removeIf(selected::contains);
         return selectedThings;
     }
 
     public <T extends ObjectClickable> T selectScreenObject(float x, float y, Class<T> type) {
-        return firstOrNull(animation.selectObjectWithType(x, y, type));
+        return firstOrNull(animation.selectObjectWithType(x, y, time, type));
     }
 
     public boolean touchDown(int x, int y, int pointer, int button) {
@@ -273,11 +273,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (paused) {
             if (touchMode == TouchMode.DEFAULT) { // Default behavior: select an object to show info about it
-                ArrayList<ScreenObject> selectedThings = animation.selectObjectWithType(x, y, ScreenObject.class);
+                ArrayList<ScreenObject> selectedThings = animation.selectObjectWithType(x, y, time, ScreenObject.class);
                 if (!selectedThings.isEmpty()) {
                     switchSelected(selectedThings.get(0));
                 } else {
-                    switchSelected(animation.selectObjectWithType(x, y, Edge.class));
+                    switchSelected(animation.selectObjectWithType(x, y, time, Edge.class));
                 }
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
@@ -305,7 +305,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (touchMode == TouchMode.NEW_EDGE) {
                 if (selected == null || selected.getClass() != Node.class) {
-                    switchSelected((Node) firstOrNull(animation.selectObjectWithType(x, y, Node.class)));
+                    switchSelected((Node) firstOrNull(animation.selectObjectWithType(x, y, time, Node.class)));
                     updateNewEdgeInputs();
                 } else {
                     Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
@@ -313,7 +313,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         if (newEdgeCollectionID == animation.getEdgeCollectionId(true) + 1) {
                             animation.getEdgeCollectionId();
                         }
-                        animation.getEdgeHandler().addEdge((Node) selected, newSelection, time, newEdgeCollectionID);
+                        animation.getNodeEdgeHandler().addEdge((Node) selected, newSelection, time, newEdgeCollectionID);
                         System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
                     }
                     switchSelected(newSelection);
@@ -681,12 +681,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Set a camera zoom set point", Input.Keys.Z).requiresControl(true).build());
         //Key presses which require control pressed and selected
         actions.add(Action.createBuilder(() -> {
-            if (selected != null) {
-                if (selected.getClass().isAssignableFrom(Node.class)) {
-                    ((Node) selected).getDeath().newSetPoint(time, !((Node) selected).getDeath().getValue());
-                    System.out.println("Set death of " + selected + " to " + ((Node) selected).getDeath().getValue());
-                }
-            }
             for (Edge edge : selectedEdges) {
                 edge.getDeath().newSetPoint(time, !edge.getDeath().getValue());
                 System.out.println("Set death of " + edge + " to " + edge.getDeath().getValue());
@@ -705,7 +699,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 animation.deleteObject(selected);
             }
             for (Edge edge : selectedEdges) {
-                animation.getEdgeHandler().removeEdge(edge);
+                animation.getNodeEdgeHandler().removeEdge(edge);
             }
             System.out.println("Deleted object");
             clearSelected();

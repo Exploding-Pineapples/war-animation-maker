@@ -12,7 +12,7 @@ class PCHIPInterpolator<I : Number>(x: Array<I>, y: Array<Double>) : Interpolato
     }
 
     // Function to compute the PCHIP slopes
-    fun computeSlopes(x: Array<I>, y: Array<Double>): DoubleArray {
+    fun computeSlopes(x: Array<I>, y: Array<Double>): DoubleArray { // ChatGPT wrote this
         val n = x.size
 
         if (n < 2) {
@@ -48,7 +48,7 @@ class PCHIPInterpolator<I : Number>(x: Array<I>, y: Array<Double>) : Interpolato
     }
 
     // Method to perform PCHIP interpolation at a given xi
-    override fun interpolateAt(xi: I): Double {
+    override fun interpolateAt(xi: I): Double { // ChatGPT wrote this
         val n = x.size
 
         if (n < 2) {

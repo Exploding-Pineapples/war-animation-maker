@@ -2,21 +2,19 @@ package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
+import kotlin.math.absoluteValue
 
 data class Node(
     override var position: Coordinate,
     override val initTime: Int,
     override val id: NodeID
-) : ScreenObject(), HasDeath, HasID  {
+) : ScreenObject(), HasID  {
     var color: Color = Color.GREEN
     override var xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator = PCHIPInterpolatedFloat(position.y, initTime)
-    override var death = InterpolatedBoolean(false, 0)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     @Transient var visitedBy = mutableListOf<EdgeCollectionID>()
     var edges = mutableListOf<Edge>()
@@ -29,22 +27,31 @@ data class Node(
         screenPosition = Coordinate(0f, 0f)
     }
 
+    override fun clicked(x: Float, y: Float): Boolean
+    {
+        if (screenPosition == null) {
+            return false
+        }
+        return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
+    }
+
     fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
-        if (edges == null) { // Edges not serialized
-            edges = mutableListOf()
+        if (time == initTime) {
+            if (edges == null) { // Edges not serialized
+                edges = mutableListOf()
+            }
+            if (visitedBy == null) { // Visited by not serialized
+                visitedBy = mutableListOf()
+            }
+
+            visitedBy.clear() // Clear to prepare to be traversed
+            color = Color.GREEN
+
+            updateScreenPosition(camera.zoom, camera.position.x, camera.position.y)
         }
-        if (visitedBy == null) { // Visited by not serialized
-            visitedBy = mutableListOf()
-        }
-        visitedBy.clear() // Clear to prepare to be traversed
-        color = if (goToTime(time, camera.zoom, camera.position.x, camera.position.y)) {
-            Color.GREEN
-        } else {
-            Color.YELLOW
-        }
-        death.update(time)
-        if (death.value) {
-            color = Color.RED
+        edges.forEach {
+            it.prepare(time)
+            it.screenCoords.clear()
         }
     }
 }
