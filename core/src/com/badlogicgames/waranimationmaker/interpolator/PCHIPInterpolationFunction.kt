@@ -25,7 +25,7 @@ class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : In
 
         // Calculate h and delta
         for (i in 0 until n - 1) {
-            h[i] = x[i + 1] as Double - x[i] as Double
+            h[i] = x[i + 1].toDouble() - x[i].toDouble()
             delta[i] = (y[i + 1] - y[i]) / h[i]
         }
 
@@ -52,14 +52,14 @@ class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : In
         val n = i.size
 
         if (n < 2) {
-            return o[0]!!
+            return o[0]
         }
 
-        if ((at as Double) < (i[0] as Double)) {
-            return o[0]!!
+        if ((at.toDouble()) < (i[0].toDouble())) {
+            return o[0]
         }
-        if (at as Double > i[n - 1] as Double) {
-            return o[n - 1]!!
+        if (at.toDouble() > i[n - 1].toDouble()) {
+            return o[n - 1]
         }
 
         // Find the interval [x_k, x_{k+1}] where xi lies
@@ -70,8 +70,8 @@ class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : In
         k = max(0.0, min(k.toDouble(), (n - 2).toDouble())).toInt()
 
         // Calculate the cubic polynomial coefficients
-        val h = i[k + 1] as Double - i[k] as Double
-        val t = (at as Double - i[k] as Double) / h
+        val h = i[k + 1].toDouble() - i[k].toDouble()
+        val t = (at.toDouble() - i[k].toDouble()) / h
         val t2 = t * t
         val t3 = t2 * t
 
@@ -81,6 +81,6 @@ class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : In
         val h11 = t3 - t2
 
         // Interpolated value
-        return h00 * o[k]!! + h10 * h * slopes[k] + h01 * o[k + 1]!! + h11 * h * slopes[k + 1]
+        return h00 * o[k] + h10 * h * slopes[k] + h01 * o[k + 1] + h11 * h * slopes[k + 1]
     }
 }
