@@ -6,80 +6,55 @@ import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.SelectBoxInput
 import com.badlogicgames.waranimationmaker.TextInput
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
+import com.badlogicgames.waranimationmaker.interpolator.NodeCollectionInterpolator
 
-open class NodeCollection(override val id: EdgeCollectionID) : HasInputs, HasID {
-    @Transient var nodes: MutableList<Node> = mutableListOf()
-    var edgeCollectionStrategy: AnyEdgeCollectionStrategy = EdgeCollectionStrategy<NodeCollectionContext>()
-    var edgeCollectionContext: AnyNodeCollectionContext = NodeCollectionContext(nodes, AreaColor.RED)
+open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID, HasAlpha, HasColor {
+    override var alpha = LinearInterpolatedFloat(1f, 0)
+    @Transient var interpolator: NodeCollectionInterpolator = NodeCollectionInterpolator()
+    override var color: AreaColor = AreaColor.RED
+    var type: String = "None"
+    var width: Float? = null
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
 
     override fun buildInputs() {
-        super.buildInputs()
+        super<HasInputs>.buildInputs()
+        super<HasAlpha>.buildInputs()
+        super<HasColor>.buildInputs()
 
         inputElements.add(
-            TextInput(null, { input ->
-                if (input != null) {
-                    for (color in AreaColor.entries) {
-                        if (input == color.name) {
-                            this.edgeCollectionContext?.color = color
-                        }
-                    }
-                }
-            }, label@{
-                return@label edgeCollectionContext?.color?.name
-            }, String::class.java, "Set color")
-        )
-        inputElements.add(
             SelectBoxInput(null, { input ->
-                if (input == "Area") {
-                    edgeCollectionContext = AreaContext()
-                    (edgeCollectionContext as AreaContext).nodes = nodes
-                    edgeCollectionStrategy = AreaStrategy()
+                type = input?: "None"
+                if (type == "Line") {
+                    width = 5f
                 }
-                if (input == "Line") {
-                    edgeCollectionContext = LineContext()
-                    (edgeCollectionContext as LineContext).nodes = nodes
-                    edgeCollectionStrategy = LineStrategy()
-                }
-                edgeCollectionContext.init()
             }, label@{
-                return@label edgeCollectionStrategy.javaClass.simpleName.substring(0, edgeCollectionStrategy.javaClass.simpleName.length - "Strategy".length )
-            }, String::class.java, "Set edge collection type", Array<String>().apply { add("Area", "Line") })
+                return@label type
+            }, String::class.java, "Set node collection type", Array<String>().apply { add("Area", "Line") })
         )
-        edgeCollectionContext.init()
+    }
+
+    fun init(initTime: Int) {
+        alpha.update(initTime)
+        if (interpolator == null) {
+            interpolator = NodeCollectionInterpolator()
+        }
     }
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
-        edgeCollectionContext.showInputs(verticalGroup, uiVisitor)
     }
 
     override fun hideInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
-        super.hideInputs(verticalGroup, uiVisitor)
-        edgeCollectionContext.hideInputs(verticalGroup, uiVisitor)
-    }
-
-    fun prepare() {
-        if (nodes == null) {
-            nodes = mutableListOf()
-        }
-        nodes.clear()
-        edgeCollectionContext.nodes = mutableListOf()
+        super<HasInputs>.hideInputs(verticalGroup, uiVisitor)
+        super<HasAlpha>.hideInputs(verticalGroup, uiVisitor)
     }
 
     fun update(time: Int, paused: Boolean) {
-        edgeCollectionContext.nodes.addAll(nodes)
-        edgeCollectionStrategy.updateAny(time, paused, edgeCollectionContext)
+        if (!paused) alpha.update(time)
     }
 
-    fun draw(drawer: Drawer) {
-        if (edgeCollectionStrategy == null) {
-            edgeCollectionStrategy = EdgeCollectionStrategy<NodeCollectionContext>()
-            //println("Edge collection strategy not set for update")
-        }
-        if (edgeCollectionContext == null) {
-            edgeCollectionContext = NodeCollectionContext(nodes, AreaColor.RED)
-        }
-        edgeCollectionStrategy.drawAny(drawer, edgeCollectionContext)
+    fun draw(drawer: Drawer, time: Int) {
+        drawer.drawNodeCollection(this, time)
     }
 }

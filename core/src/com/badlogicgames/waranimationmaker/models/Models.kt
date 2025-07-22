@@ -123,7 +123,7 @@ interface HasAlpha : HasInputs {
     }
 }
 
-interface ObjectWithColor : HasInputs {
+interface HasColor : HasInputs {
     var color: AreaColor
 
     override fun buildInputs() {
@@ -160,8 +160,8 @@ interface ID : Comparable<ID>, AbstractTypeSerializable {
     }
 }
 
-class EdgeCollectionID(override val value: Int = -1) : ID {
-    override fun getAbstractType() = EdgeCollectionID::class.java
+class NodeCollectionID(override val value: Int = -1) : ID {
+    override fun getAbstractType() = NodeCollectionID::class.java
 }
 
 class NodeID(override val value: Int = -1) : ID {

@@ -26,7 +26,6 @@ import static java.lang.Math.round;
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 75;
     public static final int DEFAULT_UNIT_HEIGHT = 75;
-    public static final int LINES_PER_NODE = 12; // Number of straight lines per node on a spline
 
     WarAnimationMaker game; // Contains some variables common to all screens
     OrthographicCamera orthographicCamera; // Camera whose properties directly draw the screen
@@ -52,11 +51,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     SelectBoxInput<String> createSelectBoxInput;
 
     GL20 gl;
-    ShapeRenderer shapeRenderer; // Draws all geometric shapes
+    ShapeRenderer shapeRenderer;
     Drawer drawer;
 
     //UI
-    Stage stage; // Entire UI is drawn to this
+    Stage stage;
     Table selectedInfoTable;
     VerticalGroup selectedGroup;
     Table leftPanel;
@@ -131,7 +130,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         newEdgeCollectionID = 0;
         Array<Integer> idChoices = new Array<>();
-        idChoices.add(animation.getEdgeCollectionId(true));
+        idChoices.add(animation.getNodeCollectionID());
         for (NodeCollection nodeCollection : animation.getNodeCollections()) {
             idChoices.add(nodeCollection.getId().getValue());
         }
@@ -240,7 +239,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (!newSelections.isEmpty()) {
             for (Edge newSelection : newSelections) {
                 System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
-                NodeCollection nodeCollection = animation.getEdgeCollectionByID(new EdgeCollectionID(newSelection.getCollectionID().getValue()));
+                NodeCollection nodeCollection = animation.getEdgeCollectionByID(new NodeCollectionID(newSelection.getCollectionID().getValue()));
                 if (nodeCollection != null) {
                     System.out.println("selected edge collection " + nodeCollection.getId().getValue());
                     selectedNodeCollections.add(nodeCollection);
@@ -287,12 +286,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         if (!selectedNodes.isEmpty()) {
                             //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
                             Node newSelection = selectedNodes.get(0);
-                            selected.newSetPoint(time, newSelection.getPosition().getX(), newSelection.getPosition().getY());
+                            selected.setPosition(new Coordinate(newSelection.getPosition().getX(), newSelection.getPosition().getY()));
                             clearSelected();
                             return true;
                         }
                     }
-                    selected.newSetPoint(time, mouseX, mouseY);
+                    selected.setPosition(new Coordinate(mouseX, mouseY));
                     clearSelected();
                     return true;
                 }
@@ -310,8 +309,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 } else {
                     Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
                     if (newSelection != null) {
-                        if (newEdgeCollectionID == animation.getEdgeCollectionId(true) + 1) {
-                            animation.getEdgeCollectionId();
+                        if (newEdgeCollectionID == animation.getNodeCollectionID()) {
+                            animation.getNodeCollectionID();
                         }
                         animation.getNodeEdgeHandler().addEdge((Node) selected, newSelection, time, newEdgeCollectionID);
                         System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
@@ -446,7 +445,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 }
                 for (NodeCollection nodeCollection : selectedNodeCollections) {
                     selectedInfo.append("Selected ").append(nodeCollection.getClass().getSimpleName()).append(": \n");
-                    selectedInfo.append("# Edges: ").append(nodeCollection.getNodes().size()).append("\n");
                     selectedInfo.append("EdgeCollectionID: ").append(nodeCollection.getId().getValue()).append("\n");
                 }
             }
@@ -471,7 +469,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (touchMode == TouchMode.NEW_EDGE) {
                 Array<Integer> idChoices = new Array<>();
-                idChoices.add(animation.getEdgeCollectionId(true) + 1);
+                idChoices.add(animation.getNodeCollectionID());
                 for (NodeCollection nodeCollection : animation.getNodeCollections()) {
                     idChoices.add(nodeCollection.getId().getValue());
                 }
@@ -539,7 +537,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public void render(float delta) {
         update();
 
-        animation.draw(drawer);
+        animation.draw(drawer, time);
 
         if (animationMode) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -605,9 +603,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 }
             }
             for (NodeCollection selectedNodeCollection : selectedNodeCollections) {
-                if (HasAlpha.class.isAssignableFrom(selectedNodeCollection.getEdgeCollectionContext().getClass())) {
-                    ((HasAlpha) selectedNodeCollection.getEdgeCollectionContext()).getAlpha().newSetPoint(time, ((HasAlpha) selectedNodeCollection.getEdgeCollectionContext()).getAlpha().getValue());
-                    System.out.println("set new alpha set point, set points: " + ((HasAlpha) selectedNodeCollection.getEdgeCollectionContext()).getAlpha().getSetPoints());
+                if (!selectedNodeCollection.getType().equals("None")) {
+                    selectedNodeCollection.getAlpha().newSetPoint(time, selectedNodeCollection.getAlpha().getValue());
+                    System.out.println("set new alpha set point, set points: " + selectedNodeCollection.getAlpha().getSetPoints());
                 }
             }
             return null;

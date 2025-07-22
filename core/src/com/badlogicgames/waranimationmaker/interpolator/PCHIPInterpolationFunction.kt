@@ -4,7 +4,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 // this is a java number which isn't rly the saME AS KOTLIN number, uu should converr this class  to kotlin first of all 
-class PCHIPInterpolator<I : Number>(x: Array<I>, y: Array<Double>) : Interpolator<I, Double>(x, y) {
+class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : InterpolationFunction<I, Double>(x, y) {
     protected val slopes: DoubleArray
 
     init {
@@ -48,30 +48,30 @@ class PCHIPInterpolator<I : Number>(x: Array<I>, y: Array<Double>) : Interpolato
     }
 
     // Method to perform PCHIP interpolation at a given xi
-    override fun interpolateAt(xi: I): Double { // ChatGPT wrote this
-        val n = x.size
+    override fun evaluate(at: I): Double { // ChatGPT wrote this
+        val n = i.size
 
         if (n < 2) {
-            return y[0]!!
+            return o[0]!!
         }
 
-        if ((xi as Double) < (x[0] as Double)) {
-            return y[0]!!
+        if ((at as Double) < (i[0] as Double)) {
+            return o[0]!!
         }
-        if (xi as Double > x[n - 1] as Double) {
-            return y[n - 1]!!
+        if (at as Double > i[n - 1] as Double) {
+            return o[n - 1]!!
         }
 
         // Find the interval [x_k, x_{k+1}] where xi lies
-        var k = x.binarySearch(xi)
+        var k = i.binarySearch(at)
         if (k < 0) {
             k = -k - 2
         }
         k = max(0.0, min(k.toDouble(), (n - 2).toDouble())).toInt()
 
         // Calculate the cubic polynomial coefficients
-        val h = x[k + 1] as Double - x[k] as Double
-        val t = (xi as Double - x[k] as Double) / h
+        val h = i[k + 1] as Double - i[k] as Double
+        val t = (at as Double - i[k] as Double) / h
         val t2 = t * t
         val t3 = t2 * t
 
@@ -81,6 +81,6 @@ class PCHIPInterpolator<I : Number>(x: Array<I>, y: Array<Double>) : Interpolato
         val h11 = t3 - t2
 
         // Interpolated value
-        return h00 * y[k]!! + h10 * h * slopes[k] + h01 * y[k + 1]!! + h11 * h * slopes[k + 1]
+        return h00 * o[k]!! + h10 * h * slopes[k] + h01 * o[k + 1]!! + h11 * h * slopes[k + 1]
     }
 }

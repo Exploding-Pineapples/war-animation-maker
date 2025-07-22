@@ -5,7 +5,7 @@ import com.badlogicgames.waranimationmaker.utilities.toDoubleArray
 class PCHIPInterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int, Float>(initValue, initTime) {
 
     @Transient
-    override var interpolator = PCHIPInterpolator(arrayOf(initTime.toDouble()), arrayOf(initValue.toDouble())).map({
+    override var interpolationFunction = PCHIPInterpolationFunction(arrayOf(initTime.toDouble()), arrayOf(initValue.toDouble())).map({
         it.toInt()
     }, {
         it.toFloat()
@@ -15,11 +15,11 @@ class PCHIPInterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValu
 
     init {
         setPoints[initTime] = initValue
-        updateInterpolator()
+        updateInterpolationFunction()
     }
 
-    override fun updateInterpolator() {
-        interpolator = PCHIPInterpolator(
+    override fun updateInterpolationFunction() {
+        interpolationFunction = PCHIPInterpolationFunction(
             setPoints.keys.toDoubleArray(),
             setPoints.values.toDoubleArray()
         ).map({ it.toInt() }, { it.toFloat() }, { it.toDouble() })

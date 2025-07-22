@@ -4,10 +4,11 @@ import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID
 import org.joml.Vector2f
 
-class Edge(val collectionID: InterpolatedID,
-           var segment: Pair<NodeID, NodeID>,
-           @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
-           override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
+class Edge(
+    var collectionID: NodeCollectionID,
+    var segment: Pair<NodeID, NodeID>,
+    @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
+    override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
 ) : HasDeath, ObjectClickable {
     override fun clicked(x: Float, y: Float): Boolean {
         if (screenCoords.isNotEmpty()) {
@@ -40,7 +41,6 @@ class Edge(val collectionID: InterpolatedID,
     fun prepare(time: Int) {
         screenCoords = mutableListOf()
         death.update(time)
-        collectionID.update(time)
     }
 
     companion object {

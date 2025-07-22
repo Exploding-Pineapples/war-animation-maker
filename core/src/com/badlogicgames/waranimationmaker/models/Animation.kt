@@ -12,7 +12,7 @@ data class Animation @JvmOverloads constructor(
     val arrows: MutableList<Arrow> = mutableListOf(),
     val mapLabels: MutableList<MapLabel> = mutableListOf(),
     var images: MutableList<Image> = mutableListOf(),
-    private var edgeCollectionId: Int = 0,
+    var nodeCollectionID: Int = 0,
     var nodeId: Int = 0,
     val linesPerNode: Int = 12,
     var initTime: Int = 0
@@ -20,21 +20,12 @@ data class Animation @JvmOverloads constructor(
 {
     @Transient var nodeEdgeHandler = NodeEdgeHandler(this)
 
-    fun getEdgeCollectionId(): Int {
-        edgeCollectionId++
-        return edgeCollectionId
-    }
-
-    fun getEdgeCollectionId(noIncrement: Boolean): Int {
-        if (!noIncrement) {
-            edgeCollectionId++
-        }
-        return edgeCollectionId
-    }
-
     fun init() {
         nodeEdgeHandler = NodeEdgeHandler(this)
-        units.forEach { it.alpha.update(initTime) }
+        nodes.forEach { it.init() }
+        nodeCollections.forEach { it.init(initTime) }
+        nodeEdgeHandler.updateNodeCollections()
+        units.forEach { it.init(initTime) }
         mapLabels.forEach { it.alpha.update(initTime) }
         arrows.forEach { it.alpha.update(initTime) }
         images.forEach { it.alpha.update(initTime); it.loadTexture() }
@@ -53,7 +44,7 @@ data class Animation @JvmOverloads constructor(
 
     fun deleteObject(obj: Object): Boolean {
         if (obj.javaClass == Node::class.java) {
-            return nodeEdgeHandler.remove(obj as Node)
+            return nodeEdgeHandler.removeNode(obj as Node)
         }
         if (obj.javaClass == Image::class.java) {
             return images.remove(obj as Image)
@@ -70,7 +61,7 @@ data class Animation @JvmOverloads constructor(
         return false
     }
 
-    fun getEdgeCollectionByID(id: EdgeCollectionID): NodeCollection? {
+    fun getEdgeCollectionByID(id: NodeCollectionID): NodeCollection? {
         return nodeCollections.find { it.id.value == id.value }
     }
 
@@ -79,8 +70,7 @@ data class Animation @JvmOverloads constructor(
     fun newNode(x: Float, y: Float, time: Int): Node {
         val node = Node(Coordinate(x, y), time, NodeID(nodeId))
         node.buildInputs()
-        nodes.add(node)
-        nodeId++
+        nodeEdgeHandler.addNode(node)
         return node
     }
 
@@ -161,10 +151,12 @@ data class Animation @JvmOverloads constructor(
     }
 
     fun getParents(node: Object) : List<NodeCollection> {
+        nodeCollections.forEach { println(it.interpolator.setPoints) }
         return if (node.javaClass == Node::class.java) {
             nodeCollections.filter {
-                    nodeCollection -> (nodeCollection.nodes.find { it.id.value == (node as Node).id.value } != null)
+                    nodeCollection -> (nodeCollection.interpolator.setPoints[node.initTime]?.nodes?.find { it.id.value == (node as Node).id.value } != null)
             }
+
         } else {
             mutableListOf()
         }
@@ -187,7 +179,7 @@ data class Animation @JvmOverloads constructor(
         mapLabels.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
     }
 
-    fun draw(drawer: Drawer) {
-        drawer.draw(this)
+    fun draw(drawer: Drawer, time: Int) {
+        drawer.draw(this, time)
     }
 }

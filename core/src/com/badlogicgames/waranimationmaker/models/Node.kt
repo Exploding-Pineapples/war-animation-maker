@@ -16,7 +16,7 @@ data class Node(
     override var xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator = PCHIPInterpolatedFloat(position.y, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
-    @Transient var visitedBy = mutableListOf<EdgeCollectionID>()
+    @Transient var visitedBy = mutableListOf<NodeCollectionID>()
     var edges = mutableListOf<Edge>()
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
@@ -35,15 +35,24 @@ data class Node(
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
 
+    fun init() {
+        if (edges == null) { // Edges not serialized
+            edges = mutableListOf()
+        }
+
+        edges.forEach { it.prepare(initTime) }
+
+        if (visitedBy == null) { // Visited by not serialized
+            visitedBy = mutableListOf()
+        }
+
+        if (screenPosition == null) {
+            screenPosition = Coordinate(0f, 0f)
+        }
+    }
+
     fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
         if (time == initTime) {
-            if (edges == null) { // Edges not serialized
-                edges = mutableListOf()
-            }
-            if (visitedBy == null) { // Visited by not serialized
-                visitedBy = mutableListOf()
-            }
-
             visitedBy.clear() // Clear to prepare to be traversed
             color = Color.GREEN
 

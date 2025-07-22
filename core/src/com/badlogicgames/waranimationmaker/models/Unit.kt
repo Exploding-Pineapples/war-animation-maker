@@ -1,13 +1,6 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.GlyphLayout
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.*
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
@@ -17,7 +10,7 @@ data class Unit(
     override var position: Coordinate,
     override val initTime: Int,
     var image: String = ""
-) : ScreenObject(), HasAlpha, ObjectWithColor {
+) : ScreenObject(), HasAlpha, HasColor {
     override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
     override val alpha: LinearInterpolatedFloat = LinearInterpolatedFloat(1f, initTime)
@@ -37,10 +30,18 @@ data class Unit(
         uiVisitor.show(verticalGroup ,this)
     }
 
+    fun init(initTime: Int) {
+        if (color == null) {
+            color = AreaColor.BLUE
+        }
+
+        alpha.update(initTime)
+    }
+
     override fun buildInputs() {
         super<ScreenObject>.buildInputs()
         super<HasAlpha>.buildInputs()
-        super<ObjectWithColor>.buildInputs()
+        super<HasColor>.buildInputs()
 
         inputElements.add(TextInput(null, { input ->
             size = input?: ""

@@ -5,7 +5,10 @@ import com.badlogicgames.waranimationmaker.utilities.toDoubleArray
 class LinearInterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedValue<Int, Float>(initValue, initTime) {
 
     @Transient
-    override var interpolator = LinearInterpolator(arrayOf(initTime.toDouble()), arrayOf(initValue.toDouble())).map({
+    override var interpolationFunction = LinearInterpolationFunction(
+        arrayOf(initTime.toDouble()),
+        arrayOf(initValue.toDouble())
+    ).map({
         it.toInt()
     }, {
         it.toFloat()
@@ -15,11 +18,11 @@ class LinearInterpolatedFloat(initValue: Float, initTime: Int) : InterpolatedVal
 
     init {
         setPoints[initTime] = initValue
-        updateInterpolator()
+        updateInterpolationFunction()
     }
 
-    override fun updateInterpolator() {
-        interpolator = LinearInterpolator(
+    override fun updateInterpolationFunction() {
+        interpolationFunction = LinearInterpolationFunction(
             setPoints.keys.toDoubleArray(),
             setPoints.values.toDoubleArray()
         ).map({ it.toInt() }, { it.toFloat() }, { it.toDouble() })

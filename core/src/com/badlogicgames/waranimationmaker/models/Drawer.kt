@@ -14,6 +14,7 @@ import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.models.Unit.Companion.sizePresets
+import earcut4j.Earcut
 import kotlin.math.min
 import kotlin.math.sqrt
 
@@ -35,7 +36,7 @@ class Drawer(val font: BitmapFont,
         zoomFactor = 1f
     }
 
-    fun draw(animation: Animation) {
+    fun draw(animation: Animation, time: Int) {
         Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
@@ -54,8 +55,8 @@ class Drawer(val font: BitmapFont,
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         for (edgeCollection in animation.nodeCollections) {
-            if (edgeCollection.edgeCollectionStrategy.javaClass == AreaStrategy::class.java) {
-                edgeCollection.draw(this)
+            if (edgeCollection.type == "Area") {
+                drawNodeCollection(edgeCollection, time)
             }
         }
 
@@ -73,8 +74,8 @@ class Drawer(val font: BitmapFont,
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         for (edgeCollection in animation.nodeCollections) {
-            if (edgeCollection.edgeCollectionStrategy.javaClass == LineStrategy::class.java) {
-                edgeCollection.draw(this)
+            if (edgeCollection.type == "Line") {
+                drawNodeCollection(edgeCollection, time)
             }
         }
 
@@ -87,29 +88,47 @@ class Drawer(val font: BitmapFont,
         shapeRenderer.end()
     }
 
-    fun drawLine(context: LineContext) {
-        val nodes = context.nodes
-        if (nodes.isNotEmpty()) {
-            shapeRenderer.color = colorWithAlpha(context.color.color, context.alpha.value)
-            for (i in 0..<nodes.lastIndex) {
-                val node = nodes[i]
-                val edge = node.edges.find { it.segment.second.value == nodes[i + 1].id.value }!!
-                for (j in 0 until edge.screenCoords.lastIndex)
-                    shapeRenderer.rectLine(
-                        edge.screenCoords[j].x,
-                        edge.screenCoords[j].y,
-                        edge.screenCoords[j + 1].x,
-                        edge.screenCoords[j + 1].y,
-                        context.width
-                    )
-            }
-        }
-    }
+    fun drawNodeCollection(nodeCollection: NodeCollection, time: Int) {
+        if (nodeCollection.interpolator.setPoints.isNotEmpty() && !(time < nodeCollection.interpolator.setPoints.keys.first() || time > nodeCollection.interpolator.setPoints.keys.last())) {
+            // Only draw if time is within defined time
+            if (nodeCollection.type == "Area") {
+                val poly =
+                    nodeCollection.interpolator.evaluate(time).flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }
+                        .toDoubleArray()
 
-    fun drawArea(areaStrategy: AreaStrategy, context: AreaContext) {
-        shapeRenderer.color = context.color.color
-        for (triangle in areaStrategy.drawPoly) {
-            shapeRenderer.triangle(triangle[0], triangle[1], triangle[2], triangle[3], triangle[4], triangle[5])
+                val earcut =
+                    Earcut.earcut(poly) // Turns polygon into series of triangles which share vertices with the polygon. The triangles' vertices are represented as the index of an original polygon vertex
+
+                shapeRenderer.color = nodeCollection.color.color
+
+                var j = 0
+                while (j < earcut.size) {
+                    shapeRenderer.triangle(
+                        poly[earcut[j] * 2].toFloat(),
+                        poly[earcut[j] * 2 + 1].toFloat(),
+                        poly[earcut[j + 1] * 2].toFloat(),
+                        poly[earcut[j + 1] * 2 + 1].toFloat(),
+                        poly[earcut[j + 2] * 2].toFloat(),
+                        poly[earcut[j + 2] * 2 + 1].toFloat()
+                    )
+                    j += 3
+                }
+            }
+            if (nodeCollection.type == "Line") {
+                val coordinates = nodeCollection.interpolator.evaluate(time)
+                if (coordinates.isNotEmpty()) {
+                    shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
+                    for (i in 0..<coordinates.lastIndex) {
+                        shapeRenderer.rectLine(
+                            coordinates[i].x,
+                            coordinates[i].y,
+                            coordinates[i + 1].x,
+                            coordinates[i + 1].y,
+                            nodeCollection.width ?: 5f
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -129,10 +148,6 @@ class Drawer(val font: BitmapFont,
             }
         } else {
             val padding = unit.width / 16
-
-            if (unit.color == null) {
-                unit.color = AreaColor.BLUE
-            }
 
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             shapeRenderer.color = colorWithAlpha(unit.color.color, unit.alpha.value)
@@ -207,8 +222,8 @@ class Drawer(val font: BitmapFont,
     fun draw(arrow: Arrow) {
         var previous = projectToScreen(
             Coordinate(
-                arrow.xInterpolator.interpolator.interpolateAt(arrow.xInterpolator.setPoints.keys.first()),
-                arrow.yInterpolator.interpolator.interpolateAt(arrow.xInterpolator.setPoints.keys.first())
+                arrow.xInterpolator.interpolationFunction.evaluate(arrow.xInterpolator.setPoints.keys.first()),
+                arrow.yInterpolator.interpolationFunction.evaluate(arrow.xInterpolator.setPoints.keys.first())
             ), camera.zoom, camera.position.x, camera.position.y
         )
 
@@ -219,8 +234,8 @@ class Drawer(val font: BitmapFont,
         for (time in arrow.xInterpolator.setPoints.keys.first().toInt()..endTime) { // Draws entire body of arrow
             val position = projectToScreen(
                 Coordinate(
-                    arrow.xInterpolator.interpolator.interpolateAt(time),
-                    arrow.yInterpolator.interpolator.interpolateAt(time)
+                    arrow.xInterpolator.interpolationFunction.evaluate(time),
+                    arrow.yInterpolator.interpolationFunction.evaluate(time)
                 ), camera.zoom, camera.position.x, camera.position.y
             )
             shapeRenderer.rectLine(previous.x, previous.y, position.x, position.y, arrow.thickness)
@@ -297,12 +312,12 @@ class Drawer(val font: BitmapFont,
 
             shapeRenderer.color = Color.SKY
             for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
+                val position = projectToScreen(Coordinate(xInterpolator.interpolationFunction.evaluate(time), yInterpolator.interpolationFunction.evaluate(time)), camera.zoom, camera.position.x, camera.position.y)
                 shapeRenderer.circle(position.x, position.y, 2f)
             }
             shapeRenderer.color = Color.PURPLE
             for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
-                val position = projectToScreen(Coordinate(xInterpolator.interpolator.interpolateAt(time), yInterpolator.interpolator.interpolateAt(time)), camera.zoom, camera.position.x, camera.position.y)
+                val position = projectToScreen(Coordinate(xInterpolator.interpolationFunction.evaluate(time), yInterpolator.interpolationFunction.evaluate(time)), camera.zoom, camera.position.x, camera.position.y)
                 shapeRenderer.circle(position.x, position.y, 4f)
             }
         }

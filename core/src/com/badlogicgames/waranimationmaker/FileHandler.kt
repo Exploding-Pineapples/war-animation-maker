@@ -11,8 +11,6 @@ object FileHandler {
         .setLongSerializationPolicy(LongSerializationPolicy.STRING)
         .serializeNulls()
         .registerTypeAdapter(ID::class.java, AbstractTypeSerializer<ID>())
-        .registerTypeAdapter(AnyEdgeCollectionStrategy::class.java, AbstractTypeSerializer<AnyEdgeCollectionStrategy>())
-        .registerTypeAdapter(AnyNodeCollectionContext::class.java, AbstractTypeSerializer<AnyNodeCollectionContext>())
         .create()
 
     val animations = mutableListOf<Animation>()
