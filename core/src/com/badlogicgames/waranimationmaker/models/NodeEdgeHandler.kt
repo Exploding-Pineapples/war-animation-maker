@@ -21,8 +21,9 @@ class NodeEdgeHandler(val animation: Animation) {
             node.edges.removeIf { it.segment.second.value == removeNode.id.value } // Remove all edges that point to the node
         }
         removeNode.edges.clear()
+        val result = animation.nodes.remove(removeNode)
         updateNodeCollections()
-        return animation.nodes.remove(removeNode)
+        return result
     }
 
     fun addEdge(fromNode: Node, toNode: Node, time: Int, id: Int) {

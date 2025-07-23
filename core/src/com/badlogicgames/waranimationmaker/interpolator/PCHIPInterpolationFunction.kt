@@ -4,11 +4,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 // this is a java number which isn't rly the saME AS KOTLIN number, uu should converr this class  to kotlin first of all 
-class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : InterpolationFunction<I, Double>(x, y) {
-    protected val slopes: DoubleArray
+class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: Array<Double>) : InterpolationFunction<I, Double>(i, o) {
+    protected var slopes: DoubleArray
 
     init {
-        this.slopes = computeSlopes(x, y)
+        this.slopes = computeSlopes(i, o)
     }
 
     // Function to compute the PCHIP slopes
@@ -49,6 +49,10 @@ class PCHIPInterpolationFunction<I : Number>(x: Array<I>, y: Array<Double>) : In
 
     // Method to perform PCHIP interpolation at a given xi
     override fun evaluate(at: I): Double { // ChatGPT wrote this
+        if (slopes.size != i.size) {
+            slopes = computeSlopes(i, o)
+        }
+
         val n = i.size
 
         if (n < 2) {

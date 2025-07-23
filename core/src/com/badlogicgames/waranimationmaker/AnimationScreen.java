@@ -26,6 +26,7 @@ import static java.lang.Math.round;
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 75;
     public static final int DEFAULT_UNIT_HEIGHT = 75;
+    public static final double LINE_RESOLUTION = 10.0; // Pixels per straight line
 
     WarAnimationMaker game; // Contains some variables common to all screens
     OrthographicCamera orthographicCamera; // Camera whose properties directly draw the screen
@@ -165,6 +166,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     public static <T> T firstOrNull(ArrayList<T> list) {
         return list.isEmpty()? null : list.get(0);
+    }
+
+    public static boolean onScreen(Coordinate coordinate) {
+        return (coordinate.getX() >= 0 && coordinate.getY() >= 0) && (coordinate.getX() < DISPLAY_WIDTH) && (coordinate.getY() < DISPLAY_HEIGHT);
     }
 
     public void updateCam() {
@@ -393,7 +398,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if ((selected != null) && paused) { // Update the selected object to go to mouse in move mode
             if ((touchMode == TouchMode.MOVE)) {
-                selected.newSetPoint(time, mouseX, mouseY);
+                selected.setPosition(new Coordinate(mouseX, mouseY));
             }
         }
 

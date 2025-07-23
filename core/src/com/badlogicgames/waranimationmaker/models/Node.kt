@@ -52,12 +52,8 @@ data class Node(
     }
 
     fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
-        if (time == initTime) {
-            visitedBy.clear() // Clear to prepare to be traversed
-            color = Color.GREEN
-
-            updateScreenPosition(camera.zoom, camera.position.x, camera.position.y)
-        }
+        visitedBy.clear() // Clear to prepare to be traversed
+        updateScreenPosition(camera.zoom, camera.position.x, camera.position.y)
         edges.forEach {
             it.prepare(time)
             it.screenCoords.clear()

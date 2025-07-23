@@ -93,7 +93,7 @@ class Drawer(val font: BitmapFont,
             // Only draw if time is within defined time
             if (nodeCollection.type == "Area") {
                 val poly =
-                    nodeCollection.interpolator.evaluate(time).flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }
+                    nodeCollection.interpolator.coordinates.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }
                         .toDoubleArray()
 
                 val earcut =

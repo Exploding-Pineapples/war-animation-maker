@@ -5,11 +5,10 @@ import com.badlogic.gdx.utils.Array
 import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.InputElement
 import com.badlogicgames.waranimationmaker.SelectBoxInput
-import com.badlogicgames.waranimationmaker.TextInput
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.NodeCollectionInterpolator
 
-open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID, HasAlpha, HasColor {
+open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID, HasAlpha, HasColor, ObjectClickable {
     override var alpha = LinearInterpolatedFloat(1f, 0)
     @Transient var interpolator: NodeCollectionInterpolator = NodeCollectionInterpolator()
     override var color: AreaColor = AreaColor.RED
@@ -52,9 +51,14 @@ open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID,
 
     fun update(time: Int, paused: Boolean) {
         if (!paused) alpha.update(time)
+        interpolator.evaluate(time)
     }
 
     fun draw(drawer: Drawer, time: Int) {
         drawer.drawNodeCollection(this, time)
+    }
+
+    override fun clicked(x: Float, y: Float): Boolean {
+        TODO("Not yet implemented")
     }
 }
