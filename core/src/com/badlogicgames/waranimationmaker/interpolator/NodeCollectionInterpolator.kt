@@ -1,7 +1,9 @@
 package com.badlogicgames.waranimationmaker.interpolator
 
 import com.badlogicgames.waranimationmaker.AnimationScreen
+import com.badlogicgames.waranimationmaker.models.Animation
 import com.badlogicgames.waranimationmaker.models.Coordinate
+import com.badlogicgames.waranimationmaker.models.NodeCollectionID
 import com.badlogicgames.waranimationmaker.models.NodeCollectionSetPoint
 import java.util.*
 import kotlin.math.max
@@ -76,5 +78,44 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
         this.coordinates = coordinates.toTypedArray()
 
         return this.coordinates
+    }
+
+    fun holdValueUntil(time: Int, animation: Animation) { // Special hold function for NodeCollectionInterpolator since values are objects (pointers), not literals
+        var prevTime: Int? = null
+        var prevValue: NodeCollectionSetPoint? = null
+
+        val frameTimes = setPoints.keys.toList()
+
+        for (i in frameTimes.indices) {
+            val definedTime = frameTimes[i]
+
+            if (definedTime == time) {
+                return
+            }
+
+            if ((definedTime > time) && (prevTime != null)) {
+                val newSetPoint = NodeCollectionSetPoint(time, NodeCollectionID(prevValue!!.id.value))
+                for (node in prevValue.nodes) {
+                    newSetPoint.nodes.add(animation.newNode(node.position.x, node.position.y, time))
+                }
+                setPoints[time] = newSetPoint
+                updateInterpolationFunction()
+
+                println("Added hold frame: $setPoints")
+                return
+            }
+
+            prevTime = definedTime
+            prevValue = setPoints[prevTime]
+        }
+
+        val lastValue = setPoints.values.last()
+        val newSetPoint = NodeCollectionSetPoint(time, NodeCollectionID(lastValue.id.value), lastValue.nodes)
+        for (node in lastValue.nodes) {
+            newSetPoint.nodes.add(animation.newNode(node.position.x, node.position.y, time))
+        }
+        setPoints[time] = newSetPoint
+        updateInterpolationFunction()
+        print(setPoints)
     }
 }

@@ -631,10 +631,16 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Toggle animation mode", Input.Keys.V).build());
         // Selection required
         actions.add(Action.createBuilder(() -> {
-            selected.holdPositionUntil(time);
+            if (selected != null) {
+                selected.holdPositionUntil(time);
+            } else {
+                for (NodeCollection nodeCollection : selectedNodeCollections) {
+                    nodeCollection.getInterpolator().holdValueUntil(time, animation);
+                }
+            }
             clearSelected();
             return null;
-        }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
+        }, "Hold last defined position to this time", Input.Keys.H).build());
         // Does not care about selection
         actions.add(Action.createBuilder(() -> {
             updateTime((time / 200) * 200 + 200);

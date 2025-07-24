@@ -52,7 +52,7 @@ class Drawer(val font: BitmapFont,
 
         for (nodeCollection in animation.nodeCollections) {
             if (nodeCollection.type == "Area") {
-                drawNodeCollection(nodeCollection, time)
+                drawNodeCollection(nodeCollection)
             }
         }
 
@@ -73,7 +73,7 @@ class Drawer(val font: BitmapFont,
 
         for (edgeCollection in animation.nodeCollections) {
             if (edgeCollection.type == "Line") {
-                drawNodeCollection(edgeCollection, time)
+                drawNodeCollection(edgeCollection)
             }
         }
 
@@ -86,8 +86,8 @@ class Drawer(val font: BitmapFont,
         shapeRenderer.end()
     }
 
-    fun drawNodeCollection(nodeCollection: NodeCollection, time: Int) {
-        if (nodeCollection.interpolator.setPoints.isNotEmpty() && !(time < nodeCollection.interpolator.setPoints.keys.first() || time > nodeCollection.interpolator.setPoints.keys.last())) {
+    fun drawNodeCollection(nodeCollection: NodeCollection) {
+        if (nodeCollection.interpolator.setPoints.isNotEmpty()) {
             // Only draw if time is within defined time
             shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
             if (nodeCollection.type == "Area") {

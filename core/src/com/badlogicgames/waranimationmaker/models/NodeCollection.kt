@@ -55,7 +55,7 @@ open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID,
     }
 
     fun draw(drawer: Drawer, time: Int) {
-        drawer.drawNodeCollection(this, time)
+        drawer.drawNodeCollection(this)
     }
 
     override fun clicked(x: Float, y: Float): Boolean {

@@ -75,7 +75,7 @@ interface HasSetPoints<I : Number, O> {
             prevValue = setPoints[prevTime]
         }
         // If the input time was not in the defined period, add a movement to the end
-        setPoints[time] = setPoints.entries.last().value
+        setPoints[time] = setPoints.values.last()
         updateInterpolationFunction()
     }
 }
