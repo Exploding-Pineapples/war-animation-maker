@@ -44,24 +44,22 @@ class Drawer(val font: BitmapFont,
 
         animation.images.forEach { draw(it) }
         animation.mapLabels.forEach { draw(it) }
-        animation.units.forEach { draw(it) }
 
         Gdx.gl.glEnable(GL20.GL_BLEND)
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
-        colorLayer.begin()
-        Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        for (edgeCollection in animation.nodeCollections) {
-            if (edgeCollection.type == "Area") {
-                drawNodeCollection(edgeCollection, time)
+        for (nodeCollection in animation.nodeCollections) {
+            if (nodeCollection.type == "Area") {
+                drawNodeCollection(nodeCollection, time)
             }
         }
 
         shapeRenderer.end()
-        colorLayer.end()
+
+        //batcher.setColor(1f, 1f, 1f, 1f)
+        animation.units.forEach { draw(it) }
 
         // Draw the color layer to the screen
         batcher.begin()
@@ -91,15 +89,15 @@ class Drawer(val font: BitmapFont,
     fun drawNodeCollection(nodeCollection: NodeCollection, time: Int) {
         if (nodeCollection.interpolator.setPoints.isNotEmpty() && !(time < nodeCollection.interpolator.setPoints.keys.first() || time > nodeCollection.interpolator.setPoints.keys.last())) {
             // Only draw if time is within defined time
+            shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
             if (nodeCollection.type == "Area") {
                 val poly =
                     nodeCollection.interpolator.coordinates.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }
                         .toDoubleArray()
 
-                val earcut =
-                    Earcut.earcut(poly) // Turns polygon into series of triangles which share vertices with the polygon. The triangles' vertices are represented as the index of an original polygon vertex
+                val earcut = Earcut.earcut(poly) // Turns polygon into series of triangles which share vertices with the polygon. The triangles' vertices are represented as the index of an original polygon vertex
 
-                shapeRenderer.color = nodeCollection.color.color
+
 
                 var j = 0
                 while (j < earcut.size) {
@@ -115,9 +113,8 @@ class Drawer(val font: BitmapFont,
                 }
             }
             if (nodeCollection.type == "Line") {
-                val coordinates = nodeCollection.interpolator.evaluate(time)
+                val coordinates = nodeCollection.interpolator.coordinates
                 if (coordinates.isNotEmpty()) {
-                    shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
                     for (i in 0..<coordinates.lastIndex) {
                         shapeRenderer.rectLine(
                             coordinates[i].x,
