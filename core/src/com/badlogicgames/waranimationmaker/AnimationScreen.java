@@ -230,9 +230,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             System.out.println("Selected: " + selected.getClass().getSimpleName());
             selectedNodeCollections = animation.getParents(selected);
             selected.showInputs(selectedGroup, uiVisitor);
-            for (NodeCollection collection : selectedNodeCollections) {
-                collection.showInputs(selectedGroup, uiVisitor);
-            }
+        } else {
+            selectedNodeCollections = animation.selectObjectWithType(mouseX, mouseY, time, NodeCollection.class);
+        }
+        for (NodeCollection collection : selectedNodeCollections) {
+            collection.showInputs(selectedGroup, uiVisitor);
         }
     }
 
@@ -282,6 +284,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     switchSelected(selectedThings.get(0));
                 } else {
                     switchSelected(animation.selectObjectWithType(x, y, time, Edge.class));
+                    selectedNodeCollections = animation.selectObjectWithType(x, y, time, NodeCollection.class);
+                    for (NodeCollection collection : selectedNodeCollections) {
+                        collection.showInputs(selectedGroup, uiVisitor);
+                    }
                 }
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
@@ -292,10 +298,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                             //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
                             Node newSelection = selectedNodes.get(0);
                             selected.setPosition(new Coordinate(newSelection.getPosition().getX(), newSelection.getPosition().getY()));
+                            selected.newSetPoint(time, mouseX, mouseY);
                             clearSelected();
                             return true;
                         }
                     }
+                    selected.newSetPoint(time, mouseX, mouseY);
                     selected.setPosition(new Coordinate(mouseX, mouseY));
                     clearSelected();
                     return true;
@@ -398,6 +406,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if ((selected != null) && paused) { // Update the selected object to go to mouse in move mode
             if ((touchMode == TouchMode.MOVE)) {
+                selected.newSetPoint(time, mouseX, mouseY);
                 selected.setPosition(new Coordinate(mouseX, mouseY));
             }
         }
@@ -432,7 +441,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 selectedInfo.append("Selected Edges: ").append(selectedEdges).append("\n");
             }
             if (selected == null) {
-                selectedInfo.append("No screen object is selected");
+                selectedInfo.append("No screen object is selected").append("\n");
             } else {
                 selectedInfo.append("Selected: ").append(selected.getClass().getSimpleName()).append("\n");
                 selectedInfo.append("x: ").append(selected.getPosition().getX()).append("\n");
@@ -448,11 +457,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     }
                     selectedInfo.append("Edges: ").append(nodes).append("\n");
                 }
-                for (NodeCollection nodeCollection : selectedNodeCollections) {
-                    selectedInfo.append("Selected ").append(nodeCollection.getClass().getSimpleName()).append(": \n");
-                    selectedInfo.append("EdgeCollectionID: ").append(nodeCollection.getId().getValue()).append("\n");
-                }
             }
+            for (NodeCollection nodeCollection : selectedNodeCollections) {
+                selectedInfo.append("Selected ").append(nodeCollection.getClass().getSimpleName()).append(": \n");
+                selectedInfo.append("EdgeCollectionID: ").append(nodeCollection.getId().getValue()).append("\n");
+            }
+
             selectedLabel.setText(selectedInfo);
 
             if (!UIDisplayed) {

@@ -1,7 +1,6 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedID
 import org.joml.Vector2f
 
 class Edge(
@@ -10,26 +9,9 @@ class Edge(
     @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
     override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
 ) : HasDeath, ObjectClickable {
+
     override fun clicked(x: Float, y: Float): Boolean {
-        if (screenCoords.isNotEmpty()) {
-            var lowestDist = distanceFromPointToSegment(
-                Vector2f(x, y),
-                Vector2f(screenCoords[0].x, screenCoords[0].y),
-                Vector2f(screenCoords[1].x, screenCoords[1].y),
-            )
-            for (i in 2..<screenCoords.size) {
-                val dist = distanceFromPointToSegment(
-                    Vector2f(x, y),
-                    Vector2f(screenCoords[i - 1].x, screenCoords[i - 1].y),
-                    Vector2f(screenCoords[i].x, screenCoords[i].y),
-                    )
-                if (dist < lowestDist) {
-                    lowestDist = dist
-                }
-            }
-            return lowestDist <= 10
-        }
-        return false
+        return clickedCoordinates(x, y, screenCoords.toTypedArray())
     }
 
     override fun toString(): String {
@@ -39,24 +21,46 @@ class Edge(
         return  (nodeID.value == segment.first.value || nodeID.value == segment.second.value)
     }
     fun prepare(time: Int) {
-        screenCoords = mutableListOf()
+        if (screenCoords == null) {
+            screenCoords = mutableListOf()
+        }
         death.update(time)
     }
+}
 
-    companion object {
-        fun distanceFromPointToSegment(point: Vector2f, a: Vector2f, b: Vector2f): Float { // ChatGPT wrote this
-            val ab = Vector2f(b).sub(a)
-            val ap = Vector2f(point).sub(a)
-            val t = ap.dot(ab) / ab.lengthSquared()
+fun distanceFromPointToSegment(point: Vector2f, a: Vector2f, b: Vector2f): Float { // ChatGPT wrote this
+    val ab = Vector2f(b).sub(a)
+    val ap = Vector2f(point).sub(a)
+    val t = ap.dot(ab) / ab.lengthSquared()
 
-            return if (t < 0f) {
-                point.distance(a)
-            } else if (t > 1f) {
-                point.distance(b)
-            } else {
-                val projection = Vector2f(ab).mul(t).add(a)
-                point.distance(projection)
+    return if (t < 0f) {
+        point.distance(a)
+    } else if (t > 1f) {
+        point.distance(b)
+    } else {
+        val projection = Vector2f(ab).mul(t).add(a)
+        point.distance(projection)
+    }
+}
+
+fun clickedCoordinates(x: Float, y: Float, coordinates: Array<Coordinate>): Boolean {
+    if (coordinates.isNotEmpty()) {
+        var lowestDist = distanceFromPointToSegment(
+            Vector2f(x, y),
+            Vector2f(coordinates[0].x, coordinates[0].y),
+            Vector2f(coordinates[1].x, coordinates[1].y),
+        )
+        for (i in 2..<coordinates.size) {
+            val dist = distanceFromPointToSegment(
+                Vector2f(x, y),
+                Vector2f(coordinates[i - 1].x, coordinates[i - 1].y),
+                Vector2f(coordinates[i].x, coordinates[i].y),
+            )
+            if (dist < lowestDist) {
+                lowestDist = dist
             }
         }
+        return lowestDist <= 10
     }
+    return false
 }

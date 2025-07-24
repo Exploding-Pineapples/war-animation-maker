@@ -59,6 +59,6 @@ open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID,
     }
 
     override fun clicked(x: Float, y: Float): Boolean {
-        TODO("Not yet implemented")
+        return clickedCoordinates(x, y, interpolator.coordinates)
     }
 }

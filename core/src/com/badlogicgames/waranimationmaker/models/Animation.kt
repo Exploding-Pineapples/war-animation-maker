@@ -147,6 +147,10 @@ data class Animation @JvmOverloads constructor(
             objects.addAll( units.filter { it.clicked(x, y) }.map { it as T} )
         }
 
+        if (type.isAssignableFrom(NodeCollection::class.java)) {
+            objects.addAll(nodeCollections.filter { it.clicked(x, y) }.map {it as T} )
+        }
+
         return objects
     }
 
