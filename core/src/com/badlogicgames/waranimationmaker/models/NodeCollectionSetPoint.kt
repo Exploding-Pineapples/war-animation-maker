@@ -21,8 +21,8 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
             val node = nodes[j]
             val nextNode = nodes[j + 1]
             val distance = hypot(nextNode.screenPosition.x - node.screenPosition.x, nextNode.screenPosition.y - node.screenPosition.y).toDouble()
-            distances.add(distance)
             totalDistance += distance
+            distances.add(totalDistance)
         }
         length = totalDistance
 
@@ -33,22 +33,15 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         val coordinates = nodes.map { it.screenPosition }
 
         if (coordinates.isNotEmpty()) {
-            var t = 0.0
+            var t:Double
 
-            for (i in 0..<coordinates.size - 1) {
+            for (i in coordinates.indices) {
+                t = i.toDouble() / (coordinates.size - 1)
+
                 tVals.add(t)
                 xVals.add(coordinates[i].x.toDouble())
                 yVals.add(coordinates[i].y.toDouble())
-
-                t = 0.0
-                for (j in 0..i) {
-                    t += distances[j]
-                }
-                t /= totalDistance
             }
-            tVals.add(1.0)
-            xVals.add(coordinates.last().x.toDouble())
-            yVals.add(coordinates.last().y.toDouble())
         }
 
         xInterpolator.i = tVals.toTypedArray()
@@ -62,7 +55,7 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         for (node in nodes) {
             newSetPoint.nodes.add(animation.newNode(node.position.x, node.position.y, time).apply {
                 edges.addAll(node.edges.map {
-                    Edge(NodeCollectionID(it.collectionID.value), it.segment
+                    Edge(NodeCollectionID(it.collectionID.value), Pair(NodeID(it.segment.first.value), NodeID(it.segment.second.value))
                 ) })
             })
         }
