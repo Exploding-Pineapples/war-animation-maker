@@ -56,4 +56,16 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         xInterpolator.o = xVals.toTypedArray()
         yInterpolator.o = yVals.toTypedArray()
     }
+
+    fun duplicate(time: Int, animation: Animation): NodeCollectionSetPoint {
+        val newSetPoint = NodeCollectionSetPoint(time, NodeCollectionID(id.value))
+        for (node in nodes) {
+            newSetPoint.nodes.add(animation.newNode(node.position.x, node.position.y, time).apply {
+                edges.addAll(node.edges.map {
+                    Edge(NodeCollectionID(it.collectionID.value), it.segment
+                ) })
+            })
+        }
+        return newSetPoint
+    }
 }

@@ -1,7 +1,6 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 
 class NodeEdgeHandler(val animation: Animation) {
 
@@ -26,13 +25,12 @@ class NodeEdgeHandler(val animation: Animation) {
         return result
     }
 
-    fun addEdge(fromNode: Node, toNode: Node, time: Int, id: Int) {
+    fun addEdge(fromNode: Node, toNode: Node, id: Int) {
         if (!fromNode.edges.map { it.collectionID.value }.contains(id) && fromNode.initTime == toNode.initTime) { // Adding an edge from a node that already has an edge with the same collectionID is not allowed
             fromNode.edges.add(
                 Edge(
                     NodeCollectionID(id),
                     Pair(fromNode.id, toNode.id),
-                    death = InterpolatedBoolean(false, time)
                 )
             )
         }
@@ -79,11 +77,9 @@ class NodeEdgeHandler(val animation: Animation) {
 
         for (edge in node.edges) { // Traverses every available edge from the node
             val nextNode = animation.getNodeByID(edge.segment.second)!!
-            if (!edge.death.value) {
-                if (edge.collectionID.value == currentBranch.id.value && nextNode.initTime == currentBranch.time) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
-                    reachedEnd = false
-                    traverse(nextNode, nodeCollections, currentBranch.apply { nodes.add(node) })
-                }
+            if (edge.collectionID.value == currentBranch.id.value && nextNode.initTime == currentBranch.time) { // If edge continues the Node Collection that is being constructed, then continue recursion with this branch
+                reachedEnd = false
+                traverse(nextNode, nodeCollections, currentBranch.apply { nodes.add(node) })
             }
         }
 
@@ -145,12 +141,12 @@ class NodeEdgeHandler(val animation: Animation) {
 
     fun update(time: Int, camera: OrthographicCamera, paused: Boolean) {
         for (node in animation.nodes) { // Update all nodes and edges
-            node.update(time, camera)
+            node.update(camera)
             if (time == node.initTime) {
                 node.edges.forEach {
                     it.screenCoords.add(animation.getNodeByID(it.segment.first)!!.screenPosition)
                     it.screenCoords.add(animation.getNodeByID(it.segment.second)!!.screenPosition)
-                    it.prepare(time)
+                    it.prepare()
                 }
             }
         }

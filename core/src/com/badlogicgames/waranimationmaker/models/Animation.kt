@@ -183,7 +183,7 @@ data class Animation @JvmOverloads constructor(
         mapLabels.forEach { it.goToTime(time, orthographicCamera.zoom, orthographicCamera.position.x, orthographicCamera.position.y, paused) }
     }
 
-    fun draw(drawer: Drawer, time: Int) {
-        drawer.draw(this, time)
+    fun draw(drawer: Drawer) {
+        drawer.draw(this)
     }
 }

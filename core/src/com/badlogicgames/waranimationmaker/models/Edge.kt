@@ -1,14 +1,12 @@
 package com.badlogicgames.waranimationmaker.models
 
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
 import org.joml.Vector2f
 
 class Edge(
     var collectionID: NodeCollectionID,
     var segment: Pair<NodeID, NodeID>,
     @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
-    override var death: InterpolatedBoolean = InterpolatedBoolean(false, 0)
-) : HasDeath, ObjectClickable {
+) : ObjectClickable {
 
     override fun clicked(x: Float, y: Float): Boolean {
         return clickedCoordinates(x, y, screenCoords.toTypedArray())
@@ -20,11 +18,10 @@ class Edge(
     fun contains(nodeID: NodeID): Boolean {
         return  (nodeID.value == segment.first.value || nodeID.value == segment.second.value)
     }
-    fun prepare(time: Int) {
+    fun prepare() {
         if (screenCoords == null) {
             screenCoords = mutableListOf()
         }
-        death.update(time)
     }
 }
 

@@ -26,7 +26,7 @@ import static java.lang.Math.round;
 public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 75;
     public static final int DEFAULT_UNIT_HEIGHT = 75;
-    public static final double LINE_RESOLUTION = 10.0; // Pixels per straight line
+    public static final double LINE_RESOLUTION = 2.5; // Pixels per straight line
 
     WarAnimationMaker game; // Contains some variables common to all screens
     OrthographicCamera orthographicCamera; // Camera whose properties directly draw the screen
@@ -325,7 +325,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         if (newEdgeCollectionID == animation.getNodeCollectionID()) {
                             animation.getNodeCollectionID();
                         }
-                        animation.getNodeEdgeHandler().addEdge((Node) selected, newSelection, time, newEdgeCollectionID);
+                        animation.getNodeEdgeHandler().addEdge((Node) selected, newSelection, newEdgeCollectionID);
                         System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
                     }
                     switchSelected(newSelection);
@@ -552,7 +552,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public void render(float delta) {
         update();
 
-        animation.draw(drawer, time);
+        animation.draw(drawer);
 
         if (animationMode) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -698,15 +698,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             animation.camera().getZoomInterpolator().newSetPoint(time, orthographicCamera.zoom);
             return null;
         }, "Set a camera zoom set point", Input.Keys.Z).requiresControl(true).build());
-        //Key presses which require control pressed and selected
-        actions.add(Action.createBuilder(() -> {
-            for (Edge edge : selectedEdges) {
-                edge.getDeath().newSetPoint(time, !edge.getDeath().getValue());
-                System.out.println("Set death of " + edge + " to " + edge.getDeath().getValue());
-            }
-            clearSelected();
-            return null;
-        }, "Set death of an object", Input.Keys.D).requiresControl(true).build());
         // Key presses which require selected Object
         actions.add(Action.createBuilder(() -> {
             clearSelected();
@@ -733,17 +724,23 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Delete selected node and select next node", Input.Keys.FORWARD_DEL).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
         actions.add(Action.createBuilder(() -> {
-            if (selected.removeFrame(time)) {
-                System.out.println("Deleted last frame");
-                System.out.println("New movements: " + selected.getXInterpolator().getSetPoints().keySet());
-                System.out.println("           xs: " + selected.getXInterpolator().getSetPoints().values());
-                System.out.println("           ys: " + selected.getYInterpolator().getSetPoints().values());
+            if (selected != null) {
+                if (selected.removeFrame(time)) {
+                    System.out.println("Deleted last frame");
+                    System.out.println("New movements: " + selected.getXInterpolator().getSetPoints().keySet());
+                    System.out.println("           xs: " + selected.getXInterpolator().getSetPoints().values());
+                    System.out.println("           ys: " + selected.getYInterpolator().getSetPoints().values());
+                } else {
+                    System.out.println("Cannot delete frame on object with less than 2 frames");
+                }
+                clearSelected();
+                touchMode = TouchMode.DEFAULT;
             } else {
-                System.out.println("Cannot delete frame on object with less than 2 frames");
+                for (NodeCollection nodeCollection : selectedNodeCollections) {
+                    nodeCollection.getInterpolator().removeFrame(time);
+                }
             }
-            clearSelected();
-            touchMode = TouchMode.DEFAULT;
             return null;
-        }, "Delete last frame of selected object", Input.Keys.ESCAPE, Input.Keys.DEL).requiresSelected(Requirement.REQUIRES).build());
+        }, "Delete last frame of selected object", Input.Keys.ESCAPE, Input.Keys.DEL).build());
     }
 }

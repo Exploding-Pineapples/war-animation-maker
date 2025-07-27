@@ -1,10 +1,7 @@
 package com.badlogicgames.waranimationmaker.interpolator
 
 import com.badlogicgames.waranimationmaker.AnimationScreen
-import com.badlogicgames.waranimationmaker.models.Animation
-import com.badlogicgames.waranimationmaker.models.Coordinate
-import com.badlogicgames.waranimationmaker.models.NodeCollectionID
-import com.badlogicgames.waranimationmaker.models.NodeCollectionSetPoint
+import com.badlogicgames.waranimationmaker.models.*
 import java.util.*
 import kotlin.math.max
 import kotlin.math.round
@@ -71,9 +68,7 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
             val yInterpolatorTime = PCHIPInterpolationFunction<Int>(setPoints.keys.toTypedArray(), yInTime)
 
             val coordinate = Coordinate(xInterpolatorTime.evaluate(time).toFloat(), yInterpolatorTime.evaluate(time).toFloat())
-            if (AnimationScreen.onScreen(coordinate)) {
-                coordinates.add(coordinate)
-            }
+            coordinates.add(coordinate)
         }
         this.coordinates = coordinates.toTypedArray()
 
@@ -94,11 +89,7 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
             }
 
             if ((definedTime > time) && (prevTime != null)) {
-                val newSetPoint = NodeCollectionSetPoint(time, NodeCollectionID(prevValue!!.id.value))
-                for (node in prevValue.nodes) {
-                    newSetPoint.nodes.add(animation.newNode(node.position.x, node.position.y, time))
-                }
-                setPoints[time] = newSetPoint
+                setPoints[time] = prevValue!!.duplicate(time, animation)
                 updateInterpolationFunction()
 
                 println("Added hold frame: $setPoints")
@@ -109,12 +100,7 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
             prevValue = setPoints[prevTime]
         }
 
-        val lastValue = setPoints.values.last()
-        val newSetPoint = NodeCollectionSetPoint(time, NodeCollectionID(lastValue.id.value), lastValue.nodes)
-        for (node in lastValue.nodes) {
-            newSetPoint.nodes.add(animation.newNode(node.position.x, node.position.y, time))
-        }
-        setPoints[time] = newSetPoint
+        setPoints[time] = setPoints.values.last().duplicate(time, animation)
         updateInterpolationFunction()
         print(setPoints)
     }

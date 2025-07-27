@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogicgames.waranimationmaker.AnimationScreen
-import com.badlogicgames.waranimationmaker.AreaColor
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.models.Unit.Companion.sizePresets
@@ -36,7 +35,7 @@ class Drawer(val font: BitmapFont,
         zoomFactor = 1f
     }
 
-    fun draw(animation: Animation, time: Int) {
+    fun draw(animation: Animation) {
         Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
@@ -88,7 +87,6 @@ class Drawer(val font: BitmapFont,
 
     fun drawNodeCollection(nodeCollection: NodeCollection) {
         if (nodeCollection.interpolator.setPoints.isNotEmpty()) {
-            // Only draw if time is within defined time
             shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
             if (nodeCollection.type == "Area") {
                 val poly =

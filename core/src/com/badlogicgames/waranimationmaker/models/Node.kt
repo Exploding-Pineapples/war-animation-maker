@@ -40,7 +40,7 @@ data class Node(
             edges = mutableListOf()
         }
 
-        edges.forEach { it.prepare(initTime) }
+        edges.forEach { it.prepare() }
 
         if (visitedBy == null) { // Visited by not serialized
             visitedBy = mutableListOf()
@@ -51,11 +51,11 @@ data class Node(
         }
     }
 
-    fun update(time: Int, camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
+    fun update(camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
         visitedBy.clear() // Clear to prepare to be traversed
         updateScreenPosition(camera.zoom, camera.position.x, camera.position.y)
         edges.forEach {
-            it.prepare(time)
+            it.prepare()
             it.screenCoords.clear()
         }
     }
