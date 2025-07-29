@@ -16,8 +16,16 @@ class NodeEdgeHandler(val animation: Animation) {
 
     fun removeNode(removeNode: Node): Boolean
     {
-        for (node in animation.nodes) {
-            node.edges.removeIf { it.segment.second.value == removeNode.id.value } // Remove all edges that point to the node
+        // Redirect edges that point to the node to the next node in the Node Collection, or delete if that does not exist
+        animation.nodes.forEach { node ->
+            node.edges.filter { it.segment.second.value == removeNode.id.value }.forEach { edge ->
+                val matchingEdge = removeNode.edges.find { it.collectionID.value == edge.collectionID.value }
+                if (matchingEdge != null) {
+                    edge.segment = Pair(node.id.duplicate(), matchingEdge.segment.second.duplicate())
+                } else {
+                    node.edges.remove(edge)
+                }
+            }
         }
         removeNode.edges.clear()
         val result = animation.nodes.remove(removeNode)
