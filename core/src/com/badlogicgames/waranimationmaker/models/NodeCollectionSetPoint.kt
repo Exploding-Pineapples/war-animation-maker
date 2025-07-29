@@ -1,10 +1,12 @@
 package com.badlogicgames.waranimationmaker.models
 
 import com.badlogicgames.waranimationmaker.interpolator.InterpolationFunction
+import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolationFunction
 import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolationFunction
 import kotlin.math.hypot
 
 class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes: MutableList<Node> = mutableListOf()) {
+    var tInterpolator: InterpolationFunction<Int, Double> = LinearInterpolationFunction(arrayOf(0), arrayOf(0.0))
     var xInterpolator: InterpolationFunction<Double, Double> = PCHIPInterpolationFunction(arrayOf(0.0), arrayOf(0.0))
     var yInterpolator: InterpolationFunction<Double, Double> = PCHIPInterpolationFunction(arrayOf(0.0), arrayOf(0.0))
     var length: Double = 0.0
@@ -14,16 +16,23 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
     }
 
     fun updateInterpolators() {
+        val tSetPoints = mutableMapOf(Pair(0, 0.0), Pair(nodes.size - 1, 1.0))
         val distances = mutableListOf<Double>()
         var totalDistance = 0.0
 
-        for (j in 0..<nodes.size - 1) {
-            val node = nodes[j]
-            val nextNode = nodes[j + 1]
-            val distance = hypot(nextNode.screenPosition.x - node.screenPosition.x, nextNode.screenPosition.y - node.screenPosition.y).toDouble()
-            totalDistance += distance
+        for (index in 0..<nodes.size - 1) {
+            val node = nodes[index]
+            if (node.tSetPoint != null) {
+                tSetPoints[index] = node.tSetPoint!!
+            }
+
+            val nextNode = nodes[index + 1]
+            totalDistance += hypot(nextNode.screenPosition.x - node.screenPosition.x, nextNode.screenPosition.y - node.screenPosition.y).toDouble()
             distances.add(totalDistance)
         }
+
+        tInterpolator.i = tSetPoints.keys.toTypedArray()
+        tInterpolator.o = tSetPoints.values.toTypedArray()
         length = totalDistance
 
         val tVals = mutableListOf<Double>()
@@ -33,12 +42,8 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         val coordinates = nodes.map { it.screenPosition }
 
         if (coordinates.isNotEmpty()) {
-            var t:Double
-
             for (i in coordinates.indices) {
-                t = i.toDouble() / (coordinates.size - 1)
-
-                tVals.add(t)
+                tVals.add(tInterpolator.evaluate(i))
                 xVals.add(coordinates[i].x.toDouble())
                 yVals.add(coordinates[i].y.toDouble())
             }

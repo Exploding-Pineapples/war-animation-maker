@@ -49,7 +49,7 @@ class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: Array<Double>) : In
 
     // Method to perform PCHIP interpolation at a given xi
     override fun evaluate(at: I): Double { // ChatGPT wrote this
-        if (slopes.size != i.size) {
+        if (slopes.size != i.size) { //TODO this will not update if the i values for some reason stay the same but the points change
             slopes = computeSlopes(i, o)
         }
 
