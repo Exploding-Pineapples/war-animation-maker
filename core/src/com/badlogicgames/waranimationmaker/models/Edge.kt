@@ -42,22 +42,16 @@ fun distanceFromPointToSegment(point: Vector2f, a: Vector2f, b: Vector2f): Float
 
 fun clickedCoordinates(x: Float, y: Float, coordinates: Array<Coordinate>): Boolean {
     if (coordinates.isNotEmpty()) {
-        var lowestDist = distanceFromPointToSegment(
-            Vector2f(x, y),
-            Vector2f(coordinates[0].x, coordinates[0].y),
-            Vector2f(coordinates[1].x, coordinates[1].y),
-        )
-        for (i in 2..<coordinates.size) {
+        for (i in 1..coordinates.lastIndex) {
             val dist = distanceFromPointToSegment(
                 Vector2f(x, y),
                 Vector2f(coordinates[i - 1].x, coordinates[i - 1].y),
                 Vector2f(coordinates[i].x, coordinates[i].y),
             )
-            if (dist < lowestDist) {
-                lowestDist = dist
+            if (dist <= 10) {
+                return true
             }
         }
-        return lowestDist <= 10
     }
     return false
 }
