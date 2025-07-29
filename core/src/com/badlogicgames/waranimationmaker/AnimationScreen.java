@@ -460,11 +460,17 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         selectedInfo.append("ID: ").append(((HasID) selectedObjects).getId().getValue()).append("\n");
                     }
                     if (selectedObject.getClass() == Node.class) {
-                        ArrayList<Integer> nodes = new ArrayList<>();
-                        for (Edge edge : ((Node) selectedObject).getEdges()) {
-                            nodes.add(edge.getSegment().getSecond().getValue());
+                        ArrayList<Integer> toNodes = new ArrayList<>();
+                        Node node = (Node) selectedObject;
+                        for (Edge edge : node.getEdges()) {
+                            toNodes.add(edge.getSegment().getSecond().getValue());
                         }
-                        selectedInfo.append("Edges: ").append(nodes).append("\n");
+                        for (NodeCollection parent : animation.getParents((node))) {
+                            // Get what parameter value the node is at within its node collection set points.
+                            selectedInfo.append("T on Node Collection").append(parent.getId().getValue()).append(": ")
+                                    .append(Math.round(parent.getInterpolator().getSetPoints().get(time).tOfNode(node) * 10000) / 10000.0).append("\n");
+                        }
+                        selectedInfo.append("Edges: ").append(toNodes).append("\n");
                     }
                     if (selectedObject.getClass() == NodeCollection.class) {
                         selectedInfo.append("NodeCollectionID: ").append(((NodeCollection) selectedObject).getId().getValue()).append("\n");
