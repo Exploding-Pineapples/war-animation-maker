@@ -27,6 +27,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public static final int DEFAULT_UNIT_WIDTH = 75;
     public static final int DEFAULT_UNIT_HEIGHT = 75;
     public static final double LINE_RESOLUTION = 2.5; // Pixels per straight line
+    public static final int MAX_LINES = 5000;
 
     WarAnimationMaker game; // Contains some variables common to all screens
     OrthographicCamera orthographicCamera; // Camera whose properties directly draw the screen

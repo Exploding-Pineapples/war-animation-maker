@@ -51,7 +51,7 @@ class Drawer(val font: BitmapFont,
 
         for (nodeCollection in animation.nodeCollections) {
             if (nodeCollection.type == "Area") {
-                drawNodeCollection(nodeCollection)
+                draw(nodeCollection)
             }
         }
 
@@ -72,7 +72,7 @@ class Drawer(val font: BitmapFont,
 
         for (edgeCollection in animation.nodeCollections) {
             if (edgeCollection.type == "Line") {
-                drawNodeCollection(edgeCollection)
+                draw(edgeCollection)
             }
         }
 
@@ -85,7 +85,7 @@ class Drawer(val font: BitmapFont,
         shapeRenderer.end()
     }
 
-    fun drawNodeCollection(nodeCollection: NodeCollection) {
+    fun draw(nodeCollection: NodeCollection) {
         if (nodeCollection.interpolator.setPoints.isNotEmpty()) {
             shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
             if (nodeCollection.type == "Area") {
@@ -94,8 +94,6 @@ class Drawer(val font: BitmapFont,
                         .toDoubleArray()
 
                 val earcut = Earcut.earcut(poly) // Turns polygon into series of triangles which share vertices with the polygon. The triangles' vertices are represented as the index of an original polygon vertex
-
-
 
                 var j = 0
                 while (j < earcut.size) {

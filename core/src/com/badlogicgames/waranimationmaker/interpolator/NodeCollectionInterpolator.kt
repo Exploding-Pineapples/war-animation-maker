@@ -3,7 +3,6 @@ package com.badlogicgames.waranimationmaker.interpolator
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.models.*
 import java.util.*
-import kotlin.math.max
 import kotlin.math.round
 
 class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
@@ -48,7 +47,7 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
                 }
             }
 
-            num = max(0, num)
+            num = num.coerceIn(0..AnimationScreen.MAX_LINES)
 
             val parameter = Array(num) { index -> index.toDouble() / num }
             val coordinates = mutableListOf<Coordinate>()

@@ -41,12 +41,10 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
 
         val coordinates = nodes.map { it.screenPosition }
 
-        if (coordinates.isNotEmpty()) {
-            for (i in coordinates.indices) {
-                tVals.add(tInterpolator.evaluate(i))
-                xVals.add(coordinates[i].x.toDouble())
-                yVals.add(coordinates[i].y.toDouble())
-            }
+        for (i in coordinates.indices) {
+            tVals.add(tInterpolator.evaluate(i))
+            xVals.add(coordinates[i].x.toDouble())
+            yVals.add(coordinates[i].y.toDouble())
         }
 
         xInterpolator.i = tVals.toTypedArray()
