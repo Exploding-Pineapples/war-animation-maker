@@ -310,7 +310,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     clearSelected();
                 }
 
-                moveSelectedObjects();
+                moveObjects(selectedObjects);
             }
 
             if (touchMode == TouchMode.CREATE) {
@@ -335,13 +335,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         return true;
     }
 
-    private void moveSelectedObjects() {
-        for (AnyObject selectedObject : selectedObjects) {
-            if (selectedObject.getClass().isAssignableFrom(InterpolatedObject.class)) {
-                ((InterpolatedObject) selectedObject).newSetPoint(time, mouseX, mouseY);
+    private void moveObjects(ArrayList<AnyObject> objects) {
+        for (AnyObject object : objects) {
+            if (InterpolatedObject.class.isAssignableFrom(object.getClass())) {
+                ((InterpolatedObject) object).newSetPoint(time, mouseX, mouseY);
             }
-            if (selectedObject.getClass().isAssignableFrom(Node.class)) {
-                ((Node) selectedObject).setPosition(new Coordinate(mouseX, mouseY));
+            if (object.getClass() == Node.class) {
+                ((Node) object).setPosition(new Coordinate(mouseX, mouseY));
             }
         }
     }
@@ -412,15 +412,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             updateCam();
         }
         orthographicCamera.update();
-
         drawer.update(orthographicCamera, time, animationMode);
-
-        if ((selectedObjects != null) && paused) { // Update the selected object to go to mouse in move mode
-            if ((touchMode == TouchMode.MOVE)) {
-                moveSelectedObjects();
-            }
-        }
-
         animation.update(time, orthographicCamera, paused);
 
         //UI
@@ -497,6 +489,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 selectedInfoTable.add(selectedGroup);
 
                 UIDisplayed = true;
+            }
+
+            if (paused) { // Update the selected object to go to mouse in move mode
+                if ((touchMode == TouchMode.MOVE)) {
+                    moveObjects(selectedObjects);
+                }
             }
 
             if (touchMode == TouchMode.NEW_EDGE) {
@@ -725,16 +723,16 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Delete selected unit", Input.Keys.FORWARD_DEL).requiresSelected(Requirement.REQUIRES).build());
         actions.add(Action.createBuilder(() -> {
             for (AnyObject selectedObject : selectedObjects) {
-                if (selectedObject.getClass().isAssignableFrom(InterpolatedObject.class)) {
+                if (InterpolatedObject.class.isAssignableFrom(selectedObject.getClass())) {
                     if (((InterpolatedObject) selectedObject).removeFrame(time)) {
                         System.out.println("Deleted last frame");
                     } else {
                         System.out.println("Cannot delete frame on object with less than 2 frames");
                     }
                 }
-                clearSelected();
-                touchMode = TouchMode.DEFAULT;
             }
+            clearSelected();
+            touchMode = TouchMode.DEFAULT;
             return null;
         }, "Delete last frame of selected object", Input.Keys.ESCAPE, Input.Keys.DEL).build());
     }
