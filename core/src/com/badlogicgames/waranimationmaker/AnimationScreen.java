@@ -66,8 +66,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     UIVisitor uiVisitor;
     String newUnitCountry;
     SelectBoxInput<String> newUnitCountryInput;
-    Integer newEdgeCollectionID;
-    SelectBoxInput<Integer> newEdgeCollectionIDInput;
+    Integer newNodeCollectionID;
+    SelectBoxInput<Integer> newNodeCollectionIDInput;
     boolean newEdgeInputsDisplayed;
     boolean newUnitInputsDisplayed;
     long commaLastUnpressed = 0;
@@ -127,15 +127,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 createChoices, null);
         createClass = "Unit";
 
-        newEdgeCollectionID = 0;
+        newNodeCollectionID = 0;
         Array<Integer> idChoices = new Array<>();
         idChoices.add(animation.getNodeCollectionID());
         for (NodeCollection nodeCollection : animation.getNodeCollections()) {
             idChoices.add(nodeCollection.getId().getValue());
         }
-        newEdgeCollectionIDInput = new SelectBoxInput<>(game.skin,
-                (Integer input) -> { newEdgeCollectionID = input; return null; },
-                () -> newEdgeCollectionID,
+        newNodeCollectionIDInput = new SelectBoxInput<>(game.skin,
+                (Integer input) -> { newNodeCollectionID = input; return null; },
+                () -> newNodeCollectionID,
                 Integer.class,
                 "CollectionID of New Edge",
                 idChoices,
@@ -203,8 +203,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             System.out.println("Updating new edge inputs");
             if (selectedObject.getClass() == NodeCollection.class) {
                 NodeCollection selectedNodeCollection = (NodeCollection) selectedObject;
-                newEdgeCollectionID = selectedNodeCollection.getId().getValue();
-                newEdgeCollectionIDInput.hide(leftGroup);
+                newNodeCollectionID = selectedNodeCollection.getId().getValue();
+                newNodeCollectionIDInput.hide(leftGroup);
                 newEdgeInputsDisplayed = false;
                 break;
             }
@@ -322,10 +322,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                     Node currentSelection = (Node) selectedObjects.get(0);
                     Node newSelection = selectNewObject(x, y, selectedObjects, Node.class);
                     if (newSelection != null) {
-                        if (newEdgeCollectionID == animation.getNodeCollectionID()) {
+                        if (newNodeCollectionID == animation.getNodeCollectionID()) {
                             animation.getNodeCollectionID();
                         }
-                        animation.getNodeEdgeHandler().addEdge(currentSelection, newSelection, newEdgeCollectionID);
+                        animation.getNodeEdgeHandler().addEdge(currentSelection, newSelection, newNodeCollectionID);
                         System.out.println("Added an edge. Edges: " + currentSelection.getEdges());
                     }
                     switchSelected(newSelection);
@@ -502,15 +502,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 for (NodeCollection nodeCollection : animation.getNodeCollections()) {
                     idChoices.add(nodeCollection.getId().getValue());
                 }
-                newEdgeCollectionIDInput.getChoices().clear();
-                newEdgeCollectionIDInput.getChoices().addAll(idChoices);
+                newNodeCollectionIDInput.getChoices().clear();
+                newNodeCollectionIDInput.getChoices().addAll(idChoices);
                 if (!newEdgeInputsDisplayed) {
-                    newEdgeCollectionIDInput.show(leftGroup, game.skin);
+                    newNodeCollectionIDInput.show(leftGroup, game.skin);
                     newEdgeInputsDisplayed = true;
                 }
             } else {
                 if (newEdgeInputsDisplayed) {
-                    newEdgeCollectionIDInput.hide(leftGroup);
+                    newNodeCollectionIDInput.hide(leftGroup);
                     newEdgeInputsDisplayed = false;
                 }
             }
