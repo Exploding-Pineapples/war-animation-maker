@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogicgames.waranimationmaker.models.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -198,7 +197,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         return false;
     }
 
-    public void updateNewEdgeInputs() {
+    public void updateNewEdgeInputs() { // Makes new edges match ID with first selected node collection
+        //TODO make this work for multiple node collections at once
         for (AnyObject selectedObject : selectedObjects) {
             System.out.println("Updating new edge inputs");
             if (selectedObject.getClass() == NodeCollection.class) {
@@ -221,67 +221,59 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public <T extends AnyObject> void switchSelected(T newSelection) {
-        if (newSelection != null) {
-            switchSelected(new ArrayList<>(Collections.singletonList(newSelection)));
-        } else {
-            clearSelected();
-        }
+        clearSelected();
+        addNewSelection(newSelection);
     }
 
     public <T extends AnyObject> void switchSelected(ArrayList<T> newSelections) {
-        clearSelected(); // Hide previous selected object
+        clearSelected();
 
-        selectedObjects.clear();
-        selectedObjects.addAll(newSelections);
-
-        ArrayList<NodeCollectionID> selectedNodeCollectionIDs = new ArrayList<>();
-
-        if (!newSelections.isEmpty()) {
-            for (AnyObject newSelection : newSelections) {
-                if (newSelection.getClass() == Node.class) {
-                    for (NodeCollection collection : animation.getParents((Node) newSelection)) {
-                        addNodeCollection(collection.getId(), selectedNodeCollectionIDs);
-                    }
-                }
-                if (newSelection.getClass() == Edge.class) {
-                    addNodeCollection(((Edge) newSelection).getCollectionID(), selectedNodeCollectionIDs);
-                }
-            }
-        }
-
-        for (NodeCollectionID collectionID : selectedNodeCollectionIDs) {
-            NodeCollection collection = animation.getNodeCollection(collectionID);
-            if (collection != null) {
-                collection.showInputs(selectedGroup, uiVisitor);
-                selectedObjects.add(collection);
-            } else {
-                System.out.println("Warning: Null node collection");
-            }
-        }
-
-        for (AnyObject selection : newSelections) {
-            if (HasInputs.class.isAssignableFrom(selection.getClass())) { // Show new selected object
-                ((HasInputs) selection).showInputs(selectedGroup, uiVisitor);
-            }
-            System.out.println("Selected: " + selection.getClass().getSimpleName());
+        for (AnyObject newSelection : newSelections) {
+            addNewSelection(newSelection);
         }
     }
 
-    public void addNodeCollection(NodeCollectionID newCollectionID, ArrayList<NodeCollectionID> selectedNodeCollectionIDs) {
-        boolean found = false;
-        for (NodeCollectionID selectedNodeCollectionID : selectedNodeCollectionIDs) {
-            if (selectedNodeCollectionID.getValue() == newCollectionID.getValue()) {
-                found = true;
-                break;
+    public <T extends AnyObject> void addNewSelection(T newSelection) {
+        if (newSelection != null) {
+            selectedObjects.add(newSelection);
+
+            if (newSelection.getClass() == Node.class) { // Show new selection's parent's inputs if it has parents
+                for (NodeCollection collection : animation.getParents((Node) newSelection)) {
+                    if (!selectedObjects.contains(collection)) {
+                        selectedObjects.add(collection);
+
+                        if (collection != null) {
+                            collection.showInputs(selectedGroup, uiVisitor);
+                            selectedObjects.add(collection);
+                        } else {
+                            System.out.println("Warning: Null node collection");
+                        }
+                    }
+                }
             }
-        }
-        if (!found) {
-            selectedNodeCollectionIDs.add(newCollectionID);
+            if (newSelection.getClass() == Edge.class) {
+                NodeCollection collection = animation.getNodeCollection(((Edge) newSelection).getCollectionID());
+                if (!selectedObjects.contains(collection)) {
+                    selectedObjects.add(collection);
+
+                    if (collection != null) {
+                        collection.showInputs(selectedGroup, uiVisitor);
+                        selectedObjects.add(collection);
+                    } else {
+                        System.out.println("Warning: Null node collection");
+                    }
+                }
+            }
+
+            if (HasInputs.class.isAssignableFrom(newSelection.getClass())) { // Show new selected object inputs
+                ((HasInputs) newSelection).showInputs(selectedGroup, uiVisitor);
+            }
+            System.out.println("Selected: " + newSelection.getClass().getSimpleName());
         }
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends AnyObject> T selectNewObject(float x, float y, ArrayList<AnyObject> selected, Class<T> type) {
+    public <T extends AnyObject> T selectNewObject(float x, float y, ArrayList<AnyObject> selected, Class<T> type) { // Returns first selected object not already selected
         for (AnyObject selectedObject : animation.selectObjectWithType(x, y, time, type)) {
             if (!selected.contains(selectedObject)) {
                 return (T) selectedObject;
@@ -296,10 +288,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     public void selectDefault(float x, float y) {
         if (ctrlPressed) {
-            AnyObject newSelection = selectNewObject(x, y, selectedObjects, AnyObject.class);
-            if (newSelection != null) {
-                selectedObjects.add(newSelection);
-            }
+            addNewSelection(selectNewObject(x, y, selectedObjects, AnyObject.class));
         } else {
             switchSelected(selectNewObject(x, y, selectedObjects, AnyObject.class));
         }
