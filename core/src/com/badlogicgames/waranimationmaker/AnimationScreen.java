@@ -629,10 +629,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
         actions.add(Action.createBuilder(() -> {
-            if (selectedObjects != null) {
-                if (HasAlpha.class.isAssignableFrom(selectedObjects.getClass())) {
-                    ((HasAlpha) selectedObjects).getAlpha().newSetPoint(time, ((HasAlpha) selectedObjects).getAlpha().getValue());
-                    System.out.println("Set a new alpha set point, set points: " + ((HasAlpha) selectedObjects).getAlpha().getSetPoints());
+            for (AnyObject selectedObject : selectedObjects) {
+                if (HasAlpha.class.isAssignableFrom(selectedObject.getClass())) {
+                    ((HasAlpha) selectedObject).getAlpha().newSetPoint(time, ((HasAlpha) selectedObject).getAlpha().getValue());
+                    System.out.println("Set a new alpha set point, set points: " + ((HasAlpha) selectedObject).getAlpha().getSetPoints());
                 }
             }
             return null;
