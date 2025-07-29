@@ -250,7 +250,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         for (NodeCollectionID collectionID : selectedNodeCollectionIDs) {
-            selectedObjects.add(animation.getNodeCollection(collectionID));
+            NodeCollection collection = animation.getNodeCollection(collectionID);
+            if (collection != null) {
+                collection.showInputs(selectedGroup, uiVisitor);
+                selectedObjects.add(collection);
+            } else {
+                System.out.println("Warning: Null node collection");
+            }
         }
 
         for (AnyObject selection : newSelections) {
