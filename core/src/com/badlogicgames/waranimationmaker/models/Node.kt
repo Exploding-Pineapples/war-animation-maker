@@ -12,7 +12,7 @@ data class Node(
     val initTime: Int,
     override val id: NodeID
 ) : AnyObject, HasScreenPosition, Clickable, HasInputs, HasID  {
-    override var screenPosition: Coordinate
+    override var screenPosition = Coordinate(0f, 0f)
     var color: Color = Color.GREEN
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     @Transient var visitedBy = mutableListOf<NodeCollectionID>()
@@ -22,9 +22,7 @@ data class Node(
     override fun buildInputs() {
         super.buildInputs()
         inputElements.add(TextInput(null, { input ->
-            if (input != null) {
-                tSetPoint = input
-            }
+            tSetPoint = input
         }, label@{
             return@label tSetPoint.toString()
         }, Double::class.java, "Set t set point"))
@@ -32,10 +30,6 @@ data class Node(
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)
-    }
-
-    init {
-        screenPosition = Coordinate(0f, 0f)
     }
 
     override fun clicked(x: Float, y: Float): Boolean
@@ -46,14 +40,10 @@ data class Node(
         return (x - screenPosition.x).absoluteValue <= 10 && (y - screenPosition.y).absoluteValue <= 10
     }
 
-    fun init() {
-        if (edges == null) { // Edges not serialized
-            edges = mutableListOf()
-        }
-
+    fun init() { // Initialize transient properties
         edges.forEach { it.prepare() }
 
-        if (visitedBy == null) { // Visited by not serialized
+        if (visitedBy == null) {
             visitedBy = mutableListOf()
         }
 
