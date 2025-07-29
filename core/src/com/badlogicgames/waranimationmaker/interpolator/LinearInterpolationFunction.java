@@ -10,15 +10,15 @@ public class LinearInterpolationFunction<I extends Number> extends Interpolation
     public Double evaluate(I at) {
         I[] x = getI();
         Double[] y = getO();
-        if ((Double) at <= (Double) x[0]) {
+        if (at.doubleValue() <= x[0].doubleValue()) {
             return y[0];
         }
-        if ((Double) at >= (Double) x[x.length - 1]) {
+        if (at.doubleValue() >= x[x.length - 1].doubleValue()) {
             return y[y.length - 1];
         }
 
         int i = 0;
-        while ((Double) at > (Double) x[i+1]) {
+        while (at.doubleValue() > x[i+1].doubleValue()) {
             i++;
         }
 
@@ -27,6 +27,6 @@ public class LinearInterpolationFunction<I extends Number> extends Interpolation
         double y0 = y[i];
         double y1 = y[i+1];
 
-        return y0 + (y1 - y0) * ((Double) at - (Double) x0) / ((Double) x1 - (Double) x0);
+        return y0 + (y1 - y0) * (at.doubleValue() - x0.doubleValue()) / (x1.doubleValue() - x0.doubleValue());
     }
 }
