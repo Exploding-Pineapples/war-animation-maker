@@ -102,14 +102,23 @@ interface ID : Comparable<ID>, AbstractTypeSerializable {
     override fun compareTo(other: ID): Int {
         return value - other.value
     }
+
+    fun duplicate() : ID
 }
 
 class NodeCollectionID(override val value: Int = -1) : ID {
+    override fun duplicate() : NodeCollectionID {
+        return NodeCollectionID(value)
+    }
+
     override fun getAbstractType() = NodeCollectionID::class.java
 }
 
 class NodeID(override val value: Int = -1) : ID {
     override fun getAbstractType() = NodeID::class.java
+    override fun duplicate(): NodeID {
+        return NodeID(value)
+    }
 }
 
 fun File.getImageDimensions(): Pair<Int, Int> {
