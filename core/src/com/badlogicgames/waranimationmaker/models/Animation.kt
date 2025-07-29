@@ -22,7 +22,13 @@ data class Animation @JvmOverloads constructor(
 
     fun init() {
         nodeEdgeHandler = NodeEdgeHandler(this)
-        nodes.forEach { it.init() }
+        nodes.forEach { node ->
+            node.init()
+            node.edges.forEach {
+                it.screenCoords.add(getNodeByID(it.segment.first)!!.screenPosition)
+                it.screenCoords.add(getNodeByID(it.segment.second)!!.screenPosition)
+            }
+        }
         nodeCollections.forEach { it.init(initTime) }
         nodeEdgeHandler.updateNodeCollections()
         units.forEach { it.init(initTime) }
@@ -129,29 +135,29 @@ data class Animation @JvmOverloads constructor(
         }
 
         if (type.isAssignableFrom(Edge::class.java)) {
-            for (node in nodes) {
-                objects.addAll( node.edges.filter { it.clicked(x, y) }.map { it as T} )
+            nodes.filter { time == it.initTime }.forEach { node ->
+                objects.addAll(node.edges.filter { it.clicked(x, y) }.map { it as T} )
             }
         }
 
         if (type.isAssignableFrom(Arrow::class.java)) {
-            objects.addAll( arrows.filter { it.clicked(x, y) }.map {it as T} )
+            objects.addAll(arrows.filter { it.clicked(x, y) }.map {it as T} )
         }
 
         if (type.isAssignableFrom(MapLabel::class.java)) {
-            objects.addAll( mapLabels.filter { it.clicked(x, y) }.map {it as T} )
+            objects.addAll(mapLabels.filter { it.clicked(x, y) }.map {it as T} )
         }
 
         if (type.isAssignableFrom(Image::class.java)) {
-            objects.addAll( images.filter { it.clicked(x, y) }.map {it as T} )
+            objects.addAll(images.filter { it.clicked(x, y) }.map {it as T} )
         }
 
         if (type.isAssignableFrom(Unit::class.java)) {
-            objects.addAll( units.filter { it.clicked(x, y) }.map { it as T} )
+            objects.addAll(units.filter { it.clicked(x, y) }.map { it as T} )
         }
 
         if (type.isAssignableFrom(NodeCollection::class.java)) {
-            objects.addAll(nodeCollections.filter { it.clicked(x, y) }.map {it as T} )
+            objects.addAll(nodeCollections.filter { it.clicked(x, y, camera()) }.map {it as T} )
         }
 
         return objects
