@@ -16,7 +16,7 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
     }
 
     fun updateInterpolators() {
-        val tSetPoints = mutableMapOf(Pair(0, 0.0), Pair(nodes.size - 1, 1.0))
+        val tSetPoints = sortedMapOf(Pair(0, 0.0), Pair(nodes.size - 1, 1.0))
         val distances = mutableListOf<Double>()
         var totalDistance = 0.0
 
@@ -53,6 +53,10 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         yInterpolator.i = tVals.toTypedArray()
         xInterpolator.o = xVals.toTypedArray()
         yInterpolator.o = yVals.toTypedArray()
+    }
+
+    fun tOfNode(node: Node): Double {
+        return tInterpolator.evaluate(nodes.indexOf(node))
     }
 
     fun duplicate(time: Int, animation: Animation): NodeCollectionSetPoint {
