@@ -37,6 +37,9 @@ abstract class InputElement<T> (val skin: Skin?, var output: (T?) -> Unit, @Tran
             },
             Boolean::class.java to {
                 it.toBooleanStrictOrNull()
+            },
+            Double::class.java to {
+                it.toDouble()
             }
         )
     }
