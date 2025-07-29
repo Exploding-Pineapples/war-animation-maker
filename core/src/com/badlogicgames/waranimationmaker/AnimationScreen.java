@@ -320,13 +320,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (touchMode == TouchMode.NEW_EDGE) {
                 Node newSelection = selectNewObject(x, y, selectedObjects, Node.class);
-                for (AnyObject selectedObject : selectedObjects) {
-                    if (selectedObject.getClass() == Node.class) {
-                        System.out.println("trying to select for new edge");
+                if (newSelection != null) {
+                    for (AnyObject selectedObject : selectedObjects) {
+                        if (selectedObject.getClass() == Node.class) {
+                            System.out.println("trying to select for new edge");
 
-                        Node currentSelection = (Node) selectedObject;
-                        animation.getNodeEdgeHandler().addEdge(currentSelection, newSelection, newNodeCollectionID);
-                        System.out.println("Added an edge. Edges: " + currentSelection.getEdges());
+                            Node currentSelection = (Node) selectedObject;
+                            animation.getNodeEdgeHandler().addEdge(currentSelection, newSelection, newNodeCollectionID);
+                            System.out.println("Added an edge. Edges: " + currentSelection.getEdges());
+                        }
                     }
                 }
                 switchSelected(newSelection);
@@ -463,8 +465,11 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         }
                         for (NodeCollection parent : animation.getParents((node))) {
                             // Get what parameter value the node is at within its node collection set points.
-                            selectedInfo.append("T on Node Collection").append(parent.getId().getValue()).append(": ")
-                                    .append(Math.round(parent.getInterpolator().getSetPoints().get(time).tOfNode(node) * 10000) / 10000.0).append("\n");
+                            NodeCollectionSetPoint setPoint = parent.getInterpolator().getSetPoints().get(time);
+                            if (setPoint != null) {
+                                selectedInfo.append("T on Node Collection").append(parent.getId().getValue()).append(": ")
+                                        .append(Math.round(setPoint.tOfNode(node) * 10000) / 10000.0).append("\n");
+                            }
                         }
                         selectedInfo.append("Edges: ").append(toNodes).append("\n");
                     }
@@ -644,16 +649,16 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         // Selection required
         actions.add(Action.createBuilder(() -> {
             for (AnyObject selectedObject : selectedObjects) {
-                if (selectedObject.getClass().isAssignableFrom(InterpolatedObject.class)) {
+                if (InterpolatedObject.class.isAssignableFrom(selectedObject.getClass())) {
                     ((InterpolatedObject) selectedObject).holdPositionUntil(time);
                 }
-                if (selectedObject.getClass().isAssignableFrom(NodeCollection.class)) {
+                if (selectedObject.getClass() == NodeCollection.class) {
                     ((NodeCollection) selectedObject).getInterpolator().holdValueUntil(time, animation);
                 }
             }
             clearSelected();
             return null;
-        }, "Hold last defined position to this time", Input.Keys.H).requiredSelectedTypes(InterpolatedObject.class).build());
+        }, "Hold last defined position to this time", Input.Keys.H).requiresSelected(Requirement.REQUIRES).build());
         // Does not care about selection
         actions.add(Action.createBuilder(() -> {
             updateTime((time / 200) * 200 + 200);
