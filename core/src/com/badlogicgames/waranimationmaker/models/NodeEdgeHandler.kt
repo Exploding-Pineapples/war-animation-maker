@@ -152,8 +152,6 @@ class NodeEdgeHandler(val animation: Animation) {
             node.update(camera)
             if (time == node.initTime) {
                 node.edges.forEach {
-                    it.screenCoords.add(animation.getNodeByID(it.segment.first)!!.screenPosition)
-                    it.screenCoords.add(animation.getNodeByID(it.segment.second)!!.screenPosition)
                     it.prepare()
                 }
             }

@@ -10,9 +10,6 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
     var coordinates: Array<Coordinate> = arrayOf()
 
     override fun updateInterpolationFunction() {
-    }
-
-    fun updateInterpolators() {
         setPoints.values.forEach { it.updateInterpolators() }
     }
 
@@ -96,7 +93,7 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
 
             if ((definedTime > time) && (prevTime != null)) {
                 setPoints[time] = prevValue!!.duplicate(time, animation)
-                updateInterpolationFunction()
+                this.updateInterpolationFunction()
 
                 println("Added hold frame: $setPoints")
                 return
@@ -107,7 +104,7 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
         }
 
         setPoints[time] = setPoints.values.last().duplicate(time, animation)
-        updateInterpolationFunction()
+        this.updateInterpolationFunction()
         print(setPoints)
     }
 }
