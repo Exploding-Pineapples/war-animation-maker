@@ -199,8 +199,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     public void updateNewEdgeInputs() { // Makes new edges match ID with first selected node collection
         //TODO make this work for multiple node collections at once
+        System.out.println("Updating new edge inputs");
         for (AnyObject selectedObject : selectedObjects) {
-            System.out.println("Updating new edge inputs");
             if (selectedObject.getClass() == NodeCollection.class) {
                 NodeCollection selectedNodeCollection = (NodeCollection) selectedObject;
                 newNodeCollectionID = selectedNodeCollection.getId().getValue();
@@ -318,21 +318,18 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.NEW_EDGE) {
-                if (selectedObjects.size() == 1 && selectedObjects.get(0).getClass() == Node.class) {
-                    Node currentSelection = (Node) selectedObjects.get(0);
-                    Node newSelection = selectNewObject(x, y, selectedObjects, Node.class);
-                    if (newSelection != null) {
-                        if (newNodeCollectionID == animation.getNodeCollectionID()) {
-                            animation.getNodeCollectionID();
-                        }
+                Node newSelection = selectNewObject(x, y, selectedObjects, Node.class);
+                for (AnyObject selectedObject : selectedObjects) {
+                    if (selectedObject.getClass() == Node.class) {
+                        System.out.println("trying to select for new edge");
+
+                        Node currentSelection = (Node) selectedObject;
                         animation.getNodeEdgeHandler().addEdge(currentSelection, newSelection, newNodeCollectionID);
                         System.out.println("Added an edge. Edges: " + currentSelection.getEdges());
                     }
-                    switchSelected(newSelection);
-                } else {
-                    selectDefault(x, y);
-                    updateNewEdgeInputs();
                 }
+                switchSelected(newSelection);
+                updateNewEdgeInputs();
             }
         }
         return true;
