@@ -6,9 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.*
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
-import com.drew.imaging.ImageMetadataReader
-import com.drew.metadata.png.PngDirectory
-import java.io.File
 
 data class Coordinate(
     var x: Float,
@@ -119,20 +116,4 @@ class NodeID(override val value: Int = -1) : ID {
     override fun duplicate(): NodeID {
         return NodeID(value)
     }
-}
-
-fun File.getImageDimensions(): Pair<Int, Int> {
-    val metadata = ImageMetadataReader.readMetadata(this)
-
-    val pngDirectory = metadata
-        .getDirectoriesOfType(PngDirectory::class.java)
-        .firstOrNull { it.name == "PNG-IHDR" }
-        ?: throw IllegalStateException(
-            "Image read is not of PNG format"
-        )
-
-    return Pair(
-        pngDirectory.getInt(1), // image width
-        pngDirectory.getInt(2) // image height
-    )
 }
