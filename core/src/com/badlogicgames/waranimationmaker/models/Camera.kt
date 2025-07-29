@@ -8,7 +8,7 @@ data class Camera(
     override var position: Coordinate = Coordinate(x = 960.0f, y = 540.0f),
     override var zoom: Float = 1.0f,
     override val initTime: Int
-) : ScreenObject(), HasZoom, HasScreenPosition {
+) : ScreenObject(), HasZoom {
     override var xInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.x, initTime)
     override var yInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(position.y, initTime)
     override var zoomInterpolator: PCHIPInterpolatedFloat = PCHIPInterpolatedFloat(zoom, initTime)

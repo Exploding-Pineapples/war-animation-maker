@@ -118,7 +118,7 @@ class NodeEdgeHandler(val animation: Animation) {
         }
 
         for (nodeCollectionSetPoint in nodeCollectionSetPoints) {
-            val existingNodeCollection = animation.getEdgeCollectionByID(nodeCollectionSetPoint.id)
+            val existingNodeCollection = animation.getNodeCollection(nodeCollectionSetPoint.id)
             if (existingNodeCollection == null) { // Create new node collection if it does not exist
                 nodeCollectionSetPoint.nodes.forEach { node ->
                     node.edges.filter { it.collectionID.value == nodeCollectionSetPoint.id.value }.forEach {

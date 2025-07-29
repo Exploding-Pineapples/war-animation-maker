@@ -1,6 +1,6 @@
 package com.badlogicgames.waranimationmaker
 
-import com.badlogicgames.waranimationmaker.models.Object
+import com.badlogicgames.waranimationmaker.models.AnyObject
 
 class Action private constructor(builder: Builder) {
     val actionKeys = builder.actionKeys
@@ -16,16 +16,12 @@ class Action private constructor(builder: Builder) {
     val debug: Boolean = builder.debug
 
     //returns if the action could be executed by key press given the current conditions
-    fun couldExecute(shiftPressed: Boolean, controlPressed: Boolean, selected: Object?, touchMode: TouchMode): Boolean {
+    fun couldExecute(shiftPressed: Boolean, controlPressed: Boolean, selected: ArrayList<AnyObject>, touchMode: TouchMode): Boolean {
         if (debug) {
             println("Shift pressed: $shiftPressed" + "requires shift: $requiresShift")
             println("Control pressed: $controlPressed" + "requires control: $requiresControl")
             println("Selected requirement: " + requiresSelected.name)
-            if (selected != null) {
-                println("Selected: " + selected.javaClass.name + "required selected type: $requiredSelectedTypes")
-            } else {
-                println("Nothing is selected")
-            }
+            selected.forEach { println("Selected: " + it.javaClass.name + "required selected type: $requiredSelectedTypes") }
         }
 
         if (shiftPressed != requiresShift) {
@@ -35,24 +31,25 @@ class Action private constructor(builder: Builder) {
             return false
         }
 
-        if (requiresSelected == Requirement.REQUIRES_NOT && selected != null) { // If requires not and selected object, no
+        if (requiresSelected == Requirement.REQUIRES_NOT && selected.isNotEmpty()) {
             return false
         }
 
-        if (requiresSelected == Requirement.REQUIRES) { // If requires selected object, if there is a selected object, check for type, otherwise no
-            var correctType = false
-            if (selected != null) {
+        if (requiresSelected == Requirement.REQUIRES) {
+            if (selected.isEmpty()) {
+                return false
+            }
+            selected.forEach { // Every selected object must conform to the required types
+                var correctType = false
                 for (type in requiredSelectedTypes) {
-                    if (type.isAssignableFrom(selected.javaClass)) {
+                    if (type.isAssignableFrom(it.javaClass)) {
                         correctType = true
                         break
                     }
                 }
-            } else {
-                return false
-            }
-            if (!correctType) {
-                return false
+                if (!correctType) {
+                    return false
+                }
             }
         }
 
@@ -70,7 +67,7 @@ class Action private constructor(builder: Builder) {
         return true
     }
     //returns if the action should be executed given the current conditions
-    fun shouldExecute(keyPressed: Int, shiftPressed: Boolean, controlPressed: Boolean, selected: Object?, touchMode: TouchMode): Boolean {
+    fun shouldExecute(keyPressed: Int, shiftPressed: Boolean, controlPressed: Boolean, selected: ArrayList<AnyObject>, touchMode: TouchMode): Boolean {
         return couldExecute(shiftPressed, controlPressed, selected, touchMode) && (keyPressed in actionKeys)
     }
 
@@ -87,7 +84,7 @@ class Action private constructor(builder: Builder) {
             var requiresShift: Boolean = false
             var requiresControl: Boolean = false
             var requiresSelected: Requirement = Requirement.ANY
-            var requiredSelectedTypes: MutableList<Class<*>> = mutableListOf(Object::class.java)
+            var requiredSelectedTypes: MutableList<Class<*>> = mutableListOf(AnyObject::class.java)
             var requiredTouchModes: MutableList<TouchMode> = mutableListOf()
             var excludedTouchModes: MutableList<TouchMode> = mutableListOf()
             var debug: Boolean = false

@@ -6,7 +6,7 @@ class Edge(
     var collectionID: NodeCollectionID,
     var segment: Pair<NodeID, NodeID>,
     @Transient var screenCoords: MutableList<Coordinate> = mutableListOf(),
-) : ObjectClickable {
+) : AnyObject, Clickable {
 
     override fun clicked(x: Float, y: Float): Boolean {
         return clickedCoordinates(x, y, screenCoords.toTypedArray())

@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogicgames.waranimationmaker.models.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -36,9 +37,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     Animation animation; // Contains all information about animation loaded from file
     Integer time;
 
-    ScreenObject selected;
-    List<NodeCollection> selectedNodeCollections; // if a Node is selected, this will be the Area or Line that the Node is on
-    List<Edge> selectedEdges;
+    ArrayList<AnyObject> selectedObjects;
 
     boolean shiftPressed;
     boolean ctrlPressed;
@@ -94,8 +93,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         animationMode = true;
 
         //UI
-        selectedNodeCollections = new ArrayList<>();
-        selectedEdges = new ArrayList<>();
+        selectedObjects = new ArrayList<>();
+
         touchMode = TouchMode.DEFAULT;
         actions = new ArrayList<>();
         buildActions();
@@ -180,7 +179,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
     public boolean keyDown(int keycode) {
         for (Action action : actions) {
-            if (action.shouldExecute(keycode, shiftPressed, ctrlPressed, selected, touchMode)) {
+            if (action.shouldExecute(keycode, shiftPressed, ctrlPressed, selectedObjects, touchMode)) {
                 action.execute();
                 break;
             }
@@ -200,76 +199,104 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     }
 
     public void updateNewEdgeInputs() {
-        if (!selectedNodeCollections.isEmpty()) { // Update the inputs to match the new edge type
+        for (AnyObject selectedObject : selectedObjects) {
             System.out.println("Updating new edge inputs");
-            newEdgeCollectionID = selectedNodeCollections.get(0).getId().getValue();
-            newEdgeCollectionIDInput.hide(leftGroup);
-            newEdgeInputsDisplayed = false;
-        }
-    }
-
-    private void clearSelected() {
-        if (selected != null) {
-            selected.hideInputs(selectedGroup, uiVisitor);
-        }
-        for (NodeCollection collection : selectedNodeCollections) {
-            collection.hideInputs(selectedGroup, uiVisitor);
-        }
-        selected = null;
-        selectedEdges.clear();
-        selectedNodeCollections.clear();
-    }
-
-    public <T extends ScreenObject> void switchSelected(T newSelection) {
-        clearSelected(); // Hide previous selected object
-
-        selected = newSelection;
-
-        // Show new selected object
-        if (selected != null) {
-            System.out.println("Selected: " + selected.getClass().getSimpleName());
-            selectedNodeCollections = animation.getParents(selected);
-            selected.showInputs(selectedGroup, uiVisitor);
-        } else {
-            selectedNodeCollections = animation.selectObjectWithType(mouseX, mouseY, time, NodeCollection.class);
-        }
-        for (NodeCollection collection : selectedNodeCollections) {
-            collection.showInputs(selectedGroup, uiVisitor);
-        }
-    }
-
-    public void switchSelected(ArrayList<Edge> newSelections) {
-        clearSelected();
-
-        selectedEdges = newSelections;
-
-        if (!newSelections.isEmpty()) {
-            for (Edge newSelection : newSelections) {
-                System.out.println("new edge selection id: " + newSelection.getCollectionID().getValue());
-                NodeCollection nodeCollection = animation.getEdgeCollectionByID(new NodeCollectionID(newSelection.getCollectionID().getValue()));
-                if (nodeCollection != null) {
-                    System.out.println("selected edge collection " + nodeCollection.getId().getValue());
-                    selectedNodeCollections.add(nodeCollection);
-                    nodeCollection.showInputs(selectedGroup, uiVisitor);
-                }
+            if (selectedObject.getClass() == NodeCollection.class) {
+                NodeCollection selectedNodeCollection = (NodeCollection) selectedObject;
+                newEdgeCollectionID = selectedNodeCollection.getId().getValue();
+                newEdgeCollectionIDInput.hide(leftGroup);
+                newEdgeInputsDisplayed = false;
+                break;
             }
         }
     }
 
-    public <T extends ObjectClickable> ArrayList<T> selectNewScreenObject(float x, float y, T selected, Class<T> type) {
-        ArrayList<T> selectedThings = new ArrayList<>();
-        selectedThings.add(selected);
-        return selectNewScreenObject(x, y, selectedThings, type);
+    private void clearSelected() {
+        for (AnyObject selectedObject : selectedObjects) {
+            if (HasInputs.class.isAssignableFrom(selectedObject.getClass())) {
+                ((HasInputs) selectedObject).hideInputs(selectedGroup, uiVisitor);
+            }
+        }
+        selectedObjects.clear();
     }
 
-    public <T extends ObjectClickable> ArrayList<T> selectNewScreenObject(float x, float y, ArrayList<T> selected, Class<T> type) {
-        ArrayList<T> selectedThings = animation.selectObjectWithType(x, y, time, type);
-        selectedThings.removeIf(selected::contains);
-        return selectedThings;
+    public <T extends AnyObject> void switchSelected(T newSelection) {
+        if (newSelection != null) {
+            switchSelected(new ArrayList<>(Collections.singletonList(newSelection)));
+        } else {
+            clearSelected();
+        }
     }
 
-    public <T extends ObjectClickable> T selectScreenObject(float x, float y, Class<T> type) {
+    public <T extends AnyObject> void switchSelected(ArrayList<T> newSelections) {
+        clearSelected(); // Hide previous selected object
+
+        selectedObjects.clear();
+        selectedObjects.addAll(newSelections);
+
+        ArrayList<NodeCollectionID> selectedNodeCollectionIDs = new ArrayList<>();
+
+        if (!newSelections.isEmpty()) {
+            for (AnyObject newSelection : newSelections) {
+                if (newSelection.getClass() == Node.class) {
+                    for (NodeCollection collection : animation.getParents((Node) newSelection)) {
+                        addNodeCollection(collection.getId(), selectedNodeCollectionIDs);
+                    }
+                }
+                if (newSelection.getClass() == Edge.class) {
+                    addNodeCollection(((Edge) newSelection).getCollectionID(), selectedNodeCollectionIDs);
+                }
+            }
+        }
+
+        for (NodeCollectionID collectionID : selectedNodeCollectionIDs) {
+            selectedObjects.add(animation.getNodeCollection(collectionID));
+        }
+
+        for (AnyObject selection : newSelections) {
+            if (HasInputs.class.isAssignableFrom(selection.getClass())) { // Show new selected object
+                ((HasInputs) selection).showInputs(selectedGroup, uiVisitor);
+            }
+            System.out.println("Selected: " + selection.getClass().getSimpleName());
+        }
+    }
+
+    public void addNodeCollection(NodeCollectionID newCollectionID, ArrayList<NodeCollectionID> selectedNodeCollectionIDs) {
+        boolean found = false;
+        for (NodeCollectionID selectedNodeCollectionID : selectedNodeCollectionIDs) {
+            if (selectedNodeCollectionID.getValue() == newCollectionID.getValue()) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            selectedNodeCollectionIDs.add(newCollectionID);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends AnyObject> T selectNewObject(float x, float y, ArrayList<AnyObject> selected, Class<T> type) {
+        for (AnyObject selectedObject : animation.selectObjectWithType(x, y, time, type)) {
+            if (!selected.contains(selectedObject)) {
+                return (T) selectedObject;
+            }
+        }
+        return null;
+    }
+
+    public <T extends AnyObject> T selectObject(float x, float y, Class<T> type) {
         return firstOrNull(animation.selectObjectWithType(x, y, time, type));
+    }
+
+    public void selectDefault(float x, float y) {
+        if (ctrlPressed) {
+            AnyObject newSelection = selectNewObject(x, y, selectedObjects, AnyObject.class);
+            if (newSelection != null) {
+                selectedObjects.add(newSelection);
+            }
+        } else {
+            switchSelected(selectNewObject(x, y, selectedObjects, AnyObject.class));
+        }
     }
 
     public boolean touchDown(int x, int y, int pointer, int button) {
@@ -279,36 +306,16 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         if (paused) {
             if (touchMode == TouchMode.DEFAULT) { // Default behavior: select an object to show info about it
-                ArrayList<ScreenObject> selectedThings = animation.selectObjectWithType(x, y, time, ScreenObject.class);
-                if (!selectedThings.isEmpty()) {
-                    switchSelected(selectedThings.get(0));
-                } else {
-                    switchSelected(animation.selectObjectWithType(x, y, time, Edge.class));
-                    selectedNodeCollections = animation.selectObjectWithType(x, y, time, NodeCollection.class);
-                    for (NodeCollection collection : selectedNodeCollections) {
-                        collection.showInputs(selectedGroup, uiVisitor);
-                    }
-                }
+                selectDefault(x, y);
             }
             if (touchMode == TouchMode.MOVE) { // Selects an object to move. If a node is selected to be moved into another node, it will be merged
-                if (selected != null) {
-                    if (selected.getClass() == Node.class) {
-                        ArrayList<Node> selectedNodes = selectNewScreenObject(x, y, (Node) selected, Node.class);
-                        if (!selectedNodes.isEmpty()) {
-                            //If the current selection is a Node and the user clicks another Node, merge the 2 nodes by setting the selected to the same point and setting its death
-                            Node newSelection = selectedNodes.get(0);
-                            selected.setPosition(new Coordinate(newSelection.getPosition().getX(), newSelection.getPosition().getY()));
-                            selected.newSetPoint(time, mouseX, mouseY);
-                            clearSelected();
-                            return true;
-                        }
-                    }
-                    selected.newSetPoint(time, mouseX, mouseY);
-                    selected.setPosition(new Coordinate(mouseX, mouseY));
+                if (selectedObjects.isEmpty()) {
+                    selectDefault(x, y);
+                } else {
                     clearSelected();
-                    return true;
                 }
-                switchSelected(selectScreenObject(x, y, ScreenObject.class));
+
+                moveSelectedObjects();
             }
 
             if (touchMode == TouchMode.CREATE) {
@@ -316,23 +323,35 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
 
             if (touchMode == TouchMode.NEW_EDGE) {
-                if (selected == null || selected.getClass() != Node.class) {
-                    switchSelected((Node) firstOrNull(animation.selectObjectWithType(x, y, time, Node.class)));
-                    updateNewEdgeInputs();
-                } else {
-                    Node newSelection = firstOrNull(selectNewScreenObject(x, y, (Node) selected, Node.class));
+                if (selectedObjects.size() == 1 && selectedObjects.get(0).getClass() == Node.class) {
+                    Node currentSelection = (Node) selectedObjects.get(0);
+                    Node newSelection = selectNewObject(x, y, selectedObjects, Node.class);
                     if (newSelection != null) {
                         if (newEdgeCollectionID == animation.getNodeCollectionID()) {
                             animation.getNodeCollectionID();
                         }
-                        animation.getNodeEdgeHandler().addEdge((Node) selected, newSelection, newEdgeCollectionID);
-                        System.out.println("Added an edge. Edges: " + ((Node) selected).getEdges());
+                        animation.getNodeEdgeHandler().addEdge(currentSelection, newSelection, newEdgeCollectionID);
+                        System.out.println("Added an edge. Edges: " + currentSelection.getEdges());
                     }
                     switchSelected(newSelection);
+                } else {
+                    selectDefault(x, y);
+                    updateNewEdgeInputs();
                 }
             }
         }
         return true;
+    }
+
+    private void moveSelectedObjects() {
+        for (AnyObject selectedObject : selectedObjects) {
+            if (selectedObject.getClass().isAssignableFrom(InterpolatedObject.class)) {
+                ((InterpolatedObject) selectedObject).newSetPoint(time, mouseX, mouseY);
+            }
+            if (selectedObject.getClass().isAssignableFrom(Node.class)) {
+                ((Node) selectedObject).setPosition(new Coordinate(mouseX, mouseY));
+            }
+        }
     }
 
     public boolean touchUp(int x, int y, int pointer, int button) {
@@ -404,10 +423,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
         drawer.update(orthographicCamera, time, animationMode);
 
-        if ((selected != null) && paused) { // Update the selected object to go to mouse in move mode
+        if ((selectedObjects != null) && paused) { // Update the selected object to go to mouse in move mode
             if ((touchMode == TouchMode.MOVE)) {
-                selected.newSetPoint(time, mouseX, mouseY);
-                selected.setPosition(new Coordinate(mouseX, mouseY));
+                moveSelectedObjects();
             }
         }
 
@@ -423,7 +441,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             options.append("Touch mode: ").append(touchMode.name()).append("\n");
             options.append("Control pressed: ").append(ctrlPressed).append(" ").append("Shift pressed: ").append(shiftPressed).append("\n");
             for (Action action : actions) {
-                if (action.couldExecute(shiftPressed, ctrlPressed, selected, touchMode)) {
+                if (action.couldExecute(shiftPressed, ctrlPressed, selectedObjects, touchMode)) {
                     StringJoiner keysJoiner = new StringJoiner(", ");
                     for (int key : action.getActionKeys()) {
                         keysJoiner.add(Input.Keys.toString(key) + " ");
@@ -437,30 +455,29 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             //Add information about mouse position selected object
             StringBuilder selectedInfo = new StringBuilder("Mouse: " + round(mouseX) + ", " + round(mouseY) + "\n");
 
-            if (!selectedEdges.isEmpty()) {
-                selectedInfo.append("Selected Edges: ").append(selectedEdges).append("\n");
-            }
-            if (selected == null) {
-                selectedInfo.append("No screen object is selected").append("\n");
+            if (selectedObjects == null) {
+                selectedInfo.append("Nothing is selected").append("\n");
             } else {
-                selectedInfo.append("Selected: ").append(selected.getClass().getSimpleName()).append("\n");
-                selectedInfo.append("x: ").append(selected.getPosition().getX()).append("\n");
-                selectedInfo.append("y: ").append(selected.getPosition().getY()).append("\n");
-                if (selected.getClass().isAssignableFrom(HasID.class)) {
-                    selectedInfo.append("ID: ").append(((HasID) selected).getId().getValue()).append("\n");
-                }
-
-                if (selected.getClass() == Node.class) {
-                    ArrayList<Integer> nodes = new ArrayList<>();
-                    for (Edge edge : ((Node) selected).getEdges()) {
-                        nodes.add(edge.getSegment().getSecond().getValue());
+                for (AnyObject selectedObject : selectedObjects) {
+                    selectedInfo.append("Selected: ").append(selectedObject.getClass().getSimpleName()).append("\n");
+                    if (selectedObject.getClass().isAssignableFrom(HasPosition.class)) {
+                        selectedInfo.append("x: ").append(((HasPosition) selectedObject).getPosition().getX()).append("\n");
+                        selectedInfo.append("y: ").append(((HasPosition) selectedObject).getPosition().getY()).append("\n");
                     }
-                    selectedInfo.append("Edges: ").append(nodes).append("\n");
+                    if (selectedObject.getClass().isAssignableFrom(HasID.class)) {
+                        selectedInfo.append("ID: ").append(((HasID) selectedObjects).getId().getValue()).append("\n");
+                    }
+                    if (selectedObject.getClass() == Node.class) {
+                        ArrayList<Integer> nodes = new ArrayList<>();
+                        for (Edge edge : ((Node) selectedObject).getEdges()) {
+                            nodes.add(edge.getSegment().getSecond().getValue());
+                        }
+                        selectedInfo.append("Edges: ").append(nodes).append("\n");
+                    }
+                    if (selectedObject.getClass() == NodeCollection.class) {
+                        selectedInfo.append("NodeCollectionID: ").append(((NodeCollection) selectedObject).getId().getValue()).append("\n");
+                    }
                 }
-            }
-            for (NodeCollection nodeCollection : selectedNodeCollections) {
-                selectedInfo.append("Selected ").append(nodeCollection.getClass().getSimpleName()).append(": \n");
-                selectedInfo.append("EdgeCollectionID: ").append(nodeCollection.getId().getValue()).append("\n");
             }
 
             selectedLabel.setText(selectedInfo);
@@ -474,8 +491,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
                 selectedInfoTable.add(selectedLabel).expandX().pad(10).left();
                 selectedInfoTable.row().pad(10);
-                if (selected != null) {
-                    selected.showInputs(selectedGroup, uiVisitor);
+                for (AnyObject selectedObject : selectedObjects) {
+                    if (HasInputs.class.isAssignableFrom(selectedObject.getClass())) {
+                        ((HasInputs) selectedObject).showInputs(selectedGroup, uiVisitor);
+                    }
                 }
                 selectedInfoTable.add(selectedGroup);
 
@@ -536,8 +555,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             selectedInfoTable.setPosition(DISPLAY_WIDTH - 30 - selectedInfoTable.getWidth(), DISPLAY_HEIGHT  - 30 - selectedInfoTable.getHeight());
         } else {
             if (UIDisplayed) {
-                if (selected != null) {
-                    selected.hideInputs(selectedGroup, uiVisitor);
+                for (AnyObject selectedObject : selectedObjects) {
+                    if (HasInputs.class.isAssignableFrom(selectedObject.getClass())) {
+                        ((HasInputs) selectedObject).hideInputs(selectedGroup, uiVisitor);
+                    }
                 }
                 leftPanel.clear();
                 selectedInfoTable.clear();
@@ -565,12 +586,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             shapeRenderer.rect(leftPanel.getX(), leftPanel.getY(), leftPanel.getWidth(), leftPanel.getHeight());
             shapeRenderer.rect(selectedInfoTable.getX(), selectedInfoTable.getY(), selectedInfoTable.getWidth(), selectedInfoTable.getHeight());
 
-            //Draw the selected object and edges
-            if (selected != null) {
-                drawer.drawAsSelected(selected);
-            }
-            for (Edge edge : selectedEdges) {
-                drawer.drawAsSelected(edge);
+            //Draw the selected objects
+            for (AnyObject selectedObject : selectedObjects) {
+                drawer.drawAsSelected(selectedObject);
             }
 
             shapeRenderer.end();
@@ -611,16 +629,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Return to the main menu", Input.Keys.ESCAPE).requiresSelected(Requirement.ANY).requiresShift(true).build());
         actions.add(Action.createBuilder(() -> {
-            if (selected != null) {
-                if (HasAlpha.class.isAssignableFrom(selected.getClass())) {
-                    ((HasAlpha) selected).getAlpha().newSetPoint(time, ((HasAlpha) selected).getAlpha().getValue());
-                    System.out.println("set new alpha set point, set points: " + ((HasAlpha) selected).getAlpha().getSetPoints());
-                }
-            }
-            for (NodeCollection selectedNodeCollection : selectedNodeCollections) {
-                if (!selectedNodeCollection.getType().equals("None")) {
-                    selectedNodeCollection.getAlpha().newSetPoint(time, selectedNodeCollection.getAlpha().getValue());
-                    System.out.println("set new alpha set point, set points: " + selectedNodeCollection.getAlpha().getSetPoints());
+            if (selectedObjects != null) {
+                if (HasAlpha.class.isAssignableFrom(selectedObjects.getClass())) {
+                    ((HasAlpha) selectedObjects).getAlpha().newSetPoint(time, ((HasAlpha) selectedObjects).getAlpha().getValue());
+                    System.out.println("Set a new alpha set point, set points: " + ((HasAlpha) selectedObjects).getAlpha().getSetPoints());
                 }
             }
             return null;
@@ -631,16 +643,17 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }, "Toggle animation mode", Input.Keys.V).build());
         // Selection required
         actions.add(Action.createBuilder(() -> {
-            if (selected != null) {
-                selected.holdPositionUntil(time);
-            } else {
-                for (NodeCollection nodeCollection : selectedNodeCollections) {
-                    nodeCollection.getInterpolator().holdValueUntil(time, animation);
+            for (AnyObject selectedObject : selectedObjects) {
+                if (selectedObject.getClass().isAssignableFrom(InterpolatedObject.class)) {
+                    ((InterpolatedObject) selectedObject).holdPositionUntil(time);
+                }
+                if (selectedObject.getClass().isAssignableFrom(NodeCollection.class)) {
+                    ((NodeCollection) selectedObject).getInterpolator().holdValueUntil(time, animation);
                 }
             }
             clearSelected();
             return null;
-        }, "Hold last defined position to this time", Input.Keys.H).build());
+        }, "Hold last defined position to this time", Input.Keys.H).requiredSelectedTypes(InterpolatedObject.class).build());
         // Does not care about selection
         actions.add(Action.createBuilder(() -> {
             updateTime((time / 200) * 200 + 200);
@@ -677,7 +690,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
-            selected = animation.camera();
+            switchSelected(animation.camera());
             return null;
         }, "Select the camera", Input.Keys.C).requiresControl(true).build());
         actions.add(Action.createBuilder(() -> {
@@ -705,40 +718,24 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
         }, "Deselect Object", Input.Keys.D).description("Deselects object").requiresSelected(Requirement.REQUIRES).build());
         actions.add(Action.createBuilder(() -> {
-            if (selected != null) {
-                animation.deleteObject(selected);
-            }
-            for (Edge edge : selectedEdges) {
-                animation.getNodeEdgeHandler().removeEdge(edge);
+            for (AnyObject selectedObject : selectedObjects) {
+                animation.deleteObject(selectedObject);
             }
             System.out.println("Deleted object");
             clearSelected();
             return null;
-        }, "Delete selected unit", Input.Keys.FORWARD_DEL).clearRequiredSelectedTypes().requiredSelectedTypes(Unit.class).build());
+        }, "Delete selected unit", Input.Keys.FORWARD_DEL).requiresSelected(Requirement.REQUIRES).build());
         actions.add(Action.createBuilder(() -> {
-            animation.deleteObject(selected);
-
-            clearSelected();
-
-            System.out.println("Deleted object");
-            return null;
-        }, "Delete selected node and select next node", Input.Keys.FORWARD_DEL).requiresSelected(Requirement.REQUIRES).clearRequiredSelectedTypes().requiredSelectedTypes(Node.class).build());
-        actions.add(Action.createBuilder(() -> {
-            if (selected != null) {
-                if (selected.removeFrame(time)) {
-                    System.out.println("Deleted last frame");
-                    System.out.println("New movements: " + selected.getXInterpolator().getSetPoints().keySet());
-                    System.out.println("           xs: " + selected.getXInterpolator().getSetPoints().values());
-                    System.out.println("           ys: " + selected.getYInterpolator().getSetPoints().values());
-                } else {
-                    System.out.println("Cannot delete frame on object with less than 2 frames");
+            for (AnyObject selectedObject : selectedObjects) {
+                if (selectedObject.getClass().isAssignableFrom(InterpolatedObject.class)) {
+                    if (((InterpolatedObject) selectedObject).removeFrame(time)) {
+                        System.out.println("Deleted last frame");
+                    } else {
+                        System.out.println("Cannot delete frame on object with less than 2 frames");
+                    }
                 }
                 clearSelected();
                 touchMode = TouchMode.DEFAULT;
-            } else {
-                for (NodeCollection nodeCollection : selectedNodeCollections) {
-                    nodeCollection.getInterpolator().removeFrame(time);
-                }
             }
             return null;
         }, "Delete last frame of selected object", Input.Keys.ESCAPE, Input.Keys.DEL).build());

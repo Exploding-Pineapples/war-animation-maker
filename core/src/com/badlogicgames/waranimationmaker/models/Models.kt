@@ -6,9 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.*
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
 import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
-import com.badlogicgames.waranimationmaker.interpolator.InterpolatedBoolean
-import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
-import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.png.PngDirectory
 import java.io.File
@@ -90,59 +87,6 @@ class UIVisitor(val skin: Skin) {
         }
         labels.clear()
     }
-}
-
-interface HasID {
-    val id: ID
-}
-
-interface HasZoom {
-    var zoom: Float
-    var zoomInterpolator: PCHIPInterpolatedFloat
-}
-
-interface HasScreenPosition {
-    var screenPosition: Coordinate
-}
-
-interface HasDeath {
-    var death: InterpolatedBoolean
-}
-
-interface HasAlpha : HasInputs {
-    val alpha: LinearInterpolatedFloat
-
-    override fun buildInputs() {
-        inputElements.add(TextInput(null, { input ->
-            if (input != null) {
-                alpha.value = input
-            }
-        }, label@{
-            return@label alpha.value.toString()
-        }, Float::class.java, "Set alpha set point"))
-    }
-}
-
-interface HasColor : HasInputs {
-    var color: AreaColor
-
-    override fun buildInputs() {
-        inputElements.add(TextInput(null, { input ->
-            if (input != null) {
-                for (color in AreaColor.entries) {
-                    if (input == color.name) {
-                        this.color = color
-                    }
-                }
-            }
-        }, label@{
-            return@label color.name
-        }, String::class.java, "Set color"))
-    }
-}
-
-interface ObjectClickable {
-    fun clicked(x: Float, y: Float) : Boolean
 }
 
 fun projectToScreen(position: Coordinate, zoom: Float, cx: Float, cy: Float): Coordinate {

@@ -8,7 +8,7 @@ import com.badlogicgames.waranimationmaker.SelectBoxInput
 import com.badlogicgames.waranimationmaker.interpolator.LinearInterpolatedFloat
 import com.badlogicgames.waranimationmaker.interpolator.NodeCollectionInterpolator
 
-open class NodeCollection(override val id: NodeCollectionID) : HasInputs, HasID, HasAlpha, HasColor, ObjectClickable {
+open class NodeCollection(override val id: NodeCollectionID) : AnyObject, HasInputs, HasID, HasAlpha, HasColor, Clickable {
     override var alpha = LinearInterpolatedFloat(1f, 0)
     @Transient var interpolator: NodeCollectionInterpolator = NodeCollectionInterpolator()
     override var color: AreaColor = AreaColor.RED

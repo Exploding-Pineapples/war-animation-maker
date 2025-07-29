@@ -4,20 +4,31 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogicgames.waranimationmaker.InputElement
-import com.badlogicgames.waranimationmaker.interpolator.PCHIPInterpolatedFloat
+import com.badlogicgames.waranimationmaker.TextInput
 import kotlin.math.absoluteValue
 
 data class Node(
     override var position: Coordinate,
-    override val initTime: Int,
+    val initTime: Int,
     override val id: NodeID
-) : ScreenObject(), HasID  {
+) : AnyObject, HasScreenPosition, Clickable, HasInputs, HasID  {
+    override var screenPosition: Coordinate
     var color: Color = Color.GREEN
-    override var xInterpolator = PCHIPInterpolatedFloat(position.x, initTime)
-    override var yInterpolator = PCHIPInterpolatedFloat(position.y, initTime)
     @Transient override var inputElements: MutableList<InputElement<*>> = mutableListOf()
     @Transient var visitedBy = mutableListOf<NodeCollectionID>()
+    var tSetPoint: Double? = null
     var edges = mutableListOf<Edge>()
+
+    override fun buildInputs() {
+        super.buildInputs()
+        inputElements.add(TextInput(null, { input ->
+            if (input != null) {
+                tSetPoint = input
+            }
+        }, label@{
+            return@label tSetPoint.toString()
+        }, Double::class.java, "Set t set point"))
+    }
 
     override fun showInputs(verticalGroup: VerticalGroup, uiVisitor: UIVisitor) {
         uiVisitor.show(verticalGroup, this)

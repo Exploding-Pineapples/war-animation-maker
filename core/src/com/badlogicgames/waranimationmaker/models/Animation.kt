@@ -42,7 +42,7 @@ data class Animation @JvmOverloads constructor(
         return camera!!
     }
 
-    fun deleteObject(obj: Object): Boolean {
+    fun deleteObject(obj: AnyObject): Boolean {
         if (obj.javaClass == Node::class.java) {
             return nodeEdgeHandler.removeNode(obj as Node)
         }
@@ -58,10 +58,13 @@ data class Animation @JvmOverloads constructor(
         if (obj.javaClass == Unit::class.java) {
             return units.remove(obj as Unit)
         }
+        if (obj.javaClass == Edge::class.java) {
+            return nodeEdgeHandler.removeEdge(obj as Edge)
+        }
         return false
     }
 
-    fun getEdgeCollectionByID(id: NodeCollectionID): NodeCollection? {
+    fun getNodeCollection(id: NodeCollectionID): NodeCollection? {
         return nodeCollections.find { it.id.value == id.value }
     }
 
@@ -103,7 +106,7 @@ data class Animation @JvmOverloads constructor(
         return new
     }
 
-    fun createObjectAtPosition(time: Int, x: Float, y: Float, type: String, country: String = ""): ScreenObject? {
+    fun createObjectAtPosition(time: Int, x: Float, y: Float, type: String, country: String = ""): AnyObject? {
         if (type == "Unit") {
             return newUnit(x, y, time, country)
         }
@@ -118,7 +121,7 @@ data class Animation @JvmOverloads constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : ObjectClickable> selectObjectWithType(x: Float, y: Float, time: Int, type: Class<out ObjectClickable>): ArrayList<T> {
+    fun <T : AnyObject> selectObjectWithType(x: Float, y: Float, time: Int, type: Class<out AnyObject>): ArrayList<T> {
         val objects = ArrayList<T>()
 
         if (type.isAssignableFrom(Node::class.java)) {
@@ -154,15 +157,10 @@ data class Animation @JvmOverloads constructor(
         return objects
     }
 
-    fun getParents(node: Object) : List<NodeCollection> {
+    fun getParents(node: Node) : List<NodeCollection> {
         nodeCollections.forEach { println(it.interpolator.setPoints) }
-        return if (node.javaClass == Node::class.java) {
-            nodeCollections.filter {
-                    nodeCollection -> (nodeCollection.interpolator.setPoints[node.initTime]?.nodes?.find { it.id.value == (node as Node).id.value } != null)
-            }
-
-        } else {
-            mutableListOf()
+        return nodeCollections.filter {
+                nodeCollection -> (nodeCollection.interpolator.setPoints[node.initTime]?.nodes?.find { it.id.value == node.id.value } != null)
         }
     }
 

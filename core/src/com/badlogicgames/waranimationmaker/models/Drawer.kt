@@ -293,42 +293,63 @@ class Drawer(val font: BitmapFont,
         batcher.draw(texture, rect.x, rect.y, rect.width, rect.height)
     }
 
-    fun drawAsSelected(edge: Edge) {
-        val screenCoords = edge.screenCoords
-        for (i in 0..<screenCoords.size - 1) {
-            shapeRenderer.rectLine(screenCoords[i].x, screenCoords[i].y, screenCoords[i + 1].x, screenCoords[i + 1].y, 5f)
-        }
-    }
-
-    fun drawAsSelected(screenObject: ScreenObject) {
-        if (!screenObject.javaClass.isAssignableFrom(Node::class.java)) {
+    fun drawAsSelected(anyObject: AnyObject) {
+        if (InterpolatedObject::class.java.isAssignableFrom(anyObject.javaClass)) {
+            val screenObject = anyObject as InterpolatedObject
             val xInterpolator = screenObject.xInterpolator
             val yInterpolator = screenObject.yInterpolator
 
             shapeRenderer.color = Color.SKY
-            for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last().toInt() step 4) { // Draws entire path of the selected object over time
-                val position = projectToScreen(Coordinate(xInterpolator.interpolationFunction.evaluate(time), yInterpolator.interpolationFunction.evaluate(time)), camera.zoom, camera.position.x, camera.position.y)
+            for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last()
+                .toInt() step 4) { // Draws entire path of the selected object over time
+                val position = projectToScreen(
+                    Coordinate(
+                        xInterpolator.interpolationFunction.evaluate(time),
+                        yInterpolator.interpolationFunction.evaluate(time)
+                    ), camera.zoom, camera.position.x, camera.position.y
+                )
                 shapeRenderer.circle(position.x, position.y, 2f)
             }
             shapeRenderer.color = Color.PURPLE
             for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
-                val position = projectToScreen(Coordinate(xInterpolator.interpolationFunction.evaluate(time), yInterpolator.interpolationFunction.evaluate(time)), camera.zoom, camera.position.x, camera.position.y)
+                val position = projectToScreen(
+                    Coordinate(
+                        xInterpolator.interpolationFunction.evaluate(time),
+                        yInterpolator.interpolationFunction.evaluate(time)
+                    ), camera.zoom, camera.position.x, camera.position.y
+                )
                 shapeRenderer.circle(position.x, position.y, 4f)
             }
-        }
 
-        if (screenObject.javaClass.isAssignableFrom(Unit::class.java)) {
-            val unit = screenObject as Unit
-            shapeRenderer.color = colorWithAlpha(Color.BLACK, 0.5f)
-            shapeRenderer.rect(unit.screenPosition.x - unit.width / 2, unit.screenPosition.y - unit.width / 2, unit.width, unit.height)
-        } else {
-            shapeRenderer.color = Color.ORANGE
-            shapeRenderer.rect(
-                screenObject.screenPosition.x - 6.0f,
-                screenObject.screenPosition.y - 6.0f,
-                12f,
-                12f
-            ) // Draws an orange square to symbolize being selected
+            if (anyObject.javaClass == Unit::class.java) {
+                val unit = anyObject as Unit
+                shapeRenderer.color = colorWithAlpha(Color.BLACK, 0.5f)
+                shapeRenderer.rect(
+                    unit.screenPosition.x - unit.width / 2,
+                    unit.screenPosition.y - unit.width / 2,
+                    unit.width,
+                    unit.height
+                )
+            }
+            if (anyObject.javaClass.isAssignableFrom(HasScreenPosition::class.java)) {
+                shapeRenderer.color = Color.ORANGE
+                shapeRenderer.rect(
+                    (anyObject as HasScreenPosition).screenPosition.x - 6.0f,
+                    anyObject.screenPosition.y - 6.0f,
+                    12f,
+                    12f
+                ) // Draws an orange square to symbolize being selected
+            }
+        }
+        if (anyObject.javaClass.isAssignableFrom(Edge::class.java)) {
+            val screenCoords = (anyObject as Edge).screenCoords
+            for (i in 0..<screenCoords.size - 1) {
+                shapeRenderer.rectLine(screenCoords[i].x, screenCoords[i].y, screenCoords[i + 1].x, screenCoords[i + 1].y, 5f)
+            }
+        }
+        if (anyObject.javaClass.isAssignableFrom(Node::class.java)) {
+            val screenCoords = (anyObject as Node).screenPosition
+            shapeRenderer.circle(screenCoords.x, screenCoords.y, 7.0f)
         }
     }
 
