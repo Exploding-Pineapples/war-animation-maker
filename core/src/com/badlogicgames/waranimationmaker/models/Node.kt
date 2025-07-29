@@ -57,7 +57,6 @@ data class Node(
         updateScreenPosition(camera.zoom, camera.position.x, camera.position.y)
         edges.forEach {
             it.prepare()
-            it.screenCoords.clear()
         }
     }
 }

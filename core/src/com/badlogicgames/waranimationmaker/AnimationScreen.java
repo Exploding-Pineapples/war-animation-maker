@@ -343,6 +343,9 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             }
             if (object.getClass() == Node.class) {
                 ((Node) object).setPosition(new Coordinate(mouseX, mouseY));
+                for (NodeCollection parent : animation.getParents((Node) object)) {
+                    parent.getInterpolator().updateInterpolationFunction();
+                }
             }
         }
     }
@@ -494,10 +497,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (paused) { // Update the selected object to go to mouse in move mode
                 if ((touchMode == TouchMode.MOVE)) {
-                    for (NodeCollection collection : animation.getNodeCollections()) {
-                        collection.getInterpolator().updateInterpolators();
-                    }
-
                     moveObjects(selectedObjects);
                 }
             }
