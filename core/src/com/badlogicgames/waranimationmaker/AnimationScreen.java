@@ -494,6 +494,10 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
 
             if (paused) { // Update the selected object to go to mouse in move mode
                 if ((touchMode == TouchMode.MOVE)) {
+                    for (NodeCollection collection : animation.getNodeCollections()) {
+                        collection.getInterpolator().updateInterpolators();
+                    }
+
                     moveObjects(selectedObjects);
                 }
             }

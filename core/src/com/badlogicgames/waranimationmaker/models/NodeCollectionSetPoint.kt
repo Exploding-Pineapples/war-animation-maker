@@ -27,7 +27,7 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
             }
 
             val nextNode = nodes[index + 1]
-            totalDistance += hypot(nextNode.screenPosition.x - node.screenPosition.x, nextNode.screenPosition.y - node.screenPosition.y).toDouble()
+            totalDistance += hypot(nextNode.position.x - node.position.x, nextNode.position.y - node.position.y).toDouble()
             distances.add(totalDistance)
         }
 
@@ -39,7 +39,7 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         val xVals = mutableListOf<Double>()
         val yVals = mutableListOf<Double>()
 
-        val coordinates = nodes.map { it.screenPosition }
+        val coordinates = nodes.map { it.position }
 
         for (i in coordinates.indices) {
             tVals.add(tInterpolator.evaluate(i))
@@ -51,6 +51,9 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         yInterpolator.i = tVals.toTypedArray()
         xInterpolator.o = xVals.toTypedArray()
         yInterpolator.o = yVals.toTypedArray()
+
+        xInterpolator.init()
+        yInterpolator.init()
     }
 
     fun tOfNode(node: Node): Double {

@@ -12,9 +12,11 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
     override fun updateInterpolationFunction() {
     }
 
-    fun evaluate(time: Int): Array<Coordinate> {
+    fun updateInterpolators() {
         setPoints.values.forEach { it.updateInterpolators() }
+    }
 
+    fun evaluate(time: Int): Array<Coordinate> {
         var num = 0
 
         coordinates = arrayOf()

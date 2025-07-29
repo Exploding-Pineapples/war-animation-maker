@@ -29,4 +29,9 @@ public class LinearInterpolationFunction<I extends Number> extends Interpolation
 
         return y0 + (y1 - y0) * (at.doubleValue() - x0.doubleValue()) / (x1.doubleValue() - x0.doubleValue());
     }
+
+    @Override
+    public void init() {
+
+    }
 }

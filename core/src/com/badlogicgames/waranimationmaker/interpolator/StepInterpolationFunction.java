@@ -24,4 +24,9 @@ public class StepInterpolationFunction<I extends Number, O> extends Interpolatio
         }
         throw new IllegalStateException("Step interpolation failed somehow");
     }
+
+    @Override
+    public void init() {
+
+    }
 }

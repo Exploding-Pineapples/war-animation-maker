@@ -50,7 +50,10 @@ open class NodeCollection(override val id: NodeCollectionID) : AnyObject, HasInp
     }
 
     fun update(time: Int, paused: Boolean) {
-        if (!paused) alpha.update(time)
+        if (!paused) {
+            interpolator.updateInterpolators()
+            alpha.update(time)
+        }
         interpolator.evaluate(time)
     }
 

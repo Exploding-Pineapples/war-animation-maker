@@ -5,9 +5,9 @@ import kotlin.math.min
 
 // this is a java number which isn't rly the saME AS KOTLIN number, uu should converr this class  to kotlin first of all 
 class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: Array<Double>) : InterpolationFunction<I, Double>(i, o) {
-    protected var slopes: DoubleArray
+    protected var slopes: DoubleArray = computeSlopes(i, o)
 
-    init {
+    override fun init() {
         this.slopes = computeSlopes(i, o)
     }
 
@@ -49,10 +49,6 @@ class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: Array<Double>) : In
 
     // Method to perform PCHIP interpolation at a given xi
     override fun evaluate(at: I): Double { // ChatGPT wrote this
-        if (slopes.size != i.size) { //TODO this will not update if the i values for some reason stay the same but the points change
-            slopes = computeSlopes(i, o)
-        }
-
         val n = i.size
 
         if (n < 2) {

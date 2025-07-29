@@ -25,4 +25,8 @@ class MapperInterpolationFunction<I : Number, O, NewOutput, NewInput : Number>(
             mapBackToOriginalIn(at)
         )
     )
+
+    override fun init() {
+        TODO("Not yet implemented")
+    }
 }

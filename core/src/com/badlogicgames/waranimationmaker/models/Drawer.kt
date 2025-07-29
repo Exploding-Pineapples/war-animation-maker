@@ -86,12 +86,11 @@ class Drawer(val font: BitmapFont,
     }
 
     fun draw(nodeCollection: NodeCollection) {
+        val screenCoords = nodeCollection.interpolator.coordinates.map { projectToScreen(it, camera.zoom, camera.position.x, camera.position.y) }
         if (nodeCollection.interpolator.setPoints.isNotEmpty()) {
             shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
             if (nodeCollection.type == "Area") {
-                val poly =
-                    nodeCollection.interpolator.coordinates.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }
-                        .toDoubleArray()
+                val poly = screenCoords.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }.toDoubleArray()
 
                 val earcut = Earcut.earcut(poly) // Turns polygon into series of triangles which share vertices with the polygon. The triangles' vertices are represented as the index of an original polygon vertex
 
@@ -109,14 +108,13 @@ class Drawer(val font: BitmapFont,
                 }
             }
             if (nodeCollection.type == "Line") {
-                val coordinates = nodeCollection.interpolator.coordinates
-                if (coordinates.isNotEmpty()) {
-                    for (i in 0..<coordinates.lastIndex) {
+                if (screenCoords.isNotEmpty()) {
+                    for (i in 0..<screenCoords.lastIndex) {
                         shapeRenderer.rectLine(
-                            coordinates[i].x,
-                            coordinates[i].y,
-                            coordinates[i + 1].x,
-                            coordinates[i + 1].y,
+                            screenCoords[i].x,
+                            screenCoords[i].y,
+                            screenCoords[i + 1].x,
+                            screenCoords[i + 1].y,
                             nodeCollection.width ?: 5f
                         )
                     }
