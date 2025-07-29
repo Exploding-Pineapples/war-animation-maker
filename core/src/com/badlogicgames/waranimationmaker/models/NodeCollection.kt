@@ -51,7 +51,7 @@ open class NodeCollection(override val id: NodeCollectionID) : AnyObject, HasInp
 
     fun update(time: Int, paused: Boolean) {
         if (!paused) {
-            interpolator.updateInterpolators()
+            interpolator.updateInterpolationFunction()
             alpha.update(time)
         }
         interpolator.evaluate(time)
@@ -61,7 +61,11 @@ open class NodeCollection(override val id: NodeCollectionID) : AnyObject, HasInp
         drawer.draw(this)
     }
 
+    fun clicked(x: Float, y: Float, camera: Camera): Boolean {
+        return clickedCoordinates(x, y, interpolator.coordinates.map { projectToScreen(it, camera.zoom, camera.position.x, camera.position.y) }.toTypedArray())
+    }
+
     override fun clicked(x: Float, y: Float): Boolean {
-        return clickedCoordinates(x, y, interpolator.coordinates)
+        return false
     }
 }
