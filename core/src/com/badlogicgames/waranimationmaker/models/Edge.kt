@@ -23,6 +23,12 @@ class Edge(
             screenCoords = mutableListOf()
         }
     }
+
+    fun updateScreenCoords(animation: Animation) {
+        screenCoords.clear()
+        screenCoords.add(animation.getNodeByID(segment.first)!!.screenPosition)
+        screenCoords.add(animation.getNodeByID(segment.second)!!.screenPosition)
+    }
 }
 
 fun distanceFromPointToSegment(point: Vector2f, a: Vector2f, b: Vector2f): Float { // ChatGPT wrote this

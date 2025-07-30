@@ -24,10 +24,7 @@ data class Animation @JvmOverloads constructor(
         nodeEdgeHandler = NodeEdgeHandler(this)
         nodes.forEach { node ->
             node.init()
-            node.edges.forEach {
-                it.screenCoords.add(getNodeByID(it.segment.first)!!.screenPosition)
-                it.screenCoords.add(getNodeByID(it.segment.second)!!.screenPosition)
-            }
+            node.edges.forEach { it.updateScreenCoords(this) }
         }
         nodeCollections.forEach { it.init(initTime) }
         nodeEdgeHandler.updateNodeCollections()

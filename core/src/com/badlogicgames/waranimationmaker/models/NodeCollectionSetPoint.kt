@@ -69,7 +69,7 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         for (index in 0..<newSetPoint.nodes.size - 1) {
             val node = newSetPoint.nodes[index]
             val nextNode = newSetPoint.nodes[index + 1]
-            node.edges.add(Edge(id.duplicate(), Pair(node.id.duplicate(), nextNode.id.duplicate())))
+            node.edges.add(Edge(id.duplicate(), Pair(node.id.duplicate(), nextNode.id.duplicate())).apply { updateScreenCoords(animation) })
         }
         return newSetPoint
     }
