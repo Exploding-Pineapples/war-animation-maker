@@ -321,7 +321,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             if (touchMode == TouchMode.NEW_EDGE) {
                 Node newSelection = selectNewObject(x, y, selectedObjects, Node.class);
                 if (newSelection != null) {
-                    for (AnyObject selectedObject : selectedObjects) {
+                    for (AnyObject selectedObject : selectedObjects) { // Add edge from already selected Nodes to new selected node
                         if (selectedObject.getClass() == Node.class) {
                             System.out.println("trying to select for new edge");
 
@@ -331,8 +331,12 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                         }
                     }
                 }
-                switchSelected(newSelection);
-                updateNewEdgeInputs();
+                if (selectedObjects.isEmpty()) { // Only change new edge collection if nothing was selected
+                    switchSelected(newSelection);
+                    updateNewEdgeInputs();
+                } else {
+                    switchSelected(newSelection);
+                }
             }
         }
         return true;
