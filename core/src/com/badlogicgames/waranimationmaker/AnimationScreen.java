@@ -697,6 +697,18 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             return null;
             }, "Create Object Mode", Input.Keys.C
         ).build());
+        actions.add(Action.createBuilder(() -> {
+            ArrayList<AnyObject> selectedObjectsCopy = new ArrayList<>(selectedObjects);
+            for (AnyObject selectedObject : selectedObjectsCopy) {
+                if (selectedObject.getClass() == Node.class) {
+                    Node newNode = animation.newNode(mouseX, mouseY, time);
+                    animation.getNodeEdgeHandler().insert((Node) selectedObject, newNode);
+                    switchSelected(newNode);
+                }
+            }
+            return null;
+            }, "Insert", Input.Keys.I
+        ).build());
         //Key presses which require control pressed
         actions.add(Action.createBuilder(() -> {
             switchSelected(animation.camera());

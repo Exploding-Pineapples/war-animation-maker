@@ -60,6 +60,18 @@ class NodeCollectionSetPoint(val time: Int, val id: NodeCollectionID, var nodes:
         return tInterpolator.evaluate(nodes.indexOf(node))
     }
 
+    fun insert(at: Node, node: Node) { // Insert node after at
+        val atEdge = at.edges.find { it.collectionID.value == id.value }
+        if (atEdge != null) {
+            node.edges.add(Edge(id.duplicate(), Pair(node.id.duplicate(), atEdge.segment.second.duplicate())))
+            atEdge.segment = Pair(at.id.duplicate(), node.id.duplicate())
+        } else {
+            at.edges.add(Edge(id.duplicate(), Pair(at.id.duplicate(), node.id.duplicate())))
+        }
+
+        nodes.add(nodes.indexOf(at), node)
+    }
+
     fun duplicate(time: Int, animation: Animation): NodeCollectionSetPoint {
         // TODO this will not work with multiple NCs sharing one node because duplication will create new nodes for each one
         val newSetPoint = NodeCollectionSetPoint(time, NodeCollectionID(id.value))

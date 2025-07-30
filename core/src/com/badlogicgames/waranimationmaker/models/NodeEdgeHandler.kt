@@ -179,4 +179,11 @@ class NodeEdgeHandler(val animation: Animation) {
 
         animation.nodeCollections.forEach { it.update(time, paused) }
     }
+
+    fun insert(at: Node, node: Node) {
+        at.edges.forEach {
+            animation.getNodeCollection(it.collectionID)!!.interpolator.setPoints[at.initTime]?.insert(at, node)
+        }
+        updateNodeCollections()
+    }
 }
