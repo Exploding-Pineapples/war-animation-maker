@@ -14,6 +14,22 @@ class NodeEdgeHandler(val animation: Animation) {
         animation.nodeId++
     }
 
+    fun removeNode(removeNode: Node, redirectEdge: Boolean): Boolean
+    {
+        if (redirectEdge) {
+            return removeNode(removeNode)
+        } else {
+            animation.nodes.forEach { node ->
+                node.edges.removeIf() { it.segment.second.value == removeNode.id.value }
+            }
+            removeNode.edges.clear()
+            val result = animation.nodes.remove(removeNode)
+            updateNodeCollections()
+            return result
+        }
+
+    }
+
     fun removeNode(removeNode: Node): Boolean
     {
         // Redirect edges that point to the node to the next node in the Node Collection, or delete if that does not exist
@@ -56,6 +72,10 @@ class NodeEdgeHandler(val animation: Animation) {
 
         updateNodeCollections()
         return removed
+    }
+
+    fun deleteNodeCollectionSetPoint() {
+
     }
 
     private fun traverse(node: Node, nodeCollections: MutableList<NodeCollectionSetPoint>, currentBranch: NodeCollectionSetPoint) {
