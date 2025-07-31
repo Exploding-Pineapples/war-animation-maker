@@ -114,7 +114,7 @@ data class Unit(
         val sizePresets = mapOf(
             "XX" to 1.0f,
             "X" to 0.8f,
-            "III" to 0.65f,
+            "III" to 0.7f,
             "II" to 0.55f,
             "I" to 0.5f
         )
