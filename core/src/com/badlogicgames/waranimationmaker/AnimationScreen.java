@@ -157,6 +157,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(game.multiplexer);
 
+        game.frameExporter = new FrameExporter(DISPLAY_WIDTH, DISPLAY_HEIGHT, animation.getName());
+
         // Final init
         animation.camera().goToTime(time);
         updateCam();
@@ -605,6 +607,8 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         }
 
         stage.draw();
+
+        //game.frameExporter.captureFrame(time); // uncomment to export (temp)
 
         if (!paused) { //now that both update and draw are done, advance the time
             time++;

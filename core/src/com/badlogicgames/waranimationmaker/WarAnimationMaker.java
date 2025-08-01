@@ -37,6 +37,7 @@ public class WarAnimationMaker extends Game {
 	public InputMultiplexer multiplexer;
 	public static final int DISPLAY_WIDTH = 1920;
 	public static final int DISPLAY_HEIGHT = 1080;
+	FrameExporter frameExporter;
 
 	public Menu menu;
 
@@ -47,6 +48,7 @@ public class WarAnimationMaker extends Game {
 		shapeRenderer = new ShapeRenderer();
 		bitmapFont = Assets.loadFont();
 		fontShader = new ShaderProgram(Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.vert"), Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.frag"));
+
 		if (!fontShader.isCompiled()) {
 			Gdx.app.error("fontShader", "compilation failed:\n" + fontShader.getLog());
 		}
@@ -68,5 +70,13 @@ public class WarAnimationMaker extends Game {
 	@Override
 	public void render() {
 		super.render();
+	}
+
+	@Override
+	public void dispose() {
+		batcher.dispose();
+		if (frameExporter != null) {
+			frameExporter.dispose();
+		}
 	}
 }
