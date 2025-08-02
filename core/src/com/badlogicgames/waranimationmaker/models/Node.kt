@@ -52,11 +52,13 @@ data class Node(
         }
     }
 
-    fun update(camera: OrthographicCamera) { // Goes to time, and if animation mode is active, draws colored circle
+    fun update(camera: OrthographicCamera, time: Int) { // Goes to time, and if animation mode is active, draws colored circle
         visitedBy.clear() // Clear to prepare to be traversed
         updateScreenPosition(camera.zoom, camera.position.x, camera.position.y)
-        edges.forEach {
-            it.prepare()
+        if (time == initTime) {
+            edges.forEach {
+                it.prepare()
+            }
         }
     }
 }

@@ -2,7 +2,6 @@ package com.badlogicgames.waranimationmaker
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.PixmapIO
 import java.io.BufferedOutputStream
 
 class FrameExporter(
