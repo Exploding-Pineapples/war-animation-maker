@@ -168,15 +168,7 @@ class NodeEdgeHandler(val animation: Animation) {
     }
 
     fun update(time: Int, camera: OrthographicCamera, paused: Boolean) {
-        for (node in animation.nodes) { // Update all nodes and edges
-            node.update(camera)
-            if (time == node.initTime) {
-                node.edges.forEach {
-                    it.prepare()
-                }
-            }
-        }
-
+        animation.nodes.forEach { it.update(camera, time) }
         animation.nodeCollections.forEach { it.update(time, paused) }
     }
 

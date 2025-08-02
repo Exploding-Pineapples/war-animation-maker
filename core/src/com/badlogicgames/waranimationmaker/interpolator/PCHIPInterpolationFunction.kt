@@ -1,18 +1,17 @@
 package com.badlogicgames.waranimationmaker.interpolator
 
-import kotlin.math.max
-import kotlin.math.min
-
 // this is a java number which isn't rly the saME AS KOTLIN number, uu should converr this class  to kotlin first of all 
-class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: Array<Double>) : InterpolationFunction<I, Double>(i, o) {
+class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: DoubleArray) : InterpolationFunction<I, Double>(i, o.toTypedArray()) {
     protected var slopes: DoubleArray = computeSlopes(i, o)
+    private var iDoubles: DoubleArray = i.map { it.toDouble() }.toDoubleArray()
 
     override fun init() {
-        this.slopes = computeSlopes(i, o)
+        this.slopes = computeSlopes(i, o.toDoubleArray())
+        iDoubles = i.map { it.toDouble() }.toDoubleArray()
     }
 
     // Function to compute the PCHIP slopes
-    fun computeSlopes(x: Array<I>, y: Array<Double>): DoubleArray { // ChatGPT wrote this
+    fun computeSlopes(x: Array<I>, y: DoubleArray): DoubleArray { // ChatGPT wrote this
         val n = x.size
 
         if (n < 2) {
@@ -50,28 +49,34 @@ class PCHIPInterpolationFunction<I : Number>(i: Array<I>, o: Array<Double>) : In
     // Method to perform PCHIP interpolation at a given xi
     override fun evaluate(at: I): Double { // ChatGPT wrote this
         val n = i.size
+        val i = iDoubles
+        val at1 = at.toDouble()
 
         if (n < 2) {
             return o[0]
         }
 
-        if ((at.toDouble()) < (i[0].toDouble())) {
+        if ((at1) < (i[0])) {
             return o[0]
         }
-        if (at.toDouble() > i[n - 1].toDouble()) {
+        if (at1 > i[n - 1]) {
             return o[n - 1]
         }
 
         // Find the interval [x_k, x_{k+1}] where xi lies
-        var k = i.binarySearch(at)
+        var k = i.binarySearch(at1)
         if (k < 0) {
             k = -k - 2
         }
-        k = max(0.0, min(k.toDouble(), (n - 2).toDouble())).toInt()
+        k = when {
+            k < 0 -> -k - 2
+            k >= n - 1 -> n - 2
+            else -> k
+        }
 
         // Calculate the cubic polynomial coefficients
-        val h = i[k + 1].toDouble() - i[k].toDouble()
-        val t = (at.toDouble() - i[k].toDouble()) / h
+        val h = i[k + 1] - i[k]
+        val t = (at1 - i[k]) / h
         val t2 = t * t
         val t3 = t2 * t
 

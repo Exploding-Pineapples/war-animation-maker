@@ -57,7 +57,6 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
 
                 var index = 0
                 for (frame in setPoints) {
-
                     // frame.value's interpolators are through space at a specific time
                     xInTime[index] = frame.value.xInterpolator.evaluate(parameter[i])
                     yInTime[index] = frame.value.yInterpolator.evaluate(parameter[i])
@@ -65,8 +64,8 @@ class NodeCollectionInterpolator : HasSetPoints<Int, NodeCollectionSetPoint> {
                 }
 
 
-                val xInterpolatorTime = PCHIPInterpolationFunction<Int>(setPoints.keys.toTypedArray(), xInTime)
-                val yInterpolatorTime = PCHIPInterpolationFunction<Int>(setPoints.keys.toTypedArray(), yInTime)
+                val xInterpolatorTime = PCHIPInterpolationFunction<Int>(setPoints.keys.toTypedArray(), xInTime.toDoubleArray())
+                val yInterpolatorTime = PCHIPInterpolationFunction<Int>(setPoints.keys.toTypedArray(), yInTime.toDoubleArray())
 
                 val coordinate =
                     Coordinate(xInterpolatorTime.evaluate(time).toFloat(), yInterpolatorTime.evaluate(time).toFloat())
