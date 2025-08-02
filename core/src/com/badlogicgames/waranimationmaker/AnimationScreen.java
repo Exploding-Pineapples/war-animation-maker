@@ -73,6 +73,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     boolean newUnitInputsDisplayed;
     long commaLastUnpressed = 0;
     long periodLastUnpressed = 0;
+    long firstTime = System.nanoTime();
 
     public AnimationScreen(WarAnimationMaker game, Animation animation)  {
         this.animation = animation;
@@ -157,7 +158,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         game.multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(game.multiplexer);
 
-        game.frameExporter = new FrameExporter(DISPLAY_WIDTH, DISPLAY_HEIGHT, animation.getName());
+        //game.frameExporter = new FrameExporter(DISPLAY_WIDTH, DISPLAY_HEIGHT, animation.getName());
 
         // Final init
         animation.camera().goToTime(time);
@@ -384,51 +385,13 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         return true;
     }
 
-    private void update() {
-        mouseX = (float) ((double) Gdx.input.getX() - orthographicCamera.position.x * (1 - orthographicCamera.zoom) - (Gdx.graphics.getWidth() / 2.0f - orthographicCamera.position.x)) / orthographicCamera.zoom;
-        mouseY = (float) ((double) (DISPLAY_HEIGHT - Gdx.input.getY()) - orthographicCamera.position.y * (1 - orthographicCamera.zoom) - (Gdx.graphics.getHeight() / 2.0f - orthographicCamera.position.y)) / orthographicCamera.zoom;
-        ctrlPressed = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT));
-        shiftPressed = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT));
-
-        //Camera
-        animation.camera().goToTime(time);
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            orthographicCamera.position.y += 10 / orthographicCamera.zoom;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            orthographicCamera.position.y -= 10 / orthographicCamera.zoom;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            orthographicCamera.position.x -= 10 / orthographicCamera.zoom;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            orthographicCamera.position.x += 10 / orthographicCamera.zoom;
-        }
-
-        if (Gdx.input.isKeyPressed(Input.Keys.COMMA)) {
-            if (System.currentTimeMillis() - commaLastUnpressed >= 250) {
-                updateTime(time - 1);
-            }
-        } else {
-            commaLastUnpressed = System.currentTimeMillis();
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.PERIOD)) {
-            if (System.currentTimeMillis() - periodLastUnpressed >= 250) {
-                updateTime(time + 1);
-            }
-        } else {
-            periodLastUnpressed = System.currentTimeMillis();
-        }
-
-        if (!paused) { //don't update camera when paused to allow for movement when paused
-            updateCam();
-        }
-        orthographicCamera.update();
-        drawer.update(orthographicCamera, time, animationMode);
-        animation.update(time, orthographicCamera, paused);
-
-        //UI
+    private void updateUI() {
         if (animationMode) {
+            if (paused) { // Update the selected object to go to mouse in move mode
+                if ((touchMode == TouchMode.MOVE)) {
+                    moveObjects(selectedObjects);
+                }
+            }
             // Set information about keyboard options and current animator state
             timeAndFPS.setText(Gdx.graphics.getFramesPerSecond() + " FPS \n" + "Time: " + time);
 
@@ -451,7 +414,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             //Add information about mouse position selected object
             StringBuilder selectedInfo = new StringBuilder("Mouse: " + round(mouseX) + ", " + round(mouseY) + "\n");
 
-            if (selectedObjects == null) {
+            if (selectedObjects.isEmpty()) {
                 selectedInfo.append("Nothing is selected").append("\n");
             } else {
                 for (AnyObject selectedObject : selectedObjects) {
@@ -504,12 +467,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 selectedInfoTable.add(selectedGroup);
 
                 UIDisplayed = true;
-            }
-
-            if (paused) { // Update the selected object to go to mouse in move mode
-                if ((touchMode == TouchMode.MOVE)) {
-                    moveObjects(selectedObjects);
-                }
             }
 
             if (touchMode == TouchMode.NEW_EDGE) {
@@ -576,8 +533,58 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
                 UIDisplayed = false;
             }
         }
+    }
+
+    private void update() {
+        System.out.println("Time since last frame: " + (System.nanoTime() - firstTime));
+        firstTime = System.nanoTime();
+        mouseX = (float) ((double) Gdx.input.getX() - orthographicCamera.position.x * (1 - orthographicCamera.zoom) - (DISPLAY_WIDTH / 2f - orthographicCamera.position.x)) / orthographicCamera.zoom;
+        mouseY = (float) ((double) (DISPLAY_HEIGHT - Gdx.input.getY()) - orthographicCamera.position.y * (1 - orthographicCamera.zoom) - (DISPLAY_HEIGHT / 2f - orthographicCamera.position.y)) / orthographicCamera.zoom;
+        ctrlPressed = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT));
+        shiftPressed = (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT));
+
+        //Camera
+        animation.camera().goToTime(time);
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            orthographicCamera.position.y += 10 / orthographicCamera.zoom;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            orthographicCamera.position.y -= 10 / orthographicCamera.zoom;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            orthographicCamera.position.x -= 10 / orthographicCamera.zoom;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            orthographicCamera.position.x += 10 / orthographicCamera.zoom;
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.COMMA)) {
+            if (System.currentTimeMillis() - commaLastUnpressed >= 250) {
+                updateTime(time - 1);
+            }
+        } else {
+            commaLastUnpressed = System.currentTimeMillis();
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.PERIOD)) {
+            if (System.currentTimeMillis() - periodLastUnpressed >= 250) {
+                updateTime(time + 1);
+            }
+        } else {
+            periodLastUnpressed = System.currentTimeMillis();
+        }
+
+        if (!paused) { //don't update camera when paused to allow for movement when paused
+            updateCam();
+        }
+        orthographicCamera.update();
+        drawer.update(orthographicCamera, time, animationMode);
+        animation.update(time, orthographicCamera, paused);
+
+        //UI
+        updateUI();
 
         stage.act();
+        System.out.println("update done: " + (System.nanoTime() - firstTime));
     }
 
     @Override
@@ -613,6 +620,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         if (!paused) { //now that both update and draw are done, advance the time
             time++;
         }
+        System.out.println("draw done: " + (System.nanoTime() - firstTime));
     }
 
     @Override
