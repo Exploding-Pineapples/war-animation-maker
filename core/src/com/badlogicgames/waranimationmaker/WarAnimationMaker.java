@@ -23,21 +23,22 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class WarAnimationMaker extends Game {
 	// Used by all screens
 	GL20 gl;
 	public SpriteBatch batcher;
-	public ShapeRenderer shapeRenderer;
+	public ShapeDrawer shapeDrawer;
 	public BitmapFont bitmapFont;
 	public ShaderProgram fontShader;
 	public Skin skin;
 	public InputMultiplexer multiplexer;
+	public FrameExporter frameExporter;
+
 	public static final int DISPLAY_WIDTH = 1920;
 	public static final int DISPLAY_HEIGHT = 1080;
-	FrameExporter frameExporter;
 
 	public Menu menu;
 
@@ -45,7 +46,7 @@ public class WarAnimationMaker extends Game {
 	public void create() {
 		// Initialize rendering objects
 		batcher = new SpriteBatch();
-		shapeRenderer = new ShapeRenderer();
+		shapeDrawer = new ShapeDrawer(batcher, Assets.whitePixel());
 		bitmapFont = Assets.loadFont();
 		fontShader = new ShaderProgram(Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.vert"), Gdx.files.internal("assets/fonts/bitstream_vera_sans/font.frag"));
 

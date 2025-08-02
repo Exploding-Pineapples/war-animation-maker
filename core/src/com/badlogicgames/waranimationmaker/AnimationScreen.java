@@ -7,7 +7,6 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -50,8 +49,6 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     String createClass;
     SelectBoxInput<String> createSelectBoxInput;
 
-    GL20 gl;
-    ShapeRenderer shapeRenderer;
     Drawer drawer;
 
     //UI
@@ -78,15 +75,15 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public AnimationScreen(WarAnimationMaker game, Animation animation)  {
         this.animation = animation;
         this.game = game;
-        gl = game.gl;
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
         // Camera
         orthographicCamera = new OrthographicCamera(DISPLAY_WIDTH, DISPLAY_HEIGHT);
         orthographicCamera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
         animation.camera();
         // Graphics init
-        shapeRenderer = game.shapeRenderer;
-        drawer = new Drawer(game.bitmapFont, game.fontShader, game.shapeRenderer, game.batcher, animation.getInitTime());
+        drawer = new Drawer(game.bitmapFont, game.fontShader, game.batcher, game.shapeDrawer, animation.getInitTime());
 
         // Animation init
         time = 0;//animation.getInitTime();
@@ -591,30 +588,24 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
     public void render(float delta) {
         update();
 
+        game.batcher.begin();
         animation.draw(drawer);
 
         if (animationMode) {
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
             // Draw contrast backgrounds for UI
-            shapeRenderer.setColor(new Color(0, 0, 0, 0.5f));
+            game.shapeDrawer.setColor(new Color(0, 0, 0, 0.5f));
 
-            shapeRenderer.rect(leftPanel.getX(), leftPanel.getY(), leftPanel.getWidth(), leftPanel.getHeight());
-            shapeRenderer.rect(selectedInfoTable.getX(), selectedInfoTable.getY(), selectedInfoTable.getWidth(), selectedInfoTable.getHeight());
+            game.shapeDrawer.filledRectangle(leftPanel.getX(), leftPanel.getY(), leftPanel.getWidth(), leftPanel.getHeight());
+            game.shapeDrawer.filledRectangle(selectedInfoTable.getX(), selectedInfoTable.getY(), selectedInfoTable.getWidth(), selectedInfoTable.getHeight());
 
             //Draw the selected objects
             for (AnyObject selectedObject : selectedObjects) {
                 drawer.drawAsSelected(selectedObject);
             }
-
-            shapeRenderer.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
         }
+        game.batcher.end();
 
         stage.draw();
-
         //game.frameExporter.captureFrame(time); // uncomment to export (temp)
 
         if (!paused) { //now that both update and draw are done, advance the time

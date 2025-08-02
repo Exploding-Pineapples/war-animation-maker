@@ -8,11 +8,12 @@ sourceCompatibility = 1.8
 dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib-common
-    implementation("io.github.earcut4j:earcut4j:2.2.2")
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21")
 
+    implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
+    implementation("io.github.earcut4j:earcut4j:2.2.2")
     implementation("org.joml:joml:1.10.5")
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation 'com.google.code.gson:gson:2.10.1'

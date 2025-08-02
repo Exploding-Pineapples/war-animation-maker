@@ -4,28 +4,26 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.EarClippingTriangulator
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogicgames.waranimationmaker.AnimationScreen
-import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_HEIGHT
-import com.badlogicgames.waranimationmaker.WarAnimationMaker.DISPLAY_WIDTH
 import com.badlogicgames.waranimationmaker.models.Unit.Companion.sizePresets
 import earcut4j.Earcut
+import space.earlygrey.shapedrawer.JoinType
+import space.earlygrey.shapedrawer.ShapeDrawer
 import kotlin.math.min
 import kotlin.math.sqrt
 
 class Drawer(val font: BitmapFont,
              val fontShader: ShaderProgram,
-             val shapeRenderer: ShapeRenderer = ShapeRenderer(),
-             val batcher: SpriteBatch = SpriteBatch(),
+             val batcher: SpriteBatch,
+             val shapeDrawer: ShapeDrawer,
              var time: Int = 0
 ) {
     private var zoomFactor: Float = 1f
     var animationMode = false
-    val colorLayer: FrameBuffer = FrameBuffer(Pixmap.Format.RGBA8888, 1024, 720, false)
     lateinit var camera: OrthographicCamera
 
     fun update(camera: OrthographicCamera, time: Int, animationMode: Boolean) {
@@ -44,31 +42,14 @@ class Drawer(val font: BitmapFont,
         animation.images.forEach { draw(it) }
         animation.mapLabels.forEach { draw(it) }
 
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-
         for (nodeCollection in animation.nodeCollections) {
             if (nodeCollection.type == "Area") {
                 draw(nodeCollection)
             }
         }
 
-        shapeRenderer.end()
-
         //batcher.setColor(1f, 1f, 1f, 1f)
         animation.units.forEach { draw(it) }
-
-        // Draw the color layer to the screen
-        batcher.begin()
-        batcher.setColor(1f, 1f, 1f, 0.2f) // Draw the color layers with transparency
-        batcher.draw(TextureRegion(colorLayer.colorBufferTexture).apply { flip(false, true) }, 0f, 0f, DISPLAY_WIDTH.toFloat(), DISPLAY_HEIGHT.toFloat())
-        batcher.end()
-
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         for (edgeCollection in animation.nodeCollections) {
             if (edgeCollection.type == "Line") {
@@ -76,19 +57,14 @@ class Drawer(val font: BitmapFont,
             }
         }
 
-        shapeRenderer.end()
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         if (animationMode) animation.nodes.forEach { draw(it) }
         animation.arrows.forEach { draw(it) }
-
-        shapeRenderer.end()
     }
 
     fun draw(nodeCollection: NodeCollection) {
         val screenCoords = nodeCollection.interpolator.coordinates.map { projectToScreen(it, camera.zoom, camera.position.x, camera.position.y) }
         if (nodeCollection.interpolator.setPoints.isNotEmpty()) {
-            shapeRenderer.color = colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value)
+            shapeDrawer.setColor(colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value))
             if (nodeCollection.type == "Area") {
                 val poly = screenCoords.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }.toDoubleArray()
 
@@ -96,7 +72,7 @@ class Drawer(val font: BitmapFont,
 
                 var j = 0
                 while (j < earcut.size) {
-                    shapeRenderer.triangle(
+                    shapeDrawer.filledTriangle(
                         poly[earcut[j] * 2].toFloat(),
                         poly[earcut[j] * 2 + 1].toFloat(),
                         poly[earcut[j + 1] * 2].toFloat(),
@@ -109,15 +85,8 @@ class Drawer(val font: BitmapFont,
             }
             if (nodeCollection.type == "Line") {
                 if (screenCoords.isNotEmpty()) {
-                    for (i in 0..<screenCoords.lastIndex) {
-                        shapeRenderer.rectLine(
-                            screenCoords[i].x,
-                            screenCoords[i].y,
-                            screenCoords[i + 1].x,
-                            screenCoords[i + 1].y,
-                            nodeCollection.width ?: 5f
-                        )
-                    }
+                    val screenCoordsArray = screenCoords.flatMap { listOf(it.x, it.y) }.toFloatArray()
+                    shapeDrawer.path(screenCoordsArray, nodeCollection.width?: 5f, JoinType.NONE, true)
                 }
             }
         }
@@ -132,33 +101,28 @@ class Drawer(val font: BitmapFont,
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         if (unit.alpha.value == 0f) {
             if (animationMode) {
-                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-                shapeRenderer.color = colorWithAlpha(Color.BLACK, 0.5f)
-                shapeRenderer.rect(unit.screenPosition.x - unit.width / 2, unit.screenPosition.y - unit.width / 2, unit.width, unit.height)
-                shapeRenderer.end()
+                shapeDrawer.setColor(colorWithAlpha(Color.BLACK, 0.5f))
+                shapeDrawer.filledRectangle(unit.screenPosition.x - unit.width / 2, unit.screenPosition.y - unit.width / 2, unit.width, unit.height)
             }
         } else {
             val padding = unit.width / 16
 
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-            shapeRenderer.color = colorWithAlpha(unit.color.color, unit.alpha.value)
-            shapeRenderer.rect(
+            shapeDrawer.setColor(colorWithAlpha(unit.color.color, unit.alpha.value))
+            shapeDrawer.filledRectangle(
                 unit.screenPosition.x - unit.width * 0.5f,
                 unit.screenPosition.y - unit.height * 0.5f,
                 unit.width,
                 unit.height
             )
 
-            shapeRenderer.color = colorWithAlpha(Color.LIGHT_GRAY, unit.alpha.value)
-            shapeRenderer.rect(
+            shapeDrawer.setColor(colorWithAlpha(Color.LIGHT_GRAY, unit.alpha.value))
+            shapeDrawer.filledRectangle(
                 unit.screenPosition.x - unit.width * 0.5f + padding,
                 unit.screenPosition.y - unit.height * 0.5f + padding,
                 unit.width - 2 * padding,
                 unit.height - 2 * padding
             )
-            shapeRenderer.end()
 
-            batcher.begin()
             batcher.setColor(1f, 1f, 1f, unit.alpha.value)
             if (unit.typeTexture() != null) {
                 batcher.draw(
@@ -199,14 +163,13 @@ class Drawer(val font: BitmapFont,
             }
 
             batcher.shader = null
-            batcher.end()
         }
     }
 
     fun draw(node: Node) {
         if (time == node.initTime) {
-            shapeRenderer.color = node.color
-            shapeRenderer.circle(node.screenPosition.x, node.screenPosition.y, 7.0f)
+            shapeDrawer.setColor(node.color)
+            shapeDrawer.filledCircle(node.screenPosition.x, node.screenPosition.y, 7.0f)
         }
     }
 
@@ -218,7 +181,7 @@ class Drawer(val font: BitmapFont,
             ), camera.zoom, camera.position.x, camera.position.y
         )
 
-        shapeRenderer.color = arrow.color.color.apply { a = arrow.alpha.value }
+        shapeDrawer.setColor(colorWithAlpha(arrow.color.color, arrow.alpha.value))
 
         val endTime = min(time, arrow.xInterpolator.setPoints.keys.last())
 
@@ -229,10 +192,10 @@ class Drawer(val font: BitmapFont,
                     arrow.yInterpolator.interpolationFunction.evaluate(time)
                 ), camera.zoom, camera.position.x, camera.position.y
             )
-            shapeRenderer.rectLine(previous.x, previous.y, position.x, position.y, arrow.thickness)
+            shapeDrawer.line(previous.x, previous.y, position.x, position.y, arrow.thickness)
             if (time == endTime) {
                 val triangle = generateTriangle(previous, position, arrow.thickness * 2, arrow.thickness * 3)
-                shapeRenderer.triangle(
+                shapeDrawer.filledTriangle(
                     triangle[0].x,
                     triangle[0].y,
                     triangle[1].x,
@@ -247,13 +210,10 @@ class Drawer(val font: BitmapFont,
 
     fun draw(image: Image) {
         if (animationMode) {
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             drawAsSelected(image)
-            shapeRenderer.end()
         }
         if (image.texture != null && image.alpha.value != 0f) {
             batcher.color = colorWithAlpha(Color.WHITE, image.alpha.value)
-            batcher.begin()
             batcher.draw(
                 image.texture,
                 image.screenPosition.x,
@@ -261,20 +221,14 @@ class Drawer(val font: BitmapFont,
                 image.texture!!.width.toFloat() * camera.zoom * image.scale,
                 image.texture!!.height.toFloat() * camera.zoom * image.scale
             )
-            batcher.end()
         }
     }
 
     fun draw(mapLabel: MapLabel) {
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color(mapLabel.color.color.r, mapLabel.color.color.g, mapLabel.color.color.b, mapLabel.alpha.value)
-        shapeRenderer.circle(mapLabel.screenPosition.x, mapLabel.screenPosition.y, mapLabel.size * 10)
-        shapeRenderer.end()
+        shapeDrawer.setColor(Color(mapLabel.color.color.r, mapLabel.color.color.g, mapLabel.color.color.b, mapLabel.alpha.value))
+        shapeDrawer.filledCircle(mapLabel.screenPosition.x, mapLabel.screenPosition.y, mapLabel.size * 10)
 
         batcher.setColor(1f, 1f, 1f, mapLabel.alpha.value)
-        batcher.begin()
 
         prepareFont(Color.WHITE, mapLabel.color.color, mapLabel.alpha.value, mapLabel.size)
 
@@ -282,7 +236,6 @@ class Drawer(val font: BitmapFont,
         font.draw(batcher, mapLabel.text, mapLabel.screenPosition.x - textSize.width / 2, mapLabel.screenPosition.y + textSize.height * (3f / 2) + mapLabel.size * 5)
 
         batcher.shader = null
-        batcher.end()
     }
 
     fun drawTexture(texture: Texture, rect: Rectangle) {
@@ -295,7 +248,7 @@ class Drawer(val font: BitmapFont,
             val xInterpolator = screenObject.xInterpolator
             val yInterpolator = screenObject.yInterpolator
 
-            shapeRenderer.color = Color.SKY
+            shapeDrawer.setColor(Color.SKY)
             for (time in xInterpolator.setPoints.keys.first().toInt()..xInterpolator.setPoints.keys.last()
                 .toInt() step 4) { // Draws entire path of the selected object over time
                 val position = projectToScreen(
@@ -304,9 +257,9 @@ class Drawer(val font: BitmapFont,
                         yInterpolator.interpolationFunction.evaluate(time)
                     ), camera.zoom, camera.position.x, camera.position.y
                 )
-                shapeRenderer.circle(position.x, position.y, 2f)
+                shapeDrawer.filledCircle(position.x, position.y, 2f)
             }
-            shapeRenderer.color = Color.PURPLE
+            shapeDrawer.setColor(Color.PURPLE)
             for (time in xInterpolator.setPoints.keys) { // Draws all set points of the selected object
                 val position = projectToScreen(
                     Coordinate(
@@ -314,13 +267,13 @@ class Drawer(val font: BitmapFont,
                         yInterpolator.interpolationFunction.evaluate(time)
                     ), camera.zoom, camera.position.x, camera.position.y
                 )
-                shapeRenderer.circle(position.x, position.y, 4f)
+                shapeDrawer.filledCircle(position.x, position.y, 4f)
             }
 
             if (anyObject.javaClass == Unit::class.java) {
                 val unit = anyObject as Unit
-                shapeRenderer.color = colorWithAlpha(Color.BLACK, 0.5f)
-                shapeRenderer.rect(
+                shapeDrawer.setColor(colorWithAlpha(Color.BLACK, 0.5f))
+                shapeDrawer.line(
                     unit.screenPosition.x - unit.width / 2,
                     unit.screenPosition.y - unit.width / 2,
                     unit.width,
@@ -328,8 +281,8 @@ class Drawer(val font: BitmapFont,
                 )
             }
             if (anyObject.javaClass.isAssignableFrom(HasScreenPosition::class.java)) {
-                shapeRenderer.color = Color.ORANGE
-                shapeRenderer.rect(
+                shapeDrawer.setColor(Color.ORANGE)
+                shapeDrawer.filledRectangle(
                     (anyObject as HasScreenPosition).screenPosition.x - 6.0f,
                     anyObject.screenPosition.y - 6.0f,
                     12f,
@@ -340,12 +293,12 @@ class Drawer(val font: BitmapFont,
         if (anyObject.javaClass.isAssignableFrom(Edge::class.java)) {
             val screenCoords = (anyObject as Edge).screenCoords
             for (i in 0..<screenCoords.size - 1) {
-                shapeRenderer.rectLine(screenCoords[i].x, screenCoords[i].y, screenCoords[i + 1].x, screenCoords[i + 1].y, 5f)
+                shapeDrawer.line(screenCoords[i].x, screenCoords[i].y, screenCoords[i + 1].x, screenCoords[i + 1].y, 5f)
             }
         }
         if (anyObject.javaClass.isAssignableFrom(Node::class.java)) {
             val screenCoords = (anyObject as Node).screenPosition
-            shapeRenderer.circle(screenCoords.x, screenCoords.y, 7.0f)
+            shapeDrawer.filledCircle(screenCoords.x, screenCoords.y, 7.0f)
         }
     }
 

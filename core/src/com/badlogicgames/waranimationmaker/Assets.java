@@ -46,6 +46,10 @@ public class Assets {
 		return file + ".png";
 	}
 
+	public static TextureRegion whitePixel() {
+		return new TextureRegion(new Texture(Gdx.files.internal("assets/white pixel.png")));
+	}
+
 	public static Texture loadTexture (String file) {
 		if (LOADED_TEXTURES.containsKey(file)) {
 			return LOADED_TEXTURES.get(file);
