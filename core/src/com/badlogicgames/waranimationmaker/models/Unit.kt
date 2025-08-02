@@ -31,10 +31,6 @@ data class Unit(
     }
 
     fun init(initTime: Int) {
-        if (color == null) {
-            color = AreaColor.BLUE
-        }
-
         alpha.update(initTime)
     }
 
