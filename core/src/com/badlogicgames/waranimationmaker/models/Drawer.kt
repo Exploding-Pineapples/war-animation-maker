@@ -5,12 +5,10 @@ import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.badlogic.gdx.math.EarClippingTriangulator
 import com.badlogic.gdx.math.Rectangle
-import com.badlogic.gdx.math.Vector2
 import com.badlogicgames.waranimationmaker.AnimationScreen
 import com.badlogicgames.waranimationmaker.models.Unit.Companion.sizePresets
-import earcut4j.Earcut
+import com.badlogicgames.waranimationmaker.utilities.Earcut
 import space.earlygrey.shapedrawer.JoinType
 import space.earlygrey.shapedrawer.ShapeDrawer
 import kotlin.math.min
@@ -20,14 +18,13 @@ class Drawer(val font: BitmapFont,
              val fontShader: ShaderProgram,
              val batcher: SpriteBatch,
              val shapeDrawer: ShapeDrawer,
+             var camera: OrthographicCamera,
              var time: Int = 0
 ) {
     private var zoomFactor: Float = 1f
     var animationMode = false
-    lateinit var camera: OrthographicCamera
 
-    fun update(camera: OrthographicCamera, time: Int, animationMode: Boolean) {
-        this.camera = camera
+    fun update(time: Int, animationMode: Boolean) {
         this.time = time
         this.animationMode = animationMode
         zoomFactor = 1f
@@ -66,19 +63,19 @@ class Drawer(val font: BitmapFont,
         if (nodeCollection.interpolator.setPoints.isNotEmpty()) {
             shapeDrawer.setColor(colorWithAlpha(nodeCollection.color.color, nodeCollection.alpha.value))
             if (nodeCollection.type == "Area") {
-                val poly = screenCoords.flatMap { listOf(it.x.toDouble(), it.y.toDouble()) }.toDoubleArray()
+                val poly = screenCoords.flatMap { listOf(it.x, it.y) }.toFloatArray()
 
                 val earcut = Earcut.earcut(poly) // Turns polygon into series of triangles which share vertices with the polygon. The triangles' vertices are represented as the index of an original polygon vertex
 
                 var j = 0
                 while (j < earcut.size) {
                     shapeDrawer.filledTriangle(
-                        poly[earcut[j] * 2].toFloat(),
-                        poly[earcut[j] * 2 + 1].toFloat(),
-                        poly[earcut[j + 1] * 2].toFloat(),
-                        poly[earcut[j + 1] * 2 + 1].toFloat(),
-                        poly[earcut[j + 2] * 2].toFloat(),
-                        poly[earcut[j + 2] * 2 + 1].toFloat()
+                        poly[earcut[j] * 2],
+                        poly[earcut[j] * 2 + 1],
+                        poly[earcut[j + 1] * 2],
+                        poly[earcut[j + 1] * 2 + 1],
+                        poly[earcut[j + 2] * 2],
+                        poly[earcut[j + 2] * 2 + 1]
                     )
                     j += 3
                 }

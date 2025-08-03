@@ -83,7 +83,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
         orthographicCamera.position.set(DISPLAY_WIDTH / 2.0f, DISPLAY_HEIGHT / 2.0f, 0);
         animation.camera();
         // Graphics init
-        drawer = new Drawer(game.bitmapFont, game.fontShader, game.batcher, game.shapeDrawer, animation.getInitTime());
+        drawer = new Drawer(game.bitmapFont, game.fontShader, game.batcher, game.shapeDrawer, orthographicCamera, animation.getInitTime());
 
         // Animation init
         time = 0;//animation.getInitTime();
@@ -574,7 +574,7 @@ public class AnimationScreen extends ScreenAdapter implements InputProcessor {
             updateCam();
         }
         orthographicCamera.update();
-        drawer.update(orthographicCamera, time, animationMode);
+        drawer.update(time, animationMode);
         animation.update(time, orthographicCamera, paused);
 
         //UI
